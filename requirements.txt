@@ -1,0 +1,10 @@
+# SnapGPU Dashboard - Dependencias
+
+# Web Framework
+flask>=2.0.0
+
+# HTTP Requests (para testes)
+requests>=2.28.0
+
+# Vast.ai API (opcional - pode usar requests diretamente)
+# vastai>=0.1.0
