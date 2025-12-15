@@ -19,6 +19,7 @@ venv/
 Thumbs.db
 
 # Credentials (IMPORTANTE!)
+.env
 gcloud-credentials.json
 *.pem
 *.key

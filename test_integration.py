@@ -280,7 +280,7 @@ class IntegrationTester:
 
             # Step 5: Aguardar instancia ficar pronta
             log_step(5, "Aguardando instancia ficar pronta")
-            instance_info = self.wait_for_instance(instance_id, timeout=180)
+            instance_info = self.wait_for_instance(instance_id, timeout=300)
 
             if instance_info:
                 elapsed = time.time() - start_time
