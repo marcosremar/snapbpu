@@ -33,3 +33,10 @@ gcloud-credentials.json
 
 # Node
 node_modules/
+
+# Playwright
+playwright-report/
+test-results/
+
+# Build artifacts
+web/build/
