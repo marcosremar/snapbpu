@@ -1,6 +1,7 @@
 {
   "users": {
     "marcosremar@gmail.com": {
+      "password": "d52d73c7f98eaf8689eb9203765ff63c991ae2948d84ca348ab5d986ebeb6ff6",
       "vast_api_key": "a9df8f732d9b1b8a6bb54fd43c477824254552b0d964c58bd92b16c6f25ca3dd",
       "settings": {
         "stage_timeout": 30,
@@ -21,6 +22,11 @@
         "sync_interval": 30,
         "keep_last": 10
       }
+    },
+    "test@example.com": {
+      "password": "85777f270ad7cf2a790981bbae3c4e484a1dc55e24a77390d692fbf1cffa12fa",
+      "vast_api_key": "test-api-key-123",
+      "settings": {}
     }
   },
   "locked_instances": {

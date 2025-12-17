@@ -33,10 +33,20 @@ export default function App() {
 
   const checkAuth = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+      const token = localStorage.getItem('auth_token')
+      if (!token) {
+        setLoading(false)
+        return
+      }
+      const res = await fetch(`${API_BASE}/api/auth/me`, {
+        credentials: 'include',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
       const data = await res.json()
       if (data.authenticated) {
         setUser(data.user)
+      } else {
+        localStorage.removeItem('auth_token')
       }
     } catch (e) {
       console.error('Auth check failed:', e)
@@ -54,6 +64,9 @@ export default function App() {
       })
       const data = await res.json()
       if (data.success) {
+        if (data.token) {
+          localStorage.setItem('auth_token', data.token)
+        }
         setUser(data.user)
         return { success: true }
       }
@@ -64,10 +77,13 @@ export default function App() {
   }
 
   const handleLogout = async () => {
+    const token = localStorage.getItem('auth_token')
     await fetch(`${API_BASE}/api/auth/logout`, {
       method: 'POST',
       credentials: 'include',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
     })
+    localStorage.removeItem('auth_token')
     setUser(null)
   }
 
