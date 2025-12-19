@@ -79,6 +79,32 @@ async def update_settings(
         )
 
 
+@router.post("/complete-onboarding", response_model=SuccessResponse)
+async def complete_onboarding(
+    user_email: str = Depends(get_current_user_email),
+    auth_service: AuthService = Depends(get_auth_service),
+):
+    """
+    Marks onboarding as completed for the current user.
+    """
+    try:
+        from ..dependencies import get_user_repository
+        user_repo = next(get_user_repository())
+        user = auth_service.get_user(user_email)
+        
+        settings = user.settings or {}
+        settings["has_completed_onboarding"] = True
+        
+        user_repo.update_user(user_email, {"settings": settings})
+        
+        return SuccessResponse(
+            success=True,
+            message="Onboarding completed",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # Balance endpoint (separate router to mount at /api/balance)
 balance_router = APIRouter(tags=["Balance"], dependencies=[Depends(require_auth)])
 

@@ -411,3 +411,183 @@ async def list_machine_types():
     Lista todos os tipos de máquina disponíveis.
     """
     return ["on-demand", "interruptible", "bid"]
+
+
+@router.get("/savings/real")
+async def get_real_savings(
+    days: int = Query(30, ge=1, le=365, description="Período em dias"),
+    user_id: Optional[str] = Query(None, description="Filtrar por usuário"),
+):
+    """
+    Calcula a economia REAL baseada em eventos de hibernação.
+    
+    Analisa o histórico de hibernações e calcula:
+    - Total de horas economizadas (máquinas desligadas)
+    - Total em USD economizado
+    - Média por dia
+    - Breakdown por GPU
+    """
+    from ....models.instance_status import HibernationEvent, InstanceStatus
+    from sqlalchemy import func
+    
+    db = SessionLocal()
+    try:
+        start_date = datetime.utcnow() - timedelta(days=days)
+        
+        # Query base para eventos de hibernação
+        query = db.query(HibernationEvent).filter(
+            HibernationEvent.timestamp >= start_date,
+            HibernationEvent.event_type.in_(["hibernated", "deleted"])
+        )
+        
+        if user_id:
+            # Filtrar por instâncias do usuário
+            user_instances = db.query(InstanceStatus.instance_id).filter(
+                InstanceStatus.user_id == user_id
+            ).subquery()
+            query = query.filter(HibernationEvent.instance_id.in_(user_instances))
+        
+        events = query.all()
+        
+        # Calcular economia
+        total_savings_usd = 0.0
+        total_idle_hours = 0.0
+        gpu_breakdown = {}
+        hibernation_count = 0
+        
+        for event in events:
+            if event.savings_usd:
+                total_savings_usd += event.savings_usd
+            if event.idle_hours:
+                total_idle_hours += event.idle_hours
+            hibernation_count += 1
+            
+            # Buscar info da instância para breakdown
+            instance = db.query(InstanceStatus).filter(
+                InstanceStatus.instance_id == event.instance_id
+            ).first()
+            
+            if instance and instance.gpu_type:
+                gpu_type = instance.gpu_type
+                if gpu_type not in gpu_breakdown:
+                    gpu_breakdown[gpu_type] = {
+                        "hibernations": 0,
+                        "hours_saved": 0,
+                        "usd_saved": 0
+                    }
+                gpu_breakdown[gpu_type]["hibernations"] += 1
+                gpu_breakdown[gpu_type]["hours_saved"] += event.idle_hours or 0
+                gpu_breakdown[gpu_type]["usd_saved"] += event.savings_usd or 0
+        
+        # Calcular médias
+        avg_daily_savings = total_savings_usd / days if days > 0 else 0
+        avg_daily_hours = total_idle_hours / days if days > 0 else 0
+        
+        # Projeção mensal
+        projected_monthly = avg_daily_savings * 30
+        
+        return {
+            "period_days": days,
+            "summary": {
+                "total_savings_usd": round(total_savings_usd, 2),
+                "total_hours_saved": round(total_idle_hours, 1),
+                "hibernation_count": hibernation_count,
+                "avg_daily_savings_usd": round(avg_daily_savings, 2),
+                "avg_daily_hours_saved": round(avg_daily_hours, 1),
+                "projected_monthly_savings_usd": round(projected_monthly, 2),
+            },
+            "gpu_breakdown": gpu_breakdown,
+            "generated_at": datetime.utcnow().isoformat(),
+        }
+        
+    finally:
+        db.close()
+
+
+@router.get("/savings/history")
+async def get_savings_history(
+    days: int = Query(30, ge=1, le=365, description="Período em dias"),
+    group_by: str = Query("day", description="Agrupar por: day, week, month"),
+):
+    """
+    Retorna histórico de economia ao longo do tempo.
+    
+    Útil para gráficos de economia acumulada.
+    """
+    from ....models.instance_status import HibernationEvent
+    from sqlalchemy import func, cast, Date
+    
+    db = SessionLocal()
+    try:
+        start_date = datetime.utcnow() - timedelta(days=days)
+        
+        # Agrupar por data
+        query = db.query(
+            cast(HibernationEvent.timestamp, Date).label("date"),
+            func.count(HibernationEvent.id).label("count"),
+            func.coalesce(func.sum(HibernationEvent.savings_usd), 0).label("savings"),
+            func.coalesce(func.sum(HibernationEvent.idle_hours), 0).label("hours"),
+        ).filter(
+            HibernationEvent.timestamp >= start_date,
+            HibernationEvent.event_type.in_(["hibernated", "deleted"])
+        ).group_by(
+            cast(HibernationEvent.timestamp, Date)
+        ).order_by(
+            cast(HibernationEvent.timestamp, Date)
+        ).all()
+        
+        history = []
+        cumulative_savings = 0
+        
+        for record in query:
+            cumulative_savings += float(record.savings or 0)
+            history.append({
+                "date": record.date.isoformat() if record.date else None,
+                "hibernations": record.count,
+                "savings_usd": round(float(record.savings or 0), 2),
+                "hours_saved": round(float(record.hours or 0), 1),
+                "cumulative_savings_usd": round(cumulative_savings, 2),
+            })
+        
+        return {
+            "period_days": days,
+            "group_by": group_by,
+            "history": history,
+            "total_cumulative_savings": round(cumulative_savings, 2),
+            "generated_at": datetime.utcnow().isoformat(),
+        }
+        
+    finally:
+        db.close()
+
+
+@router.get("/hibernation/events")
+async def get_hibernation_events(
+    limit: int = Query(50, le=200, description="Limite de eventos"),
+    instance_id: Optional[str] = Query(None, description="Filtrar por instância"),
+    event_type: Optional[str] = Query(None, description="Filtrar por tipo"),
+):
+    """
+    Lista eventos de hibernação recentes.
+    """
+    from ....models.instance_status import HibernationEvent
+    
+    db = SessionLocal()
+    try:
+        query = db.query(HibernationEvent)
+        
+        if instance_id:
+            query = query.filter(HibernationEvent.instance_id == instance_id)
+        if event_type:
+            query = query.filter(HibernationEvent.event_type == event_type)
+        
+        events = query.order_by(HibernationEvent.timestamp.desc()).limit(limit).all()
+        
+        return {
+            "events": [e.to_dict() for e in events],
+            "count": len(events),
+        }
+        
+    finally:
+        db.close()
+

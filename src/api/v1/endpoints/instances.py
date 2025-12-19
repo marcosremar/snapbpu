@@ -4,6 +4,7 @@ Instance management API endpoints
 import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
 from typing import Optional
+from pydantic import BaseModel
 
 from ..schemas.request import SearchOffersRequest, CreateInstanceRequest, MigrateInstanceRequest, MigrationEstimateRequest
 
@@ -21,7 +22,9 @@ from ..schemas.response import (
 )
 from ....domain.services import InstanceService, MigrationService, SyncService
 from ....core.exceptions import NotFoundException, VastAPIException, MigrationException
-from ..dependencies import get_instance_service, get_migration_service, get_sync_service, require_auth
+from ..dependencies import get_instance_service, get_migration_service, get_sync_service, require_auth, get_current_user_email
+from ..dependencies_usage import get_usage_service
+from ....services.usage_service import UsageService
 from ....services.standby_manager import get_standby_manager
 
 router = APIRouter(prefix="/instances", tags=["Instances"], dependencies=[Depends(require_auth)])
@@ -100,12 +103,41 @@ async def list_instances(
     """
     List all user instances
 
-    Returns all GPU instances owned by the user.
+    Returns all GPU instances owned by the user, including CPU standby info if enabled.
     """
-    instances = instance_service.list_instances()
+    from ..schemas.response import CPUStandbyInfo
 
-    instance_responses = [
-        InstanceResponse(
+    instances = instance_service.list_instances()
+    standby_manager = get_standby_manager()
+
+    # GCP Spot VM pricing (e2-medium)
+    GCP_SPOT_DPH = 0.010  # $0.01/hour for e2-medium spot
+
+    instance_responses = []
+    for inst in instances:
+        # Check if this GPU has a CPU standby
+        cpu_standby_info = None
+        total_dph = inst.dph_total
+
+        association = standby_manager.get_association(inst.id)
+        if association:
+            cpu_standby = association.get('cpu_standby', {})
+            cpu_standby_info = CPUStandbyInfo(
+                enabled=True,
+                provider="gcp",
+                name=cpu_standby.get('name'),
+                zone=cpu_standby.get('zone'),
+                ip=cpu_standby.get('ip'),
+                machine_type="e2-medium",
+                status="running",
+                dph_total=GCP_SPOT_DPH,
+                sync_enabled=association.get('sync_enabled', False),
+                sync_count=association.get('sync_count', 0),
+                state=association.get('state'),
+            )
+            total_dph = inst.dph_total + GCP_SPOT_DPH
+
+        instance_responses.append(InstanceResponse(
             id=inst.id,
             status=inst.status,
             actual_status=inst.actual_status,
@@ -127,9 +159,10 @@ async def list_instances(
             cpu_util=inst.cpu_util,
             ram_used=inst.ram_used,
             ram_total=inst.ram_total,
-        )
-        for inst in instances
-    ]
+            provider="vast.ai",
+            cpu_standby=cpu_standby_info,
+            total_dph=total_dph,
+        ))
 
     return ListInstancesResponse(instances=instance_responses, count=len(instance_responses))
 
@@ -139,6 +172,8 @@ async def create_instance(
     request: CreateInstanceRequest,
     background_tasks: BackgroundTasks,
     instance_service: InstanceService = Depends(get_instance_service),
+    usage_service: UsageService = Depends(get_usage_service),
+    user_id: str = Depends(get_current_user_email),
 ):
     """
     Create a new GPU instance
@@ -153,6 +188,13 @@ async def create_instance(
             disk_size=request.disk_size,
             label=request.label,
             ports=request.ports,
+        )
+
+        # Iniciar tracking de uso
+        usage_service.start_usage(
+            user_id=user_id,
+            instance_id=str(instance.id),
+            gpu_type=instance.gpu_name
         )
 
         # Auto-criar CPU standby em background (não bloqueia resposta)
@@ -232,14 +274,18 @@ async def destroy_instance(
     instance_id: int,
     background_tasks: BackgroundTasks,
     destroy_standby: bool = Query(True, description="Also destroy associated CPU standby"),
+    reason: str = Query("user_request", description="Reason for destruction: user_request, gpu_failure, spot_interruption"),
     instance_service: InstanceService = Depends(get_instance_service),
+    usage_service: UsageService = Depends(get_usage_service),
 ):
     """
     Destroy an instance
-
-    Permanently deletes a GPU instance.
-    If destroy_standby=true (default), also destroys the associated CPU standby.
+    ...
+    If destroy_standby=false, CPU standby is always kept.
     """
+    # Finalizar tracking de uso
+    usage_service.stop_usage(str(instance_id))
+
     success = instance_service.destroy_instance(instance_id)
 
     if not success:
@@ -248,14 +294,35 @@ async def destroy_instance(
             detail=f"Failed to destroy instance {instance_id}",
         )
 
-    # Destruir CPU standby associado em background
-    if destroy_standby:
-        standby_manager = get_standby_manager()
-        if standby_manager.get_association(instance_id):
-            logger.info(f"Scheduling CPU standby destruction for GPU {instance_id}")
+    standby_manager = get_standby_manager()
+    association = standby_manager.get_association(instance_id)
+
+    # Lógica de destruição do CPU standby:
+    # - Se destroy_standby=false, nunca destrói
+    # - Se reason é falha (gpu_failure, spot_interruption), mantém CPU para backup
+    # - Se reason=user_request, destrói CPU junto
+
+    should_destroy_cpu = destroy_standby and reason == "user_request"
+
+    if association:
+        if should_destroy_cpu:
+            logger.info(f"Scheduling CPU standby destruction for GPU {instance_id} (reason={reason})")
             background_tasks.add_task(
                 standby_manager.on_gpu_destroyed,
                 gpu_instance_id=instance_id
+            )
+            return SuccessResponse(
+                success=True,
+                message=f"Instance {instance_id} destroyed. CPU standby also destroyed.",
+            )
+        else:
+            # Mantém CPU standby para backup/restore
+            logger.info(f"Keeping CPU standby for GPU {instance_id} (reason={reason}) - useful for backup/restore")
+            # Marcar associação como "orphan" (GPU morreu, CPU viva)
+            standby_manager.mark_gpu_failed(instance_id, reason=reason)
+            return SuccessResponse(
+                success=True,
+                message=f"Instance {instance_id} destroyed. CPU standby kept for backup/restore (reason: {reason}).",
             )
 
     return SuccessResponse(
@@ -310,6 +377,83 @@ async def resume_instance(
         success=True,
         message=f"Instance {instance_id} resumed successfully",
     )
+
+
+class WakeInstanceRequest(BaseModel):
+    """Request to wake a hibernated instance"""
+    gpu_type: Optional[str] = None
+    region: Optional[str] = None
+    max_price: float = 1.0
+    restore_snapshot: bool = True
+
+
+class WakeInstanceResponse(BaseModel):
+    """Response from wake operation"""
+    success: bool
+    new_instance_id: Optional[int] = None
+    old_instance_id: str
+    snapshot_id: Optional[str] = None
+    ssh_host: Optional[str] = None
+    ssh_port: Optional[int] = None
+    time_taken: float
+    message: str
+
+
+@router.post("/{instance_id}/wake", response_model=WakeInstanceResponse)
+async def wake_instance(
+    instance_id: str,
+    request: WakeInstanceRequest = None,
+    background_tasks: BackgroundTasks = None,
+):
+    """
+    Wake a hibernated instance.
+    
+    This will:
+    1. Find the last snapshot for this instance
+    2. Provision a new GPU matching criteria (or similar to original)
+    3. Restore the snapshot to the new instance
+    4. Return the new instance details
+    
+    The old instance_id is used to find the snapshot, but a NEW instance ID
+    will be returned since we're provisioning a new machine.
+    """
+    from ....services.auto_hibernation_manager import get_auto_hibernation_manager
+    
+    if request is None:
+        request = WakeInstanceRequest()
+    
+    manager = get_auto_hibernation_manager()
+    if not manager:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Auto-hibernation manager not initialized. Configure it in settings first."
+        )
+    
+    try:
+        result = manager.wake_instance(
+            instance_id=instance_id,
+            gpu_type=request.gpu_type,
+            region=request.region,
+            max_price=request.max_price
+        )
+        
+        return WakeInstanceResponse(
+            success=result.get("success", False),
+            new_instance_id=result.get("new_instance_id"),
+            old_instance_id=instance_id,
+            snapshot_id=result.get("snapshot_id"),
+            ssh_host=result.get("ssh_host"),
+            ssh_port=result.get("ssh_port"),
+            time_taken=result.get("time_taken", 0),
+            message=result.get("message", "Instance woken successfully")
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to wake instance {instance_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
 
 
 @router.post("/{instance_id}/migrate", response_model=MigrationResponse)

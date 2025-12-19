@@ -58,9 +58,11 @@ def get_current_user_email_optional(
     session_manager: SessionManager = Depends(get_session_manager),
 ) -> Optional[str]:
     """Get current user email (returns None if not authenticated)"""
-    # Check for demo mode
+    # Check for demo mode (from env or query param)
     settings = get_settings()
-    if settings.app.demo_mode:
+    demo_param = request.query_params.get("demo", "").lower() == "true"
+
+    if settings.app.demo_mode or demo_param:
         return "marcosremar@gmail.com"
 
     # Check Authorization header
@@ -90,6 +92,20 @@ def get_current_user_email(
     return user_email
 
 
+def get_current_user(
+    user_email: str = Depends(get_current_user_email),
+    user_repo: IUserRepository = Depends(get_user_repository),
+) -> any:
+    """Get current user object (raises exception if not found)"""
+    user = user_repo.get_user(user_email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    return user
+
+
 def require_auth(
     user_email: str = Depends(get_current_user_email),
 ) -> str:
@@ -110,6 +126,14 @@ def get_instance_service(
     user_email: str = Depends(get_current_user_email),
 ) -> InstanceService:
     """Get instance service"""
+    settings = get_settings()
+
+    # In demo mode, use demo provider that returns mock data
+    if settings.app.demo_mode:
+        from ...infrastructure.providers.demo_provider import DemoProvider
+        gpu_provider = DemoProvider()
+        return InstanceService(gpu_provider=gpu_provider)
+
     # Get user's vast API key
     user_repo = next(get_user_repository())
     user = user_repo.get_user(user_email)

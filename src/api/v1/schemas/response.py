@@ -32,7 +32,7 @@ class LoginResponse(BaseModel):
 class AuthMeResponse(BaseModel):
     """Auth me response"""
     authenticated: bool = Field(..., description="Authentication status")
-    user: Optional[str] = Field(None, description="User email if authenticated")
+    user: Optional[Dict[str, Any]] = Field(None, description="User data if authenticated")
 
 
 # GPU Offer Responses
@@ -70,6 +70,23 @@ class SearchOffersResponse(BaseModel):
     count: int = Field(..., description="Number of offers found")
 
 
+# CPU Standby Info
+
+class CPUStandbyInfo(BaseModel):
+    """CPU Standby information"""
+    enabled: bool = False
+    provider: str = "gcp"  # gcp, aws, etc
+    name: Optional[str] = None
+    zone: Optional[str] = None
+    ip: Optional[str] = None
+    machine_type: Optional[str] = None
+    status: Optional[str] = None  # running, stopped, etc
+    dph_total: float = 0.0  # Cost per hour
+    sync_enabled: bool = False
+    sync_count: int = 0
+    state: Optional[str] = None  # syncing, ready, failover_active
+
+
 # Instance Responses
 
 class InstanceResponse(BaseModel):
@@ -97,6 +114,15 @@ class InstanceResponse(BaseModel):
     cpu_util: Optional[float] = None
     ram_used: Optional[float] = None
     ram_total: Optional[float] = None
+
+    # Provider info
+    provider: str = "vast.ai"
+
+    # CPU Standby info (for failover)
+    cpu_standby: Optional[CPUStandbyInfo] = None
+
+    # Combined cost (GPU + CPU standby)
+    total_dph: Optional[float] = None
 
 
 class ListInstancesResponse(BaseModel):

@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import OnboardingWizard from '../components/onboarding/OnboardingWizard';
 import {
   Cpu, Server, Wifi, DollarSign, Shield, HardDrive,
   Activity, Search, RotateCcw, Sliders, Wand2,
-  Gauge, Globe, Zap, Monitor, ChevronDown, Sparkles,
+  Gauge, Globe, Zap, Monitor, ChevronDown, ChevronLeft, ChevronRight, Sparkles,
   Send, Bot, User, Loader2
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -22,7 +24,7 @@ import { EmptyState } from '../components/EmptyState';
 import { SkeletonList } from '../components/Skeleton';
 
 const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const regionCountries = {
   'EUA': ['USA'],
@@ -398,7 +400,7 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [recommendation, setRecommendation] = useState(null);
 
-  const getToken = () => localStorage.getItem('token');
+  const getToken = () => localStorage.getItem('auth_token');
 
   const sendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -430,90 +432,26 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters }) => {
           role: 'assistant',
           content: `Preciso de mais algumas informações para fazer uma recomendação precisa:\n\n${questionsText}`
         }]);
-      } else if (data.recommendation) {
-        // Got recommendation
-        setRecommendation(data.recommendation);
-        const rec = data.recommendation;
-
-        // Build message based on new format with gpu_options and frameworks
-        let messageContent = `## Recomendação\n\n${rec.explanation}\n\n`;
-
-        if (rec.model_info) {
-          messageContent += `### Modelo\n`;
-          messageContent += `- **Nome:** ${rec.model_info.name} (${rec.model_info.parameters})\n`;
-          if (rec.model_info.vram_fp16) {
-            messageContent += `- **VRAM FP16:** ${rec.model_info.vram_fp16}\n`;
-            messageContent += `- **VRAM INT8:** ${rec.model_info.vram_int8 || 'N/A'}\n`;
-            messageContent += `- **VRAM INT4:** ${rec.model_info.vram_int4 || 'N/A'}\n`;
-          } else if (rec.model_info.vram_required) {
-            messageContent += `- **VRAM:** ${rec.model_info.vram_required}\n`;
-          }
-          if (rec.model_info.recommended_quantization) {
-            messageContent += `- **Quantização:** ${rec.model_info.recommended_quantization}\n`;
-          }
-          messageContent += `\n`;
-        }
-
-        if (rec.gpu_options && rec.gpu_options.length > 0) {
-          messageContent += `### Opções de GPU\n\n`;
-          rec.gpu_options.forEach(opt => {
-            const tierEmoji = opt.tier === 'minima' ? '🟢' : opt.tier === 'recomendada' ? '🟡' : '🔴';
-            const tierLabel = opt.tier === 'minima' ? 'Mínima' : opt.tier === 'recomendada' ? 'Recomendada' : 'Máxima';
-            messageContent += `#### ${tierEmoji} ${tierLabel}: ${opt.gpu} (${opt.vram}) - ${opt.price_per_hour}\n\n`;
-
-            // Show frameworks if available
-            if (opt.frameworks) {
-              messageContent += `| Framework | Performance |\n`;
-              messageContent += `|-----------|-------------|\n`;
-              Object.entries(opt.frameworks).forEach(([framework, perf]) => {
-                const frameworkName = framework === 'vllm' ? 'vLLM' :
-                                     framework === 'pytorch' ? 'PyTorch' :
-                                     framework === 'llama_cpp' ? 'llama.cpp' :
-                                     framework === 'tgi' ? 'TGI' :
-                                     framework === 'transformers' ? 'Transformers' : framework;
-                messageContent += `| ${frameworkName} | ${perf} |\n`;
-              });
-              messageContent += `\n`;
-            } else if (opt.tokens_per_second) {
-              messageContent += `- **Performance:** ${opt.tokens_per_second} tok/s\n`;
-            }
-
-            // RAM offload info
-            if (opt.ram_offload) {
-              messageContent += `- **RAM Offload:** ${opt.ram_offload}\n`;
-            }
-
-            messageContent += `- ${opt.observation}\n\n`;
-          });
-        } else if (rec.recommended_gpus) {
-          // Fallback to old format
-          messageContent += `### GPUs Recomendadas\n`;
-          messageContent += `${rec.recommended_gpus.join(', ')}\n\n`;
-          messageContent += `- **VRAM Mínima:** ${rec.min_vram_gb}GB\n`;
-        }
-
-        // Optimization tips
-        if (rec.optimization_tips && rec.optimization_tips.length > 0) {
-          messageContent += `### Dicas de Otimização\n`;
-          rec.optimization_tips.forEach(tip => {
-            messageContent += `- ${tip}\n`;
-          });
-          messageContent += `\n`;
-        }
-
-        messageContent += `---\n**Workload:** ${rec.workload_type}`;
-
-        // Sources
-        if (rec.search_sources) {
-          messageContent += ` | *${rec.search_sources}*`;
-        }
-
-        setMessages(prev => [...prev, {
+      } else {
+        // Handle all stages (research, options, selection, reservation, or legacy recommendation)
+        const stage = data.stage || (data.recommendation ? 'recommendation' : 'unknown');
+        let messageContent = data.explanation || (data.recommendation?.explanation) || 'Processamento concluído.';
+        
+        // Prepare payload based on stage
+        const msgPayload = {
           role: 'assistant',
           content: messageContent,
-          recommendation: rec
-        }]);
-        if (onRecommendation) onRecommendation(rec);
+          stage: stage,
+          data: data, // Store full data for rendering
+          recommendation: data.recommendation, // Keep for legacy compatibility
+          showCards: true
+        };
+
+        setMessages(prev => [...prev, msgPayload]);
+        
+        if (data.recommendation && onRecommendation) {
+          onRecommendation(data.recommendation);
+        }
       }
     } catch (error) {
       console.error('AI Wizard error:', error);
@@ -573,7 +511,7 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters }) => {
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px] max-h-[400px]">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 min-h-[300px] max-h-[500px]">
         {messages.length === 0 && (
           <div className="text-center py-8">
             <Bot className="w-12 h-12 text-gray-600 mx-auto mb-3" />
@@ -603,15 +541,131 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters }) => {
                 <Bot className="w-4 h-4 text-purple-400" />
               </div>
             )}
-            <div className={`max-w-[80%] p-3 rounded-lg ${
+            <div className={`max-w-[90%] p-3 rounded-lg ${
               msg.role === 'user'
-                ? 'bg-green-600/20 text-green-100'
-                : 'bg-gray-800/50 text-gray-200'
+                ? 'ai-wizard-message-user'
+                : 'ai-wizard-message-assistant'
             }`}>
-              <div className="text-xs prose prose-invert prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-strong:text-green-400 prose-ul:my-1 prose-li:my-0">
-                <ReactMarkdown>{msg.content}</ReactMarkdown>
+              {/* Text content */}
+              <div className="text-xs prose prose-invert prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-strong:text-green-400 prose-ul:my-1 prose-li:my-0 prose-hr:border-gray-700 prose-h2:text-base prose-h3:text-sm prose-h4:text-xs mb-3">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
               </div>
-              {msg.recommendation && (
+
+              {/* Interactive Stage Displays */}
+              {msg.showCards && (
+                <div className="mt-3 pt-3 border-t border-gray-700/30">
+                  {/* Legacy Recommendation */}
+                  {(msg.stage === 'recommendation' || (!msg.stage && msg.recommendation?.gpu_options)) && (
+                    <GPUWizardDisplay
+                      recommendation={msg.recommendation}
+                      onSearch={(opt) => applyRecommendation(opt)}
+                    />
+                  )}
+
+                  {/* Research Stage */}
+                  {msg.stage === 'research' && msg.data?.research_results && (
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-xs space-y-2">
+                      <div className="font-semibold text-blue-400">Resultados da Pesquisa:</div>
+                      {msg.data.research_results.findings && (
+                        <div><span className="text-gray-400">Descobertas:</span> {msg.data.research_results.findings}</div>
+                      )}
+                      {msg.data.research_results.benchmarks && (
+                        <div><span className="text-gray-400">Benchmarks:</span> {msg.data.research_results.benchmarks}</div>
+                      )}
+                      {msg.data.research_results.prices && (
+                        <div><span className="text-gray-400">Preços:</span> {msg.data.research_results.prices}</div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Options Stage */}
+                  {msg.stage === 'options' && msg.data?.price_options && (
+                    <div className="space-y-2">
+                      <div className="font-semibold text-purple-400 text-xs mb-2">Opções de Preço Encontradas:</div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {msg.data.price_options.map((opt, idx) => (
+                          <div key={idx} className="bg-gray-800/50 p-3 rounded-lg border border-gray-700 hover:border-purple-500/50 transition-colors">
+                            <div className="flex justify-between items-start mb-1">
+                              <span className="font-bold text-white text-sm">{opt.tier}</span>
+                              <span className="text-green-400 font-mono text-xs">{opt.price_per_hour}</span>
+                            </div>
+                            <div className="text-gray-400 text-xs mb-1">{opt.gpus.join(', ')}</div>
+                            <div className="text-gray-500 text-[10px]">{opt.performance}</div>
+                            <button 
+                              onClick={() => {
+                                setInputValue(`Escolher opção ${opt.tier}`);
+                                sendMessage();
+                              }}
+                              className="mt-2 w-full py-1 text-[10px] bg-purple-600/20 text-purple-400 rounded hover:bg-purple-600/30 transition-colors"
+                            >
+                              Selecionar {opt.tier}
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Selection Stage */}
+                  {msg.stage === 'selection' && msg.data?.machines && (
+                    <div className="space-y-2">
+                      <div className="font-semibold text-green-400 text-xs mb-2">Máquinas Disponíveis:</div>
+                      <div className="grid grid-cols-1 gap-2">
+                        {msg.data.machines.map((machine, idx) => (
+                          <div key={idx} className="bg-gray-800/50 p-3 rounded-lg border border-gray-700 hover:border-green-500/50 transition-colors">
+                            <div className="flex justify-between items-center mb-1">
+                              <span className="font-bold text-white text-xs">{machine.gpu}</span>
+                              <span className="text-green-400 font-mono text-xs">{machine.price_per_hour}</span>
+                            </div>
+                            <div className="flex justify-between text-[10px] text-gray-500 mb-2">
+                              <span>{machine.vram}</span>
+                              <span>{machine.location}</span>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                setInputValue(`Reservar máquina ${machine.id}`);
+                                sendMessage();
+                              }}
+                              className="w-full py-1.5 text-[10px] font-medium bg-green-600/20 text-green-400 rounded hover:bg-green-600/30 transition-colors"
+                            >
+                              Reservar Agora
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reservation Stage */}
+                  {msg.stage === 'reservation' && msg.data?.reservation && (
+                    <div className="bg-green-900/20 border border-green-500/30 p-4 rounded-lg text-center">
+                      <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <Zap className="w-5 h-5 text-green-400" />
+                      </div>
+                      <h4 className="text-green-400 font-bold text-sm mb-1">Pronto para Reservar!</h4>
+                      <p className="text-gray-300 text-xs mb-3">{msg.data.reservation.details}</p>
+                      <button className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-xs font-bold rounded-lg transition-colors shadow-lg shadow-green-900/20">
+                        Confirmar e Pagar
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Optimization Tips (keep existing) */}
+                  {msg.recommendation?.optimization_tips && msg.recommendation.optimization_tips.length > 0 && (
+                    <div className="mt-3 p-2 rounded bg-sky-900/15 border border-sky-700/20">
+                      <div className="text-[10px] text-sky-400/80 font-semibold mb-1">Dicas de Otimização:</div>
+                      <ul className="text-[10px] text-gray-400 space-y-0.5">
+                        {msg.recommendation.optimization_tips.map((tip, idx) => (
+                          <li key={idx}>• {tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Fallback: Simple search button if no visual cards */}
+              {msg.recommendation && !msg.showCards && (
                 <button
                   onClick={() => applyRecommendation()}
                   className="mt-3 w-full py-2 px-3 text-xs font-medium text-white bg-purple-600/50 hover:bg-purple-600/70 rounded-lg transition-colors flex items-center justify-center gap-2"
@@ -634,8 +688,9 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters }) => {
             <div className="w-7 h-7 rounded-lg bg-purple-500/20 flex items-center justify-center">
               <Bot className="w-4 h-4 text-purple-400" />
             </div>
-            <div className="bg-gray-800/50 p-3 rounded-lg">
-              <Loader2 className="w-4 h-4 text-purple-400 animate-spin" />
+            <div className="ai-wizard-loading">
+              <Loader2 className="w-4 h-4 text-purple-400 ai-wizard-loading-spinner" />
+              Processando...
             </div>
           </div>
         )}
@@ -643,24 +698,358 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters }) => {
 
       {/* Chat Input */}
       <div className="p-4 border-t border-gray-800/50">
+        {/* Botões de ação rápida */}
+        <div className="ai-wizard-quick-actions">
+          {['Fine-tuning LLaMA 7B', 'Stable Diffusion XL', 'YOLO object detection', 'Orçamento $50/hora'].map((action) => (
+            <button
+              key={action}
+              onClick={() => setInputValue(action)}
+              className="ai-wizard-quick-action"
+            >
+              {action}
+            </button>
+          ))}
+        </div>
+        
         <div className="flex gap-2">
           <textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Descreva seu projeto... (ex: Quero rodar LLaMA 13B para fine-tuning)"
-            className="flex-1 px-3 py-2 text-xs text-white bg-[#1a1f1a] border border-gray-700/50 rounded-lg resize-none focus:outline-none focus:border-purple-500/50 placeholder:text-gray-600"
+            className="flex-1 ai-wizard-improved-input"
             rows={2}
           />
           <button
             onClick={sendMessage}
             disabled={!inputValue.trim() || isLoading}
-            className="px-4 py-2 bg-purple-600/50 hover:bg-purple-600/70 disabled:bg-gray-700/50 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            className="ai-wizard-improved-send-button"
           >
             <Send className="w-4 h-4" />
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+// Visual GPU Recommendation Card Component - Cores suavizadas
+const GPURecommendationCard = ({ option, onSearch }) => {
+  // Cores mais suaves e elegantes
+  const tierColors = {
+    'mínima': {
+      bg: 'bg-gray-800/40',
+      border: 'border-gray-600/20',
+      badge: 'bg-gray-700/50 text-gray-400',
+      button: 'bg-gray-600/40 hover:bg-gray-600/60'
+    },
+    'recomendada': {
+      bg: 'bg-emerald-900/20',
+      border: 'border-emerald-700/25',
+      badge: 'bg-emerald-800/40 text-emerald-400',
+      button: 'bg-emerald-700/40 hover:bg-emerald-700/60'
+    },
+    'máxima': {
+      bg: 'bg-violet-900/20',
+      border: 'border-violet-700/25',
+      badge: 'bg-violet-800/40 text-violet-400',
+      button: 'bg-violet-700/40 hover:bg-violet-700/60'
+    }
+  };
+  const colors = tierColors[option.tier] || tierColors['recomendada'];
+
+  return (
+    <div className={`rounded-lg border ${colors.border} ${colors.bg} p-3 flex flex-col`}>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-2">
+        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${colors.badge}`}>
+          {option.tier}
+        </span>
+        <span className="text-amber-400/80 text-xs font-mono font-bold">{option.price_per_hour}</span>
+      </div>
+
+      {/* GPU Info */}
+      <div className="mb-2">
+        <div className="text-white font-semibold text-sm">{option.gpu}</div>
+        <div className="text-gray-400 text-[11px]">VRAM: {option.vram}</div>
+        {option.quantization && (
+          <div className="text-gray-500 text-[10px]">Quantização: {option.quantization}</div>
+        )}
+      </div>
+
+      {/* Framework Performance Table */}
+      {option.frameworks && Object.keys(option.frameworks).length > 0 && (
+        <div className="mb-2">
+          <div className="text-gray-500 text-[10px] mb-1 font-semibold">Performance por Framework:</div>
+          <table className="w-full text-[10px]">
+            <tbody>
+              {Object.entries(option.frameworks).map(([framework, perf]) => (
+                <tr key={framework} className="border-b border-gray-700/20">
+                  <td className="py-0.5 text-gray-400">{framework}</td>
+                  <td className="py-0.5 text-emerald-400/80 font-mono text-right">{perf}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Tokens per second (legacy support) */}
+      {option.tokens_per_second && !option.frameworks && (
+        <div className="text-emerald-400/80 text-[11px] font-mono mb-2">
+          ~{option.tokens_per_second} tokens/s
+        </div>
+      )}
+
+      {/* RAM Offload */}
+      {option.ram_offload && (
+        <div className="text-amber-500/70 text-[10px] mb-2">
+          RAM Offload: {option.ram_offload}
+        </div>
+      )}
+
+      {/* Observation */}
+      {option.observation && (
+        <div className="text-gray-500 text-[10px] italic mb-2">{option.observation}</div>
+      )}
+
+      {/* Search Button */}
+      <button
+        onClick={() => onSearch(option)}
+        className={`mt-auto py-1.5 px-2 text-[10px] font-medium text-white ${colors.button} rounded transition-colors flex items-center justify-center gap-1`}
+      >
+        <Search className="w-3 h-3" />
+        Buscar {option.gpu}
+      </button>
+    </div>
+  );
+};
+
+// Interactive GPU Wizard Component - Main display with model info and slider
+const GPUWizardDisplay = ({ recommendation, onSearch }) => {
+  const [currentIndex, setCurrentIndex] = useState(1); // Start at recommended (middle)
+  const options = recommendation?.gpu_options || [];
+  const currentOption = options[currentIndex];
+
+  if (!currentOption) return null;
+
+  const goLeft = () => setCurrentIndex(prev => Math.max(0, prev - 1));
+  const goRight = () => setCurrentIndex(prev => Math.min(options.length - 1, prev + 1));
+
+  // Extract model info from recommendation
+  const modelName = recommendation?.model_name || 'Modelo';
+  const modelSize = recommendation?.model_size || '';
+
+  // Get tier colors
+  const tierStyles = {
+    'mínima': { accent: 'text-gray-400', bg: 'bg-gray-700/30', border: 'border-gray-600/30' },
+    'recomendada': { accent: 'text-emerald-400', bg: 'bg-emerald-900/20', border: 'border-emerald-600/30' },
+    'máxima': { accent: 'text-violet-400', bg: 'bg-violet-900/20', border: 'border-violet-600/30' }
+  };
+  const style = tierStyles[currentOption.tier] || tierStyles['recomendada'];
+
+  // Parse tokens per second for display
+  const getMainToksPerSec = () => {
+    if (currentOption.frameworks?.vllm) return currentOption.frameworks.vllm;
+    if (currentOption.frameworks?.pytorch) return currentOption.frameworks.pytorch;
+    if (currentOption.tokens_per_second) return `${currentOption.tokens_per_second} tok/s`;
+    return null;
+  };
+
+  return (
+    <div className={`rounded-xl border ${style.border} ${style.bg} p-4 transition-all duration-300`}>
+      {/* Model Header */}
+      <div className="text-center mb-4 pb-3 border-b border-gray-700/30">
+        <div className="text-[10px] text-gray-500 uppercase tracking-wider mb-1">Modelo</div>
+        <div className="text-white font-bold text-lg">{modelName}</div>
+        {modelSize && <div className="text-gray-400 text-xs">{modelSize}</div>}
+      </div>
+
+      {/* Main Content with Navigation */}
+      <div className="flex items-center gap-2">
+        {/* Left Arrow - Cheaper */}
+        <button
+          onClick={goLeft}
+          disabled={currentIndex === 0}
+          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+            currentIndex === 0
+              ? 'bg-gray-800/30 text-gray-600 cursor-not-allowed'
+              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 hover:text-white'
+          }`}
+          title="Mais barato"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
+        {/* Center Card - Current Selection */}
+        <div className="flex-1 text-center">
+          {/* Tier Badge */}
+          <div className={`inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3 ${style.bg} ${style.accent}`}>
+            {currentOption.tier}
+          </div>
+
+          {/* GPU Name */}
+          <div className="text-white font-bold text-xl mb-1">{currentOption.gpu}</div>
+
+          {/* VRAM & Quantization */}
+          <div className="flex items-center justify-center gap-2 text-xs text-gray-400 mb-3">
+            <span>{currentOption.vram}</span>
+            {currentOption.quantization && (
+              <>
+                <span className="text-gray-600">•</span>
+                <span className={`px-2 py-0.5 rounded ${style.bg} ${style.accent}`}>
+                  {currentOption.quantization}
+                </span>
+              </>
+            )}
+          </div>
+
+          {/* Main Performance Display */}
+          {getMainToksPerSec() && (
+            <div className="mb-3">
+              <div className={`text-3xl font-bold ${style.accent}`}>
+                {getMainToksPerSec()}
+              </div>
+              <div className="text-[10px] text-gray-500">tokens/segundo</div>
+            </div>
+          )}
+
+          {/* Price */}
+          <div className="text-amber-400 font-mono text-lg font-bold mb-3">
+            {currentOption.price_per_hour}
+          </div>
+
+          {/* Framework Performance Grid */}
+          {currentOption.frameworks && Object.keys(currentOption.frameworks).length > 1 && (
+            <div className="grid grid-cols-3 gap-2 mb-3 text-[10px]">
+              {Object.entries(currentOption.frameworks).slice(0, 3).map(([fw, perf]) => (
+                <div key={fw} className="bg-gray-800/30 rounded p-2">
+                  <div className="text-gray-500 uppercase">{fw}</div>
+                  <div className={`font-mono ${style.accent}`}>{perf}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* RAM Offload Warning */}
+          {currentOption.ram_offload && currentOption.ram_offload !== 'Não necessário' && (
+            <div className="text-amber-500/80 text-[10px] mb-2 flex items-center justify-center gap-1">
+              <span>⚠️</span>
+              <span>RAM Offload: {currentOption.ram_offload}</span>
+            </div>
+          )}
+
+          {/* Observation */}
+          {currentOption.observation && (
+            <div className="text-gray-500 text-[10px] italic mb-3">{currentOption.observation}</div>
+          )}
+        </div>
+
+        {/* Right Arrow - Faster */}
+        <button
+          onClick={goRight}
+          disabled={currentIndex === options.length - 1}
+          className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all ${
+            currentIndex === options.length - 1
+              ? 'bg-gray-800/30 text-gray-600 cursor-not-allowed'
+              : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 hover:text-white'
+          }`}
+          title="Mais rápido"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Slider Visual */}
+      <div className="mt-4 px-4">
+        <div className="flex items-center justify-between text-[9px] text-gray-500 mb-1">
+          <span>💰 Economia</span>
+          <span>Performance 🚀</span>
+        </div>
+        <div className="relative h-2 bg-gray-700/50 rounded-full">
+          {/* Track gradient */}
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-gray-600 via-emerald-600 to-violet-600 opacity-30" />
+          {/* Dots */}
+          <div className="absolute inset-0 flex items-center justify-between px-1">
+            {options.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentIndex(idx)}
+                className={`w-3 h-3 rounded-full transition-all ${
+                  idx === currentIndex
+                    ? `${style.accent.replace('text-', 'bg-')} scale-125 ring-2 ring-white/20`
+                    : 'bg-gray-600 hover:bg-gray-500'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Search Button */}
+      <button
+        onClick={() => onSearch(currentOption)}
+        className={`mt-4 w-full py-3 px-4 rounded-lg font-medium text-white transition-all flex items-center justify-center gap-2 ${
+          currentOption.tier === 'recomendada'
+            ? 'bg-emerald-600/50 hover:bg-emerald-600/70'
+            : currentOption.tier === 'máxima'
+            ? 'bg-violet-600/50 hover:bg-violet-600/70'
+            : 'bg-gray-600/50 hover:bg-gray-600/70'
+        }`}
+      >
+        <Search className="w-4 h-4" />
+        Buscar {currentOption.gpu}
+      </button>
+    </div>
+  );
+};
+
+// Legacy GPU Carousel Component (for compact view)
+const GPUCarousel = ({ options, onSearch }) => {
+  const [currentIndex, setCurrentIndex] = useState(1);
+
+  const goLeft = () => setCurrentIndex(prev => Math.max(0, prev - 1));
+  const goRight = () => setCurrentIndex(prev => Math.min(options.length - 1, prev + 1));
+
+  return (
+    <div className="relative">
+      <div className="flex items-center justify-between mb-3">
+        <button
+          onClick={goLeft}
+          disabled={currentIndex === 0}
+          className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-all ${
+            currentIndex === 0 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-700/30'
+          }`}
+        >
+          <ChevronLeft className="w-4 h-4" />
+          <span>Economia</span>
+        </button>
+
+        <div className="flex items-center gap-2">
+          {options.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setCurrentIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === currentIndex ? 'bg-emerald-500 w-4' : 'bg-gray-600 hover:bg-gray-500'
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          onClick={goRight}
+          disabled={currentIndex === options.length - 1}
+          className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] transition-all ${
+            currentIndex === options.length - 1 ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-white hover:bg-gray-700/30'
+          }`}
+        >
+          <span>Performance</span>
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      <GPURecommendationCard option={options[currentIndex]} onSearch={onSearch} />
     </div>
   );
 };
@@ -723,7 +1112,62 @@ const FilterSection = ({ title, icon: Icon, children, defaultOpen = true }) => {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [mode, setMode] = useState('wizard');
+
+  useEffect(() => {
+    checkOnboarding();
+  }, []);
+
+  const checkOnboarding = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/auth/me`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      const data = await res.json();
+      if (data.authenticated) {
+        setUser(data.user);
+        // Verificar se o onboarding já foi completado
+        const hasCompleted = data.user?.settings?.has_completed_onboarding;
+        if (!hasCompleted) {
+          setShowOnboarding(true);
+        } else {
+          setShowOnboarding(false);
+        }
+      }
+    } catch (e) {
+      console.error('Error checking onboarding:', e);
+      // Em caso de erro, não mostrar o onboarding
+      setShowOnboarding(false);
+    }
+  };
+
+  const handleCompleteOnboarding = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/settings/complete-onboarding`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      });
+      if (res.ok) {
+        // Atualizar o estado do usuário localmente
+        setUser(prev => ({
+          ...prev,
+          settings: {
+            ...prev?.settings,
+            has_completed_onboarding: true
+          }
+        }));
+        setShowOnboarding(false);
+      } else {
+        console.error('Failed to complete onboarding:', res.statusText);
+        setShowOnboarding(false);
+      }
+    } catch (e) {
+      console.error('Error completing onboarding:', e);
+      setShowOnboarding(false);
+    }
+  };
   const [activeTab, setActiveTab] = useState('EUA');
   const [selectedTier, setSelectedTier] = useState('Rapido');
   const [selectedGPU, setSelectedGPU] = useState('any');
@@ -776,7 +1220,7 @@ export default function Dashboard() {
     { name: 'Ultra', level: 4, color: 'green', speed: '2000+ Mbps', time: '~10s', gpu: 'A100/H100', vram: '40-80GB VRAM', priceRange: '$1.00 - $10.00/hr', description: 'Máxima potência. Para as tarefas mais exigentes.', filter: { max_price: 10.0, min_gpu_ram: 40 } }
   ];
 
-  const getToken = () => localStorage.getItem('token');
+  const getToken = () => localStorage.getItem('auth_token');
 
   const searchOffers = async (filters) => {
     setLoading(true);
@@ -844,6 +1288,13 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 md:p-6 lg:p-8" style={{ backgroundColor: '#0e110e', fontFamily: "'Inter', sans-serif" }}>
+      {showOnboarding && (
+        <OnboardingWizard 
+          user={user} 
+          onClose={() => setShowOnboarding(false)} 
+          onComplete={handleCompleteOnboarding}
+        />
+      )}
       <div className="w-full max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-6xl rounded-xl overflow-hidden border border-gray-800/50 shadow-2xl" style={{ backgroundColor: '#131713' }}>
 
         {/* Header */}

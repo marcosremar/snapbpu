@@ -42,15 +42,105 @@ async def lifespan(app: FastAPI):
     logger.info(f"   Version: {API_VERSION}")
     logger.info(f"   Environment: {'Development' if get_settings().app.debug else 'Production'}")
 
-    # TODO: Initialize background agents here
-    # - PriceMonitorAgent
-    # - AutoHibernationManager
+    # Initialize background agents
+    agents_started = []
+    try:
+        settings = get_settings()
+        
+        # Initialize Auto-Hibernation Manager
+        from .services.auto_hibernation_manager import init_auto_hibernation_manager
+        
+        vast_api_key = os.environ.get("VAST_API_KEY", "")
+        r2_endpoint = os.environ.get("R2_ENDPOINT", "")
+        r2_bucket = os.environ.get("R2_BUCKET", "")
+        
+        if vast_api_key and r2_endpoint:
+            hibernation_manager = init_auto_hibernation_manager(
+                vast_api_key=vast_api_key,
+                r2_endpoint=r2_endpoint,
+                r2_bucket=r2_bucket,
+                check_interval=30
+            )
+            hibernation_manager.start()
+            agents_started.append("AutoHibernationManager")
+            logger.info("✓ AutoHibernationManager started")
+        else:
+            logger.warning("⚠ AutoHibernationManager not started (missing VAST_API_KEY or R2_ENDPOINT)")
+        
+        # Initialize CPU Standby Manager
+        try:
+            from .services.standby_manager import get_standby_manager
+            gcp_credentials_json = os.environ.get("GCP_CREDENTIALS", "")
+
+            if gcp_credentials_json and vast_api_key:
+                import json
+                gcp_creds = json.loads(gcp_credentials_json)
+
+                standby_mgr = get_standby_manager()
+                standby_mgr.configure(
+                    gcp_credentials=gcp_creds,
+                    vast_api_key=vast_api_key,
+                    auto_standby_enabled=os.environ.get("AUTO_STANDBY_ENABLED", "false").lower() == "true",
+                    config={
+                        "gcp_zone": os.environ.get("GCP_ZONE", "europe-west1-b"),
+                        "gcp_machine_type": os.environ.get("GCP_MACHINE_TYPE", "e2-medium"),
+                        "gcp_disk_size": int(os.environ.get("GCP_DISK_SIZE", "100")),
+                        "gcp_spot": os.environ.get("GCP_SPOT", "true").lower() == "true",
+                        "sync_interval_seconds": int(os.environ.get("SYNC_INTERVAL", "30")),
+                        "health_check_interval": int(os.environ.get("HEALTH_CHECK_INTERVAL", "10")),
+                        "failover_threshold": int(os.environ.get("FAILOVER_THRESHOLD", "3")),
+                        "auto_failover": os.environ.get("AUTO_FAILOVER", "true").lower() == "true",
+                        "auto_recovery": os.environ.get("AUTO_RECOVERY", "true").lower() == "true",
+                    }
+                )
+                agents_started.append("StandbyManager")
+                logger.info("✓ CPU Standby Manager configured and ready")
+            else:
+                logger.warning("⚠ CPU Standby Manager not initialized (missing GCP_CREDENTIALS or VAST_API_KEY)")
+        except Exception as e:
+            logger.error(f"✗ Error initializing CPU Standby Manager: {e}")
+
+        # Initialize Market Monitor Agent (se houver database)
+        try:
+            from .services.market_monitor_agent import MarketMonitorAgent
+            from .config.database import SessionLocal
+
+            # Test database connection
+            db = SessionLocal()
+            db.close()
+
+            if vast_api_key:
+                market_agent = MarketMonitorAgent(
+                    vast_api_key=vast_api_key,
+                    gpus_to_monitor=["RTX 4090", "RTX 3090", "A100", "H100", "RTX 5090"],
+                    interval_minutes=5  # 5 minutos
+                )
+                market_agent.start()
+                agents_started.append("MarketMonitorAgent")
+                logger.info("✓ MarketMonitorAgent started")
+        except Exception as e:
+            logger.warning(f"⚠ MarketMonitorAgent not started: {e}")
+
+        logger.info(f"   Started agents: {', '.join(agents_started) if agents_started else 'None'}")
+        
+    except Exception as e:
+        logger.error(f"Error initializing agents: {e}")
 
     yield
 
     # Shutdown
     logger.info("🛑 Shutting down Dumont Cloud FastAPI application...")
-    # TODO: Stop background agents
+    
+    # Stop background agents
+    try:
+        from .services.auto_hibernation_manager import get_auto_hibernation_manager
+        manager = get_auto_hibernation_manager()
+        if manager:
+            manager.stop()
+            logger.info("✓ AutoHibernationManager stopped")
+    except Exception as e:
+        logger.error(f"Error stopping agents: {e}")
+
 
 
 def create_app() -> FastAPI:

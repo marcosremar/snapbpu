@@ -59,6 +59,7 @@ async def logout(
 @router.get("/me", response_model=AuthMeResponse)
 async def get_current_user(
     user_email: str = Depends(get_current_user_email),
+    auth_service: AuthService = Depends(get_auth_service),
 ):
     """
     Get current authenticated user
@@ -66,7 +67,27 @@ async def get_current_user(
     Returns user information if authenticated.
     """
     if user_email:
-        return AuthMeResponse(authenticated=True, user=user_email)
+        try:
+            user = auth_service.get_user(user_email)
+            if user:
+                return AuthMeResponse(
+                    authenticated=True,
+                    user={
+                        "email": user.email,
+                        "username": user.email,
+                        "settings": user.settings or {}
+                    }
+                )
+        except Exception as e:
+            # Se não conseguir buscar o usuário, ainda retorna autenticado com email
+            return AuthMeResponse(
+                authenticated=True,
+                user={
+                    "email": user_email,
+                    "username": user_email,
+                    "settings": {}
+                }
+            )
     return AuthMeResponse(authenticated=False)
 
 

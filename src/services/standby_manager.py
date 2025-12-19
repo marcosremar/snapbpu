@@ -10,6 +10,7 @@ import os
 import json
 import logging
 import threading
+from datetime import datetime
 from typing import Optional, Dict, Any
 from dataclasses import dataclass, field
 
@@ -25,6 +26,10 @@ class StandbyAssociation:
     cpu_instance_ip: Optional[str] = None
     sync_enabled: bool = False
     created_at: Optional[str] = None
+    # Campos para tracking de falha de GPU
+    gpu_failed: bool = False
+    failure_reason: Optional[str] = None
+    failed_at: Optional[str] = None
 
 
 class StandbyManager:
@@ -184,9 +189,44 @@ class StandbyManager:
             logger.error(f"Failed to create CPU standby for GPU {gpu_instance_id}: {e}")
             return None
 
+    def mark_gpu_failed(self, gpu_instance_id: int, reason: str = "unknown") -> bool:
+        """
+        Marca que a GPU falhou, mas mantém o CPU standby para backup/restore.
+
+        Args:
+            gpu_instance_id: ID da instância GPU que falhou
+            reason: Motivo da falha (gpu_failure, spot_interruption, etc)
+
+        Returns:
+            True se marcou com sucesso
+        """
+        if gpu_instance_id not in self._associations:
+            logger.debug(f"No standby association for GPU {gpu_instance_id}")
+            return False
+
+        association = self._associations[gpu_instance_id]
+        logger.info(f"Marking GPU {gpu_instance_id} as failed (reason={reason}), keeping CPU standby {association.cpu_instance_name}")
+
+        # Atualizar estado da associação
+        association.gpu_failed = True
+        association.failure_reason = reason
+        association.failed_at = datetime.now().isoformat()
+
+        # Parar sync se estiver rodando (GPU não existe mais)
+        if gpu_instance_id in self._services:
+            try:
+                self._services[gpu_instance_id].stop_sync()
+            except Exception as e:
+                logger.warning(f"Failed to stop sync for failed GPU {gpu_instance_id}: {e}")
+
+        self._save_associations()
+
+        logger.info(f"GPU {gpu_instance_id} marked as failed. CPU standby kept for backup/restore.")
+        return True
+
     def on_gpu_destroyed(self, gpu_instance_id: int) -> bool:
         """
-        Callback quando uma GPU é destruída.
+        Callback quando uma GPU é destruída (por solicitação do usuário).
         Destroi o CPU standby associado.
 
         Args:
@@ -295,11 +335,14 @@ class StandbyManager:
 
     def get_status(self) -> Dict[str, Any]:
         """Retorna status geral do manager"""
+        # Converter chaves de associações para string para compatibilidade JSON/Pydantic
+        associations = {str(k): v for k, v in self.list_associations().items()}
+        
         return {
             'configured': self.is_configured(),
             'auto_standby_enabled': self._auto_standby_enabled,
             'active_associations': len(self._associations),
-            'associations': self.list_associations(),
+            'associations': associations,
             'config': {
                 'gcp_zone': self._config.get('gcp_zone', 'europe-west1-b'),
                 'gcp_machine_type': self._config.get('gcp_machine_type', 'e2-medium'),
@@ -323,12 +366,15 @@ class StandbyManager:
                 'ip': assoc.cpu_instance_ip,
             },
             'sync_enabled': assoc.sync_enabled,
+            'gpu_failed': assoc.gpu_failed,
+            'failure_reason': assoc.failure_reason,
+            'failed_at': assoc.failed_at,
         }
 
         if service:
             result['state'] = service.state.value
             result['sync_count'] = service.sync_count
-            result['health_status'] = service.health_status
+            result['health_status'] = getattr(service, 'health_status', 'unknown')
 
         return result
 
@@ -349,6 +395,9 @@ class StandbyManager:
                         cpu_instance_zone=assoc_data['cpu_instance_zone'],
                         cpu_instance_ip=assoc_data.get('cpu_instance_ip'),
                         sync_enabled=assoc_data.get('sync_enabled', False),
+                        gpu_failed=assoc_data.get('gpu_failed', False),
+                        failure_reason=assoc_data.get('failure_reason'),
+                        failed_at=assoc_data.get('failed_at'),
                     )
 
                 logger.info(f"Loaded {len(self._associations)} standby associations")
@@ -368,6 +417,9 @@ class StandbyManager:
                     'cpu_instance_zone': assoc.cpu_instance_zone,
                     'cpu_instance_ip': assoc.cpu_instance_ip,
                     'sync_enabled': assoc.sync_enabled,
+                    'gpu_failed': assoc.gpu_failed,
+                    'failure_reason': assoc.failure_reason,
+                    'failed_at': assoc.failed_at,
                 }
 
             with open(assoc_file, 'w') as f:

@@ -9,7 +9,12 @@ const API_BASE = ''
  * Automatically adds JWT token from localStorage
  */
 export async function apiFetch(endpoint, options = {}) {
-  const token = localStorage.getItem('auth_token')
+  let token = localStorage.getItem('auth_token')
+
+  // Fallback para sessionStorage
+  if (!token) {
+    token = sessionStorage.getItem('auth_token')
+  }
 
   const headers = {
     ...options.headers,

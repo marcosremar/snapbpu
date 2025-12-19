@@ -1,114 +1,89 @@
-# Dumont Cloud - Sistema de Gerenciamento de GPU Cloud
+# Dumont Cloud - Sistema de Gerenciamento de GPU Cloud (v3)
 
 ## Objetivo Principal
 
-Sistema de backup/restore ultra-rápido para ambientes de GPU cloud (vast.ai, runpod, etc).
-**O tempo de inicialização é crítico** - o sistema deve restaurar o ambiente de trabalho o mais rápido possível.
+Sistema de gerenciamento e backup/restore ultra-rápido para ambientes de GPU cloud (vast.ai, runpod, etc).
+**O tempo de inicialização e a economia de custos são críticos** - o sistema deve restaurar o ambiente o mais rápido possível e hibernar máquinas ociosas automaticamente.
 
 ## Princípios de Design
 
 ### 1. Velocidade é Prioridade #1
-- Cada segundo conta na inicialização
-- Preferir soluções que minimizem latência
-- Paralelizar operações sempre que possível
+- Cada segundo conta na inicialização.
+- Uso de compactação ANS e restic otimizado (32+ conexões).
+- Restore em menos de 15 segundos para 7GB.
 
-### 2. Timeout Agressivo de 10 Segundos por Etapa
-- **REGRA CRÍTICA**: Cada etapa de inicialização tem timeout máximo de 10 segundos
-- Se qualquer etapa demorar mais de 10s, a máquina é considerada lenta e deve ser:
-  1. Imediatamente destruída
-  2. Substituída por outra oferta disponível
-- Etapas monitoradas:
-  1. Criação da instância (API vast.ai)
-  2. Instância ficar "running" com SSH disponível
-  3. Conexão SSH estabelecida
-  4. Instalação do restic
-  5. Restore dos dados (timeout maior: 120s)
+### 2. Auto-Hibernação Inteligente (Custo Zero)
+- **REGRA CRÍTICA**: Monitoramento constante via `DumontAgent`.
+- Se GPU ociosa (< 5%) por **3 minutos**: Instantânea criação de snapshot e destruição da máquina.
+- Se hibernada por **30 minutos**: Limpeza da reserva, mantendo apenas o snapshot no R2 ($0.01/mês).
 
-### 3. Estratégia de Multi-Start para Máquinas
-- Máquinas GPU cloud têm tempos de inicialização imprevisíveis (10s a 3+ min)
-- **Solução**: Iniciar múltiplas máquinas em paralelo, usar a primeira que ficar pronta
-- Algoritmo:
-  1. Iniciar 5 máquinas simultaneamente
-  2. Aguardar 10 segundos
-  3. Se nenhuma estiver pronta, iniciar mais 5 diferentes
-  4. Repetir até 3 vezes (máximo 15 máquinas)
-  5. Usar a primeira que responder, cancelar as outras
+### 3. Estratégia de Multi-Start Dinâmico (Batches)
+- **Implementado**: Supera a variabilidade de boot das clouds iniciando máquinas em paralelo.
+- **Batches**: Inicia batches de 5 máquinas (até 3 rounds/15 máquinas total).
+- **Vencedor**: Monitora todas via API; a primeira que reportar status "Running" e liberar dados de SSH vence.
+- **Cleanup Imediato**: Todas as outras máquinas são destruídas no instante em que o vencedor é confirmado.
+- **Timeouts**: Timeout agressivo de 90s por batch para garantir rapidez.
 
-### 4. Restore Otimizado
-- Usar restic com máximo de conexões paralelas (32+)
-- Considerar cache local para arquivos frequentes
-- Priorizar restauração de arquivos críticos primeiro
+### 4. Arquitetura SOLID & FastAPI
+- Backend moderno com **FastAPI**, **Pydantic v2** e **Dependency Injection**.
+- Autenticação via **JWT** (stateless).
+- Camadas bem definidas: Domain, Infrastructure, API, Core.
 
 ## Arquitetura
 
 ```
-VPS (54.37.225.188)           GPU Cloud (vast.ai)
-┌─────────────────┐           ┌─────────────────┐
-│ Dashboard       │           │ Workspace       │
-│ - Flask API     │◄─────────►│ - MuseTalk1.5   │
-│ - Restic client │           │ - Sync daemon   │
-└────────┬────────┘           └─────────────────┘
+VPS (Control Plane)             GPU Cloud (Data Plane)
+┌─────────────────┐           ┌──────────────────┐
+│ FastAPI Backend │           │ DumontAgent      │
+│ - Domain Logic  │◄─────────►│ - GPU Monitor    │
+│ - Auto-Hiber.   │   (SSH)   │ - Sync Service   │
+└────────┬────────┘           └──────────────────┘
          │
          ▼
 ┌─────────────────┐
 │ Cloudflare R2   │
-│ - Restic repo   │
-│ - ~7GB comprim. │
+│ - Snapshots ANS │
+│ - Restic Repos  │
 └─────────────────┘
 ```
 
-## APIs Principais
+## APIs Principais (v1)
 
-- `/api/snapshots` - Lista snapshots com deduplicação por tree hash
-- `/api/offers` - Lista máquinas disponíveis com filtros completos
-- `/api/create-instance` - Cria instância vast.ai
-- `/api/restore` - Restaura snapshot na máquina
+- `/api/v1/auth/login` - Autenticação JWT
+- `/api/v1/instances` - Gerenciamento de instâncias (list, create, destroy, pause, resume)
+- `/api/v1/instances/{id}/wake` - Reativação ultra-rápida de máquina hibernada
+- `/api/v1/snapshots` - Lista e gerencia backups
+- `/api/v1/metrics` - Métricas de performance e uso
+- `/api/v1/metrics/savings/real` - Economia real acumulada via hibernação
+- `/api/v1/agent/status` - Recebe heartbeats do DumontAgent
+- `/api/v1/standby` - Configura CPU Standby/Failover (GCP)
 
-## Credenciais (Desenvolvimento)
+## Credenciais e Acesso (Dev)
 
 - VPS: ubuntu@54.37.225.188
 - Dashboard: http://vps-a84d392b.vps.ovh.net:8765/
-- R2 Bucket: musetalk
 - Restic repo: s3:https://....r2.cloudflarestorage.com/musetalk/restic
 
 ## Boas Práticas de Desenvolvimento
 
-### Execução de Comandos SSH
+### 1. Camada de Domínio Primeiro
+Sempre defina os modelos em `src/domain/models/` e interfaces em `src/domain/repositories/` antes de implementar infraestrutura.
 
-**IMPORTANTE**: Evitar comandos inline complexos que podem travar o terminal.
+### 2. Dependency Injection
+Use o decorator `Depends()` do FastAPI para injetar serviços e repositórios. Nunca instancie classes de infraestrutura diretamente nos endpoints.
 
-#### ❌ NÃO FAZER:
-```bash
-# Comandos longos inline que podem travar o terminal
-ssh ubuntu@54.37.225.188 'ps aux | grep "python3 app" | grep -v grep && killall -9 python3 2>/dev/null; sleep 2; cd ~/dumont-cloud && python3 app.py > /tmp/app.log 2>&1 & sleep 3...'
-```
+### 3. SSH Otimizado
+Evite comandos inline complexos. Use `src/infrastructure/providers/vast_provider.py` para abstrair operações SSH.
 
-#### ✅ FAZER:
-```bash
-# Criar script temporário e executar
-cat > /tmp/deploy.sh << 'EOF'
-#!/bin/bash
-killall python3 2>/dev/null
-sleep 1
-cd ~/dumont-cloud
-nohup python3 app.py > /tmp/app.log 2>&1 &
-sleep 2
-ps aux | grep "python3 app" | grep -v grep
-EOF
+## Status Atual (Atualizado 2024-12-17)
 
-scp /tmp/deploy.sh ubuntu@54.37.225.188:/tmp/
-ssh ubuntu@54.37.225.188 'bash /tmp/deploy.sh'
-```
-
-**Razões**:
-- Comandos inline longos podem bloquear o terminal
-- Scripts separados são mais fáceis de debugar
-- Melhor controle sobre timeouts e erros
-- Não trava Claude Code durante execução
-
-## TODO
-
-- [ ] Implementar multi-start de máquinas (5 paralelas, 10s timeout)
-- [ ] Cancelamento automático de máquinas não utilizadas
-- [ ] Métricas de tempo de inicialização por host
-- [ ] Cache de hosts "rápidos" para priorização futura
+- [x] Migração Flask → FastAPI (100%)
+- [x] Autenticação JWT (100%)
+- [x] Sistema de Auto-Hibernação (100%) - Inclui endpoint `/wake` e agents inicializados
+- [x] Refatoração SOLID (100%)
+- [x] Multi-Start Dinâmico (Batches 5x3) (100%)
+- [x] Dashboard de Economia Real (100%) - Endpoints e componentes React prontos
+- [x] Endpoint de Heartbeats `/api/agent/status` (100%)
+- [x] CPU Standby/Failover Backend (100%)
+- [/] CPU Standby UI (70%) - Componente Config pronto, falta badge detalhado
+- [ ] Testes E2E (0%)

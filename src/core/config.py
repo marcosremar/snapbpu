@@ -89,6 +89,17 @@ class DumontAgentSettings(BaseSettings):
         env_prefix = ""
 
 
+class LLMSettings(BaseSettings):
+    """LLM configuration for AI Advisor"""
+    openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
+    anthropic_api_key: str = Field(default="", env="ANTHROPIC_API_KEY")
+    default_provider: str = Field(default="openai", env="LLM_DEFAULT_PROVIDER")
+    model_name: str = Field(default="gpt-4o", env="LLM_MODEL_NAME")
+
+    class Config:
+        env_prefix = ""
+
+
 class Settings(BaseSettings):
     """Main settings container"""
     app: AppSettings = Field(default_factory=AppSettings)
@@ -96,6 +107,7 @@ class Settings(BaseSettings):
     restic: ResticSettings = Field(default_factory=ResticSettings)
     vast: VastSettings = Field(default_factory=VastSettings)
     agent: DumontAgentSettings = Field(default_factory=DumontAgentSettings)
+    llm: LLMSettings = Field(default_factory=LLMSettings)
 
     class Config:
         env_prefix = ""

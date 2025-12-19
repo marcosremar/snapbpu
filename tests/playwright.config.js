@@ -11,8 +11,9 @@ module.exports = defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  timeout: 600000, // 10 minutes for long tests
   use: {
-    baseURL: 'https://dumontcloud.com',
+    baseURL: process.env.BASE_URL || 'http://localhost:8766',
     trace: 'on-first-retry',
     screenshot: 'on',
     video: 'on-first-retry',

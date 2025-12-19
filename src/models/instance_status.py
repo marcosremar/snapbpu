@@ -33,6 +33,8 @@ class InstanceStatus(Base):
     pause_after_minutes = Column(Integer, default=3)  # Pausar após X minutos ociosa
     delete_after_minutes = Column(Integer, default=30)  # Deletar após X minutos pausada
     gpu_usage_threshold = Column(Float, default=5.0)  # Threshold de uso (%)
+    idle_timeout_seconds = Column(Integer, default=180)  # Timeout em segundos (3 min)
+    last_snapshot_id = Column(String(200), nullable=True)  # ID do último snapshot
 
     # Vast.ai info
     vast_instance_id = Column(Integer, nullable=True, index=True)
@@ -114,6 +116,11 @@ class HibernationEvent(Base):
     gpu_utilization = Column(Float, nullable=True)
     snapshot_id = Column(String(200), nullable=True)
     reason = Column(String(500), nullable=True)  # Motivo (ex: "GPU ociosa por 3 minutos")
+    
+    # Economia (para calcular savings)
+    dph_total = Column(Float, nullable=True)  # Preço por hora da instância
+    idle_hours = Column(Float, nullable=True)  # Horas economizadas
+    savings_usd = Column(Float, nullable=True)  # Valor economizado em USD
 
     # Info adicional (JSON-like)
     event_metadata = Column(String(2000), nullable=True)  # JSON string com dados extras
@@ -137,5 +144,9 @@ class HibernationEvent(Base):
             'gpu_utilization': self.gpu_utilization,
             'snapshot_id': self.snapshot_id,
             'reason': self.reason,
+            'dph_total': self.dph_total,
+            'idle_hours': self.idle_hours,
+            'savings_usd': self.savings_usd,
             'metadata': self.event_metadata,
         }
+

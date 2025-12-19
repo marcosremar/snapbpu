@@ -35,26 +35,28 @@ async def get_reliability_scores(
         if gpu_name:
             query = query.filter(ProviderReliability.gpu_name == gpu_name)
 
-        providers = query.order_by(ProviderReliability.reliability_score.desc()).limit(limit * 2).all()
+        # Pegar todos para calcular estatísticas, depois limitar
+        providers = query.all()
 
         items = []
         excellent_count = 0
         total_score = 0
 
         for p in providers:
-            # Calcular scores (0-100)
-            reliability = p.reliability_score or 0.5
-            uptime_score = reliability * 100
+            # Calcular scores (0-100) usando os valores já calculados no banco
+            availability = p.availability_score or 0.5
+            uptime_score = availability * 100
 
             price_stability = p.price_stability_score or 0.7
             price_score = price_stability * 100
 
-            # Performance score baseado em observações
-            obs = p.total_observations or 1
-            perf_score = min(100, obs * 2)
+            # Performance score do banco (já calculado baseado em GPU type)
+            perf_score = (p.performance_score or 0.7) * 100
 
-            # Overall score ponderado
-            overall = (uptime_score * 0.4 + price_score * 0.3 + perf_score * 0.3)
+            # Overall score ponderado (mesmo cálculo do reliability_score * 100)
+            overall = p.reliability_score * 100 if p.reliability_score else (
+                uptime_score * 0.35 + price_score * 0.25 + perf_score * 0.20 + 10  # base bonus
+            )
 
             if overall < min_score:
                 continue
@@ -86,7 +88,7 @@ async def get_reliability_scores(
                 price_stability_score=round(price_score, 1),
                 performance_score=round(perf_score, 1),
                 history_days=history_days,
-                total_rentals=obs,
+                total_rentals=p.total_observations or 1,
                 recommendation=rec,
             )
             items.append(item)

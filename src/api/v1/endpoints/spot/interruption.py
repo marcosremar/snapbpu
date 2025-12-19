@@ -36,25 +36,29 @@ async def get_interruption_rates(
         if geolocation:
             query = query.filter(ProviderReliability.geolocation.ilike(f"%{geolocation}%"))
 
-        providers = query.order_by(ProviderReliability.reliability_score.desc()).limit(limit).all()
+        # Ordenar por availability_score (menor = maior interrupção = mais relevante mostrar)
+        providers = query.order_by(ProviderReliability.availability_score.asc()).limit(limit * 2).all()
 
         items = []
         total_rate = 0
         safe_count = 0
 
         for p in providers:
-            reliability = p.reliability_score or 0.5
-            interruption_rate = 1 - reliability
+            # Usar availability_score para taxa de interrupção (mais preciso)
+            availability = p.availability_score or 0.8
+            interruption_rate = 1 - availability
 
             if interruption_rate > max_rate:
                 continue
 
-            avg_uptime = reliability * 24  # horas estimadas
+            # Uptime baseado na disponibilidade real
+            avg_uptime = availability * 24  # horas estimadas por dia
 
-            if interruption_rate < 0.05:
+            # Classificar risco baseado na taxa de interrupção
+            if interruption_rate < 0.10:
                 risk = "low"
                 safe_count += 1
-            elif interruption_rate < 0.15:
+            elif interruption_rate < 0.25:
                 risk = "medium"
             else:
                 risk = "high"
@@ -67,8 +71,8 @@ async def get_interruption_rates(
                 interruption_rate=round(interruption_rate, 3),
                 avg_uptime_hours=round(avg_uptime, 1),
                 total_rentals=p.total_observations or 1,
-                successful_completions=int((p.total_observations or 1) * reliability),
-                reliability_score=round(reliability, 3),
+                successful_completions=int((p.total_observations or 1) * availability),
+                reliability_score=round(p.reliability_score or 0.7, 3),
                 risk_level=risk,
             )
             items.append(item)

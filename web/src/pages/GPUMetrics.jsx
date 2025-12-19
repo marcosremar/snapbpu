@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -11,7 +12,20 @@ import {
   Legend,
   Filler,
 } from 'chart.js'
-import { BarChart3, TrendingUp, TrendingDown, ArrowRight, Package, Cpu, AlertTriangle, Shield, Zap, DollarSign, Clock, Server } from 'lucide-react'
+import { BarChart3, TrendingUp, TrendingDown, ArrowRight, Package, Cpu, AlertTriangle, Shield, Zap, DollarSign, Clock, Server, Sparkles, PiggyBank } from 'lucide-react'
+import {
+  SpotMonitor,
+  SavingsCalculator,
+  InterruptionRate,
+  SafeWindows,
+  LLMGpuRanking,
+  SpotPrediction,
+  InstantAvailability,
+  ReliabilityScore,
+  TrainingCost,
+  FleetStrategy
+} from '../components/spot'
+import RealSavingsDashboard from '../components/RealSavingsDashboard'
 
 ChartJS.register(
   CategoryScale,
@@ -27,8 +41,26 @@ ChartJS.register(
 const API_BASE = ''
 
 export default function GPUMetrics() {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('market') // market, providers, efficiency
+
+  // Read tab and report from URL params
+  const urlTab = searchParams.get('tab') || 'market'
+  const urlReport = searchParams.get('report') || null
+  const [activeTab, setActiveTab] = useState(urlTab)
+  const [activeReport, setActiveReport] = useState(urlReport)
+
+  // Update state when URL changes
+  useEffect(() => {
+    setActiveTab(searchParams.get('tab') || 'market')
+    setActiveReport(searchParams.get('report') || null)
+  }, [searchParams])
+
+  // Update URL when tab changes
+  const handleTabChange = (tab) => {
+    setActiveTab(tab)
+    setSearchParams({ tab })
+  }
 
   // Market data
   const [marketData, setMarketData] = useState([])
@@ -220,6 +252,22 @@ export default function GPUMetrics() {
     return colors[type] || '#6b7280'
   }
 
+  const getReportTitle = (report) => {
+    const titles = {
+      'monitor': 'Monitor de Preços Spot',
+      'savings': 'Calculadora de Economia',
+      'availability': 'Disponibilidade Instantânea',
+      'prediction': 'Previsão de Preços',
+      'safe-windows': 'Janelas Seguras',
+      'reliability': 'Score de Confiabilidade',
+      'interruption': 'Taxa de Interrupção',
+      'llm': 'Melhor GPU para LLM',
+      'training': 'Custo por Treinamento',
+      'fleet': 'Estratégia de Fleet'
+    }
+    return titles[report] || 'Relatórios Spot'
+  }
+
   // Chart data for market summary
   const getMarketChartData = () => {
     const gpuData = {}
@@ -295,7 +343,7 @@ export default function GPUMetrics() {
       <div className="metrics-header">
         <div>
           <h1 className="metrics-title">
-            <BarChart3 size={28} style={{display: 'inline', verticalAlign: 'middle', marginRight: '12px'}} />
+            <BarChart3 size={28} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '12px' }} />
             Métricas de GPU
           </h1>
           <p className="metrics-subtitle">Análise completa de preços, provedores e eficiência - Vast.ai</p>
@@ -306,21 +354,33 @@ export default function GPUMetrics() {
       <div className="metrics-tabs">
         <button
           className={`metrics-tab ${activeTab === 'market' ? 'active' : ''}`}
-          onClick={() => setActiveTab('market')}
+          onClick={() => handleTabChange('market')}
         >
           <TrendingUp size={18} /> Mercado
         </button>
         <button
           className={`metrics-tab ${activeTab === 'providers' ? 'active' : ''}`}
-          onClick={() => setActiveTab('providers')}
+          onClick={() => handleTabChange('providers')}
         >
           <Shield size={18} /> Provedores
         </button>
         <button
           className={`metrics-tab ${activeTab === 'efficiency' ? 'active' : ''}`}
-          onClick={() => setActiveTab('efficiency')}
+          onClick={() => handleTabChange('efficiency')}
         >
           <Zap size={18} /> Eficiência
+        </button>
+        <button
+          className={`metrics-tab ${activeTab === 'savings' ? 'active' : ''}`}
+          onClick={() => handleTabChange('savings')}
+        >
+          <PiggyBank size={18} /> Economia
+        </button>
+        <button
+          className={`metrics-tab ${activeTab === 'spot' ? 'active' : ''}`}
+          onClick={() => handleTabChange('spot')}
+        >
+          <Sparkles size={18} /> Spot Reports
         </button>
       </div>
 
@@ -412,7 +472,7 @@ export default function GPUMetrics() {
           {marketData.length > 0 && (
             <div className="chart-section">
               <h2 className="section-title">
-                <TrendingUp size={22} style={{display: 'inline', verticalAlign: 'middle', marginRight: '8px'}} />
+                <TrendingUp size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />
                 Histórico de Preços
               </h2>
               <div className="chart-container" style={{ height: '300px' }}>
@@ -471,7 +531,7 @@ export default function GPUMetrics() {
       {activeTab === 'providers' && (
         <div className="providers-section">
           <h2 className="section-title">
-            <Shield size={22} style={{display: 'inline', verticalAlign: 'middle', marginRight: '8px'}} />
+            <Shield size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />
             Ranking de Provedores por Confiabilidade
           </h2>
 
@@ -540,64 +600,169 @@ export default function GPUMetrics() {
       {activeTab === 'efficiency' && (
         <div className="efficiency-section">
           <h2 className="section-title">
-            <Zap size={22} style={{display: 'inline', verticalAlign: 'middle', marginRight: '8px'}} />
+            <Zap size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />
             Ranking de Custo-Benefício
           </h2>
 
           {efficiency.length > 0 ? (
-            <div className="efficiency-grid">
-              {efficiency.slice(0, 20).map((item, idx) => (
-                <div key={item.offer_id} className="efficiency-card">
-                  <div className="efficiency-rank">#{idx + 1}</div>
-                  <div className="efficiency-header">
-                    <h4>{item.gpu_name}</h4>
-                    <span
-                      className="type-badge-small"
-                      style={{ backgroundColor: getMachineTypeColor(item.machine_type) }}
-                    >
-                      {getMachineTypeLabel(item.machine_type)}
-                    </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {efficiency.slice(0, 20).map((item, idx) => {
+                const score = item.efficiency_score || 0
+                const scoreColor = score >= 85 ? '#22c55e' : score >= 70 ? '#eab308' : '#ef4444'
+                const scoreLabel = score >= 85 ? 'Excelente' : score >= 70 ? 'Bom' : 'Regular'
+
+                return (
+                  <div key={item.offer_id} className="p-4 rounded-lg border border-gray-700/40 bg-[#161a16] hover:border-green-500/30 transition-all relative">
+                    {/* Rank Badge */}
+                    <div className="absolute -top-2 -left-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                      style={{
+                        backgroundColor: idx === 0 ? '#22c55e' : idx === 1 ? '#3b82f6' : idx === 2 ? '#f59e0b' : '#374151',
+                        color: 'white'
+                      }}>
+                      #{idx + 1}
+                    </div>
+
+                    {/* Header: GPU + Type Badge */}
+                    <div className="flex items-center justify-between mb-3 pt-1">
+                      <div className="flex items-center gap-2">
+                        <Cpu className="w-5 h-5 text-green-400" />
+                        <span className="text-white font-semibold text-sm">{item.gpu_name}</span>
+                      </div>
+                      <span
+                        className="text-[10px] px-2 py-0.5 rounded-full font-medium"
+                        style={{
+                          backgroundColor: getMachineTypeColor(item.machine_type) + '20',
+                          color: getMachineTypeColor(item.machine_type)
+                        }}
+                      >
+                        {getMachineTypeLabel(item.machine_type)}
+                      </span>
+                    </div>
+
+                    {/* Score Circle */}
+                    <div className="flex items-center justify-center mb-4">
+                      <div className="relative w-20 h-20">
+                        <svg className="w-full h-full transform -rotate-90">
+                          <circle
+                            cx="40" cy="40" r="36"
+                            fill="none"
+                            stroke="#1f2937"
+                            strokeWidth="6"
+                          />
+                          <circle
+                            cx="40" cy="40" r="36"
+                            fill="none"
+                            stroke={scoreColor}
+                            strokeWidth="6"
+                            strokeLinecap="round"
+                            strokeDasharray={`${score * 2.26} 226`}
+                          />
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-xl font-bold text-white">{score.toFixed(0)}</span>
+                          <span className="text-[9px] text-gray-400">{scoreLabel}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
+                      <div className="text-gray-400 flex items-center gap-1">
+                        <DollarSign size={12} className="text-gray-500" />
+                        <span className="text-gray-500">Preço:</span>
+                        <span className="text-green-400 font-mono font-medium">{formatPrice(item.dph_total)}</span>
+                      </div>
+                      <div className="text-gray-400 flex items-center gap-1">
+                        <Cpu size={12} className="text-gray-500" />
+                        <span className="text-gray-500">TFLOPS:</span>
+                        <span className="text-white">{item.total_flops?.toFixed(1) || '-'}</span>
+                      </div>
+                      <div className="text-gray-400 flex items-center gap-1">
+                        <Zap size={12} className="text-gray-500" />
+                        <span className="text-gray-500">$/TFLOPS:</span>
+                        <span className="text-white">{formatPrice(item.cost_per_tflops)}</span>
+                      </div>
+                      <div className="text-gray-400 flex items-center gap-1">
+                        <Package size={12} className="text-gray-500" />
+                        <span className="text-gray-500">VRAM:</span>
+                        <span className="text-white">{item.gpu_ram?.toFixed(0) || '-'} GB</span>
+                      </div>
+                    </div>
+
+                    {/* Footer with reliability indicator */}
+                    <div className="flex items-center justify-between pt-2 border-t border-gray-700/30">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${score >= 80 ? 'bg-green-400' : score >= 65 ? 'bg-yellow-400' : 'bg-red-400'}`} />
+                        <span className="text-[10px] text-gray-400">Eficiência {score >= 80 ? 'Alta' : score >= 65 ? 'Média' : 'Baixa'}</span>
+                      </div>
+                      {item.verified && (
+                        <span className="text-[9px] text-green-400 px-1.5 py-0.5 bg-green-500/10 rounded">Verificado</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="efficiency-score">
-                    <div className="score-circle" style={{
-                      background: `conic-gradient(#22c55e ${item.efficiency_score}%, #1f2937 0)`
-                    }}>
-                      <span>{item.efficiency_score?.toFixed(0) || 0}</span>
-                    </div>
-                    <span className="score-label">Score</span>
-                  </div>
-                  <div className="efficiency-details">
-                    <div className="detail-row">
-                      <DollarSign size={14} />
-                      <span>Preço:</span>
-                      <strong>{formatPrice(item.dph_total)}</strong>
-                    </div>
-                    <div className="detail-row">
-                      <Cpu size={14} />
-                      <span>TFLOPS:</span>
-                      <strong>{item.total_flops?.toFixed(1) || '-'}</strong>
-                    </div>
-                    <div className="detail-row">
-                      <Zap size={14} />
-                      <span>$/TFLOPS:</span>
-                      <strong>{formatPrice(item.cost_per_tflops)}</strong>
-                    </div>
-                    <div className="detail-row">
-                      <Package size={14} />
-                      <span>VRAM:</span>
-                      <strong>{item.gpu_ram?.toFixed(0) || '-'} GB</strong>
-                    </div>
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           ) : (
-            <div className="empty-state">
-              <Zap size={64} style={{ opacity: 0.5 }} />
-              <h3>Calculando rankings de eficiência...</h3>
-              <p>Os rankings são calculados com base em preço, performance e confiabilidade.</p>
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-[#1a2418] flex items-center justify-center mb-4">
+                <Zap size={32} className="text-green-400/50" />
+              </div>
+              <h3 className="text-white text-lg font-medium mb-2">Calculando rankings de eficiência...</h3>
+              <p className="text-gray-400 text-sm max-w-md">Os rankings são calculados com base em preço, performance e confiabilidade.</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Economia Tab - Dashboard de Economia Real */}
+      {activeTab === 'savings' && (
+        <div className="savings-section">
+          <RealSavingsDashboard getAuthHeaders={getAuthHeaders} />
+        </div>
+      )}
+
+      {/* Spot Reports Tab */}
+      {activeTab === 'spot' && (
+        <div className="spot-section">
+          <h2 className="section-title">
+            <Sparkles size={22} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '8px' }} />
+            {activeReport ? getReportTitle(activeReport) : 'Relatórios Spot - Maximize suas Economias'}
+          </h2>
+
+          {/* If specific report requested, show only that one, otherwise show all */}
+          <div className={activeReport ? "spot-report-single" : "spot-reports-grid"}>
+            {(!activeReport || activeReport === 'monitor') && (
+              <SpotMonitor getAuthHeaders={getAuthHeaders} />
+            )}
+            {(!activeReport || activeReport === 'availability') && (
+              <InstantAvailability getAuthHeaders={getAuthHeaders} />
+            )}
+            {(!activeReport || activeReport === 'savings') && (
+              <SavingsCalculator getAuthHeaders={getAuthHeaders} selectedGPU={selectedGPU} />
+            )}
+            {(!activeReport || activeReport === 'training') && (
+              <TrainingCost getAuthHeaders={getAuthHeaders} />
+            )}
+            {(!activeReport || activeReport === 'prediction') && (
+              <SpotPrediction getAuthHeaders={getAuthHeaders} selectedGPU={selectedGPU !== 'all' ? selectedGPU : 'RTX 4090'} />
+            )}
+            {(!activeReport || activeReport === 'safe-windows') && (
+              <SafeWindows getAuthHeaders={getAuthHeaders} selectedGPU={selectedGPU !== 'all' ? selectedGPU : 'RTX 4090'} />
+            )}
+            {(!activeReport || activeReport === 'reliability') && (
+              <ReliabilityScore getAuthHeaders={getAuthHeaders} selectedGPU={selectedGPU} />
+            )}
+            {(!activeReport || activeReport === 'interruption') && (
+              <InterruptionRate getAuthHeaders={getAuthHeaders} />
+            )}
+            {(!activeReport || activeReport === 'llm') && (
+              <LLMGpuRanking getAuthHeaders={getAuthHeaders} />
+            )}
+            {(!activeReport || activeReport === 'fleet') && (
+              <FleetStrategy getAuthHeaders={getAuthHeaders} />
+            )}
+          </div>
         </div>
       )}
     </div>

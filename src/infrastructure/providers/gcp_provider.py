@@ -134,10 +134,29 @@ class GCPProvider:
 
             # Carregar chave SSH pública do usuário
             ssh_pub_key = ""
+            ssh_key_path = os.path.expanduser("~/.ssh/id_rsa")
             ssh_pub_path = os.path.expanduser("~/.ssh/id_rsa.pub")
+
+            # Se não existir, gerar nova chave SSH
+            if not os.path.exists(ssh_key_path):
+                import subprocess
+                ssh_dir = os.path.expanduser("~/.ssh")
+                os.makedirs(ssh_dir, exist_ok=True)
+
+                logger.info("Generating SSH key pair...")
+                subprocess.run(
+                    ["ssh-keygen", "-t", "rsa", "-f", ssh_key_path, "-N", ""],
+                    check=True,
+                    capture_output=True
+                )
+                logger.info(f"✓ SSH key generated at {ssh_key_path}")
+
+            # Carregar chave pública
             if os.path.exists(ssh_pub_path):
                 with open(ssh_pub_path, 'r') as f:
                     ssh_pub_key = f.read().strip()
+            else:
+                raise RuntimeError(f"SSH public key not found at {ssh_pub_path}")
 
             # Startup script para configurar a VM
             startup_script = f"""#!/bin/bash
@@ -213,15 +232,26 @@ echo "Dumont CPU Standby ready" > /var/log/dumont-ready
 
             logger.info(f"Creating GCP instance {config.name} in {config.zone}")
 
-            # Criar a instância
-            operation = compute.instances().insert(
-                project=self.project_id,
-                zone=config.zone,
-                body=body
-            ).execute()
+            # Criar a instância com retry logic
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    operation = compute.instances().insert(
+                        project=self.project_id,
+                        zone=config.zone,
+                        body=body
+                    ).execute()
 
-            # Aguardar operação completar
-            self._wait_for_operation(operation['name'], config.zone)
+                    # Aguardar operação completar
+                    self._wait_for_operation(operation['name'], config.zone)
+                    break  # Sucesso, sair do loop
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        wait_time = 2 ** attempt  # Exponential backoff: 1s, 2s, 4s
+                        logger.warning(f"Failed to create instance (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                    else:
+                        raise
 
             # Obter informações da instância criada
             instance = compute.instances().get(
@@ -275,19 +305,35 @@ echo "Dumont CPU Standby ready" > /var/log/dumont-ready
 
             logger.info(f"Deleting GCP instance {name} in {zone}")
 
-            operation = compute.instances().delete(
-                project=self.project_id,
-                zone=zone,
-                instance=name
-            ).execute()
+            # Delete with retry logic
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    operation = compute.instances().delete(
+                        project=self.project_id,
+                        zone=zone,
+                        instance=name
+                    ).execute()
 
-            self._wait_for_operation(operation['name'], zone)
+                    self._wait_for_operation(operation['name'], zone)
+                    logger.info(f"✓ GCP instance {name} deleted")
+                    return True
 
-            logger.info(f"GCP instance {name} deleted")
-            return True
+                except Exception as e:
+                    if attempt < max_retries - 1:
+                        # Check if it's a "not found" error - don't retry
+                        if "notFound" in str(e) or "not found" in str(e).lower():
+                            logger.info(f"Instance {name} not found (already deleted)")
+                            return True
+
+                        wait_time = 2 ** attempt  # Exponential backoff
+                        logger.warning(f"Failed to delete instance (attempt {attempt + 1}/{max_retries}): {e}. Retrying in {wait_time}s...")
+                        time.sleep(wait_time)
+                    else:
+                        raise
 
         except Exception as e:
-            logger.error(f"Failed to delete GCP instance: {e}")
+            logger.error(f"✗ Failed to delete GCP instance after retries: {e}")
             return False
 
     def get_instance(self, name: str, zone: str) -> Dict[str, Any]:

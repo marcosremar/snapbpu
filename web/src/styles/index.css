@@ -1,3 +1,5 @@
+@import './spot.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -6087,4 +6089,164 @@ button, a, [role="button"] {
     padding: 8px;
   }
 }
+
+/* =====================================================
+   AI WIZARD INTERFACE IMPROVEMENTS
+   ===================================================== */
+
+.ai-wizard-improved-input {
+  background: #1a1f1a !important;
+  border: 2px solid #4a5568 !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  resize: vertical !important;
+  min-height: 44px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ai-wizard-improved-input:focus {
+  outline: none !important;
+  border-color: #9333ea !important;
+  box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1) !important;
+}
+
+.ai-wizard-improved-input::placeholder {
+  color: #9ca3af !important;
+}
+
+.ai-wizard-improved-send-button {
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 12px 20px !important;
+  color: white !important;
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ai-wizard-improved-send-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3) !important;
+}
+
+.ai-wizard-improved-send-button:disabled {
+  background: #374151 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.ai-wizard-quick-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin: 12px 0 !important;
+  flex-wrap: wrap !important;
+}
+
+.ai-wizard-quick-action {
+  background: #374151 !important;
+  color: #d1d5db !important;
+  border: 1px solid #4b5563 !important;
+  border-radius: 20px !important;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.ai-wizard-quick-action:hover {
+  background: #4b5563 !important;
+  transform: translateY(-1px) !important;
+  color: #f3f4f6 !important;
+}
+
+.ai-wizard-message-user {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: white !important;
+  border: none !important;
+}
+
+.ai-wizard-message-assistant {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border: 1px solid #374151 !important;
+}
+
+.ai-wizard-loading {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 16px !important;
+  color: #9ca3af !important;
+  font-size: 14px !important;
+}
+
+.ai-wizard-loading-spinner {
+  animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Melhorias para cards de recomendação */
+.ai-wizard-recommendation-card {
+  background: #111827 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 12px !important;
+  padding: 16px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ai-wizard-recommendation-card:hover {
+  border-color: #6366f1 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1) !important;
+}
+
+/* Responsividade melhorada */
+@media (max-width: 768px) {
+  .ai-wizard-improved-input {
+    font-size: 16px !important; /* Evitar zoom no iOS */
+  }
+  
+  .ai-wizard-quick-actions {
+    gap: 4px !important;
+  }
+  
+  .ai-wizard-quick-action {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+}
+
+/* Melhorias de acessibilidade */
+.ai-wizard-improved-input:focus-visible,
+.ai-wizard-improved-send-button:focus-visible,
+.ai-wizard-quick-action:focus-visible {
+  outline: 2px solid #9333ea !important;
+  outline-offset: 2px !important;
+}
+
+/* Estados de feedback */
+.ai-wizard-success-message {
+  background: #065f46 !important;
+  color: #d1fae5 !important;
+  border: 1px solid #10b981 !important;
+}
+
+.ai-wizard-error-message {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+  border: 1px solid #ef4444 !important;
+}
+
 

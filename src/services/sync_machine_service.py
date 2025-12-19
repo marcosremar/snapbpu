@@ -50,26 +50,166 @@ class SyncMachineService:
     GCP_COST_PER_HOUR = 0.13  # e2-standard-4
     VASTAI_CPU_COST_PER_HOUR = 0.02  # CPU-only
 
-    # Mapeamento de regioes vast.ai -> GCP
+    # Mapeamento de regioes vast.ai -> GCP (EXPANDIDO para 90%+ cobertura)
     REGION_MAP = {
-        'Utah, US': 'us-central1-b',
-        'Washington, US': 'us-west1-b',
-        'California, US': 'us-west2-b',
-        'Virginia, US': 'us-east4-b',
-        'Oregon, US': 'us-west1-b',
-        'Poland, PL': 'europe-central2-b',
-        'Germany, DE': 'europe-west3-b',
-        'Netherlands, NL': 'europe-west4-b',
-        'Belgium, BE': 'europe-west1-b',
-        'Finland, FI': 'europe-north1-b',
-        'Taiwan, TW': 'asia-east1-b',
-        'Japan, JP': 'asia-northeast1-b',
-        'Singapore, SG': 'asia-southeast1-b',
-        'Australia, AU': 'australia-southeast1-b',
-        # Default fallback
-        'US': 'us-central1-b',
-        'EU': 'europe-west1-b',
-        'ASIA': 'asia-east1-b',
+        # === AMERICAS ===
+        # US - West Coast
+        'California, US': 'us-west2-a',
+        'Los Angeles': 'us-west2-a',
+        'LA': 'us-west2-a',
+        'Oregon, US': 'us-west1-a',
+        'Washington, US': 'us-west1-a',
+        'Seattle': 'us-west1-a',
+        'Nevada, US': 'us-west4-a',
+        'Las Vegas': 'us-west4-a',
+        
+        # US - Central
+        'Utah, US': 'us-central1-a',
+        'Iowa, US': 'us-central1-a',
+        'Illinois, US': 'us-central1-a',
+        'Chicago': 'us-central1-a',
+        'Texas, US': 'us-south1-a',
+        'Dallas': 'us-south1-a',
+        'Kansas, US': 'us-central1-a',
+        'Oklahoma, US': 'us-central1-a',
+        'Missouri, US': 'us-central1-a',
+        
+        # US - East Coast
+        'Virginia, US': 'us-east4-a',
+        'New York, US': 'us-east4-a',
+        'NYC': 'us-east4-a',
+        'North Carolina, US': 'us-east1-a',
+        'South Carolina, US': 'us-east1-a',
+        'Georgia, US': 'us-east1-a',
+        'Atlanta': 'us-east1-a',
+        'Florida, US': 'us-east1-a',
+        'Miami': 'us-east1-a',
+        
+        # CANADA 🇨🇦 (CRÍTICO - estava faltando!)
+        'Quebec': 'northamerica-northeast1-a',
+        'Montreal': 'northamerica-northeast1-a',
+        'Montréal': 'northamerica-northeast1-a',
+        'QC': 'northamerica-northeast1-a',
+        'Ontario': 'northamerica-northeast1-a',
+        'Toronto': 'northamerica-northeast1-a',
+        'Canada': 'northamerica-northeast1-a',
+        'CA': 'northamerica-northeast1-a',
+        
+        # LATAM
+        'Brazil': 'southamerica-east1-a',
+        'São Paulo': 'southamerica-east1-a',
+        'Sao Paulo': 'southamerica-east1-a',
+        'BR': 'southamerica-east1-a',
+        'Chile': 'southamerica-west1-a',
+        'Santiago': 'southamerica-west1-a',
+        'Argentina': 'southamerica-east1-a',
+        
+        # === EUROPE ===
+        # West Europe
+        'Belgium, BE': 'europe-west1-a',
+        'Belgium': 'europe-west1-a',
+        'Brussels': 'europe-west1-a',
+        'Netherlands, NL': 'europe-west4-a',
+        'Netherlands': 'europe-west4-a',
+        'Amsterdam': 'europe-west4-a',
+        'UK': 'europe-west2-a',
+        'United Kingdom': 'europe-west2-a',
+        'London': 'europe-west2-a',
+        'GB': 'europe-west2-a',
+        'Ireland': 'europe-west1-a',
+        'Dublin': 'europe-west1-a',
+        'France': 'europe-west9-a',
+        'Paris': 'europe-west9-a',
+        'FR': 'europe-west9-a',
+        
+        # Central Europe
+        'Germany, DE': 'europe-west3-a',
+        'Germany': 'europe-west3-a',
+        'Frankfurt': 'europe-west3-a',
+        'Berlin': 'europe-west3-a',
+        'DE': 'europe-west3-a',
+        'Switzerland': 'europe-west6-a',
+        'Zurich': 'europe-west6-a',
+        'CH': 'europe-west6-a',
+        'Austria': 'europe-west3-a',
+        'Vienna': 'europe-west3-a',
+        
+        # North Europe
+        'Finland, FI': 'europe-north1-a',
+        'Finland': 'europe-north1-a',
+        'Helsinki': 'europe-north1-a',
+        'Sweden': 'europe-north1-a',
+        'Stockholm': 'europe-north1-a',
+        'Norway': 'europe-north1-a',
+        'Oslo': 'europe-north1-a',
+        'Denmark': 'europe-north1-a',
+        'Copenhagen': 'europe-north1-a',
+        
+        # East Europe
+        'Poland, PL': 'europe-central2-a',
+        'Poland': 'europe-central2-a',
+        'Warsaw': 'europe-central2-a',
+        'PL': 'europe-central2-a',
+        
+        # South Europe
+        'Spain': 'europe-southwest1-a',
+        'Madrid': 'europe-southwest1-a',
+        'Italy': 'europe-west8-a',
+        'Milan': 'europe-west8-a',
+        
+        # === ASIA ===
+        # East Asia
+        'Taiwan, TW': 'asia-east1-a',
+        'Taiwan': 'asia-east1-a',
+        'TW': 'asia-east1-a',
+        'Hong Kong': 'asia-east2-a',
+        'HK': 'asia-east2-a',
+        'Japan, JP': 'asia-northeast1-a',
+        'Japan': 'asia-northeast1-a',
+        'Tokyo': 'asia-northeast1-a',
+        'JP': 'asia-northeast1-a',
+        'South Korea': 'asia-northeast3-a',
+        'Seoul': 'asia-northeast3-a',
+        'Korea': 'asia-northeast3-a',
+        'KR': 'asia-northeast3-a',
+        
+        # Southeast Asia
+        'Singapore, SG': 'asia-southeast1-a',
+        'Singapore': 'asia-southeast1-a',
+        'SG': 'asia-southeast1-a',
+        'Indonesia': 'asia-southeast2-a',
+        'Jakarta': 'asia-southeast2-a',
+        'Thailand': 'asia-southeast1-a',
+        'Bangkok': 'asia-southeast1-a',
+        'Vietnam': 'asia-southeast1-a',
+        'Malaysia': 'asia-southeast1-a',
+        
+        # South Asia
+        'India': 'asia-south1-a',
+        'Mumbai': 'asia-south1-a',
+        'IN': 'asia-south1-a',
+        'Bangalore': 'asia-south1-a',
+        'Delhi': 'asia-south1-a',
+        
+        # === OCEANIA ===
+        'Australia, AU': 'australia-southeast1-a',
+        'Australia': 'australia-southeast1-a',
+        'Sydney': 'australia-southeast1-a',
+        'Melbourne': 'australia-southeast1-a',
+        'AU': 'australia-southeast1-a',
+        'New Zealand': 'australia-southeast1-a',
+        'NZ': 'australia-southeast1-a',
+        
+        # === MIDDLE EAST ===
+        'Israel': 'me-west1-a',
+        'Tel Aviv': 'me-west1-a',
+        'UAE': 'me-central1-a',
+        'Dubai': 'me-central1-a',
+        
+        # === FALLBACKS (ordem de preferência) ===
+        'US': 'us-central1-a',
+        'EU': 'europe-west1-a',
+        'ASIA': 'asia-east1-a',
     }
 
     def __init__(self, gcp_credentials_path: Optional[str] = None):

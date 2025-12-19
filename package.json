@@ -1,0 +1,29 @@
+{
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  },
+  "name": "dumont-cloud",
+  "version": "1.0.0",
+  "description": "[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/) [![React](https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61dafb)](https://reactjs.org/) [![Cloudflare R2](https://img.shields.io/badge/Cloudflare_R2-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://www.cloudflare.com/products/r2/) [![Vast.ai](https://img.shields.io/badge/Vast.ai-blue?style=for-the-badge)](https://vast.ai/)",
+  "main": "playwright.config.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marcosremar/dumont-cloud.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/marcosremar/dumont-cloud/issues"
+  },
+  "homepage": "https://github.com/marcosremar/dumont-cloud#readme",
+  "dependencies": {
+    "puppeteer": "^24.33.0"
+  }
+}

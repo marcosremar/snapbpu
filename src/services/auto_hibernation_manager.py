@@ -22,6 +22,7 @@ from src.services.gpu_snapshot_service import GPUSnapshotService
 from src.services.vast_service import VastService
 from src.config.database import SessionLocal
 from src.models.instance_status import InstanceStatus, HibernationEvent
+from src.services.usage_service import UsageService
 
 logger = logging.getLogger(__name__)
 
@@ -170,15 +171,48 @@ class AutoHibernationManager(Agent):
             instance.status = "hibernated"
             instance.hibernated_at = datetime.utcnow()
             instance.snapshot_id = snapshot_id
+            instance.last_snapshot_id = snapshot_id
+            
+            # Parar tracking de uso
+            usage_service = UsageService(db)
+            usage_service.stop_usage(instance.instance_id)
+            
+            # Calcular economia: horas desde idle × preço/hora
+            idle_hours = 0.0
+            savings_usd = 0.0
+            dph_total = 0.0
+            
+            if instance.idle_since:
+                idle_duration = datetime.utcnow() - instance.idle_since
+                idle_hours = idle_duration.total_seconds() / 3600
+                
+                # Buscar preço da instância (estimativa se não disponível)
+                try:
+                    vast_info = self.vast_service.get_instance_status(instance.vast_instance_id)
+                    if vast_info and 'dph_total' in vast_info:
+                        dph_total = vast_info['dph_total']
+                except:
+                    # Estimativa baseada no tipo de GPU
+                    gpu_prices = {
+                        'RTX 4090': 0.40, 'RTX 3090': 0.25, 'RTX 3080': 0.20,
+                        'A100': 1.50, 'H100': 3.00, 'A6000': 0.60
+                    }
+                    dph_total = gpu_prices.get(instance.gpu_type, 0.30)
+                
+                savings_usd = idle_hours * dph_total
+            
             instance.idle_since = None
 
-            # Registrar evento
+            # Registrar evento com economia
             event = HibernationEvent(
                 instance_id=instance.instance_id,
                 event_type="hibernated",
                 gpu_utilization=instance.gpu_utilization,
                 snapshot_id=snapshot_id,
-                reason=f"GPU ociosa por {instance.pause_after_minutes} minutos"
+                reason=f"GPU ociosa por {instance.pause_after_minutes} minutos",
+                dph_total=dph_total,
+                idle_hours=idle_hours,
+                savings_usd=savings_usd
             )
             db.add(event)
             db.commit()
@@ -336,6 +370,14 @@ class AutoHibernationManager(Agent):
             instance.woke_at = datetime.utcnow()
             instance.hibernated_at = None
 
+            # Iniciar tracking de uso
+            usage_service = UsageService(db)
+            usage_service.start_usage(
+                user_id=instance.user_id,
+                instance_id=instance.instance_id,
+                gpu_type=instance.gpu_type
+            )
+
             # Registrar evento
             event = HibernationEvent(
                 instance_id=instance_id,
@@ -440,3 +482,104 @@ class AutoHibernationManager(Agent):
             db.rollback()
         finally:
             db.close()
+
+    def get_all_instance_status(self) -> List[Dict]:
+        """Retorna status de todas as instâncias rastreadas."""
+        db = SessionLocal()
+        try:
+            instances = db.query(InstanceStatus).all()
+            result = []
+            for inst in instances:
+                result.append({
+                    "instance_id": inst.instance_id,
+                    "status": inst.status,
+                    "gpu_utilization": inst.gpu_utilization or 0,
+                    "last_heartbeat": inst.last_heartbeat.isoformat() if inst.last_heartbeat else None,
+                    "idle_since": inst.idle_since.isoformat() if inst.idle_since else None,
+                    "will_hibernate_at": self._calculate_hibernate_time(inst),
+                    "auto_hibernation_enabled": inst.auto_hibernation_enabled,
+                })
+            return result
+        finally:
+            db.close()
+
+    def get_instance_status(self, instance_id: str) -> Optional[Dict]:
+        """Retorna status de uma instância específica."""
+        db = SessionLocal()
+        try:
+            inst = db.query(InstanceStatus).filter(
+                InstanceStatus.instance_id == instance_id
+            ).first()
+            if not inst:
+                return None
+            return {
+                "instance_id": inst.instance_id,
+                "status": inst.status,
+                "gpu_utilization": inst.gpu_utilization or 0,
+                "last_heartbeat": inst.last_heartbeat.isoformat() if inst.last_heartbeat else None,
+                "idle_since": inst.idle_since.isoformat() if inst.idle_since else None,
+                "will_hibernate_at": self._calculate_hibernate_time(inst),
+                "auto_hibernation_enabled": inst.auto_hibernation_enabled,
+                "idle_timeout_seconds": inst.idle_timeout_seconds,
+                "gpu_usage_threshold": inst.gpu_usage_threshold,
+                "snapshot_id": inst.last_snapshot_id,
+            }
+        finally:
+            db.close()
+
+    def _calculate_hibernate_time(self, instance: InstanceStatus) -> Optional[str]:
+        """Calcula quando a instância será hibernada."""
+        if instance.status != "idle" or not instance.idle_since:
+            return None
+        hibernate_at = instance.idle_since + timedelta(seconds=instance.idle_timeout_seconds)
+        return hibernate_at.isoformat()
+
+    def extend_keep_alive(self, instance_id: str, minutes: int = 30) -> bool:
+        """Estende o tempo antes de hibernar uma instância."""
+        db = SessionLocal()
+        try:
+            inst = db.query(InstanceStatus).filter(
+                InstanceStatus.instance_id == instance_id
+            ).first()
+            if not inst:
+                return False
+            
+            # Resetar idle_since para agora + minutos extras
+            inst.idle_since = datetime.utcnow() + timedelta(minutes=minutes)
+            inst.status = "running"  # Temporariamente marcar como running
+            db.commit()
+            logger.info(f"Keep-alive estendido para {instance_id} por {minutes} minutos")
+            return True
+        except Exception as e:
+            logger.error(f"Erro ao estender keep-alive: {e}")
+            db.rollback()
+            return False
+        finally:
+            db.close()
+
+
+# Singleton global
+_auto_hibernation_manager: Optional[AutoHibernationManager] = None
+
+
+def get_auto_hibernation_manager() -> Optional[AutoHibernationManager]:
+    """Retorna a instância global do AutoHibernationManager."""
+    return _auto_hibernation_manager
+
+
+def init_auto_hibernation_manager(
+    vast_api_key: str,
+    r2_endpoint: str,
+    r2_bucket: str,
+    check_interval: int = 30
+) -> AutoHibernationManager:
+    """Inicializa e retorna o AutoHibernationManager global."""
+    global _auto_hibernation_manager
+    if _auto_hibernation_manager is None:
+        _auto_hibernation_manager = AutoHibernationManager(
+            vast_api_key=vast_api_key,
+            r2_endpoint=r2_endpoint,
+            r2_bucket=r2_bucket,
+            check_interval=check_interval
+        )
+    return _auto_hibernation_manager

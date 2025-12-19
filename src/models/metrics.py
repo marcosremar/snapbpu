@@ -85,6 +85,7 @@ class ProviderReliability(Base):
     reliability_score = Column(Float, default=0.0)  # Score combinado 0-1
     availability_score = Column(Float, default=0.0)  # % tempo disponível
     price_stability_score = Column(Float, default=0.0)  # Estabilidade de preço (menor variação = melhor)
+    performance_score = Column(Float, default=0.0)  # Score de performance (TFLOPS, DLPerf)
 
     # Contadores de observações
     total_observations = Column(Integer, default=0)

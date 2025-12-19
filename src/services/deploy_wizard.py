@@ -44,10 +44,10 @@ REGIONS = {
 }
 
 # Configuracoes de timeout e batches
-BATCH_TIMEOUT = 180  # segundos para aguardar batch inteiro (3 minutos)
-CHECK_INTERVAL = 5  # intervalo entre verificacoes
-BATCH_SIZE = 5  # maquinas por batch
-MAX_BATCHES = 2  # maximo de batches (10 maquinas total)
+BATCH_TIMEOUT = 90  # segundos para aguardar batch inteiro
+CHECK_INTERVAL = 3  # intervalo entre verificacoes
+BATCH_SIZE = 5      # maquinas por batch
+MAX_BATCHES = 3     # maximo de batches (15 maquinas total)
 
 
 @dataclass

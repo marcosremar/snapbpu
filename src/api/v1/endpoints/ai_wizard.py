@@ -27,22 +27,29 @@ class GPUOption(BaseModel):
     tier: str = Field(..., description="minima, recomendada, or maxima")
     gpu: str = Field(..., description="GPU model name")
     vram: str = Field(..., description="VRAM amount")
-    tokens_per_second: str = Field(..., description="Estimated tokens/second")
     price_per_hour: str = Field(..., description="Price per hour")
+    frameworks: Optional[Dict[str, str]] = Field(default=None, description="Performance by framework")
+    ram_offload: Optional[str] = Field(default=None, description="RAM offload requirements")
+    tokens_per_second: Optional[str] = Field(default=None, description="Estimated tokens/second (legacy)")
     observation: str = Field(..., description="Additional notes")
 
 
 class ModelInfo(BaseModel):
     name: str = Field(..., description="Model name")
     parameters: str = Field(..., description="Model size in parameters")
-    vram_required: str = Field(..., description="VRAM required")
-    quantization: str = Field(default="", description="Recommended quantization")
+    vram_fp16: Optional[str] = Field(default=None, description="VRAM for FP16")
+    vram_int8: Optional[str] = Field(default=None, description="VRAM for INT8")
+    vram_int4: Optional[str] = Field(default=None, description="VRAM for INT4")
+    vram_required: Optional[str] = Field(default=None, description="VRAM required (legacy)")
+    recommended_quantization: Optional[str] = Field(default=None, description="Recommended quantization")
+    quantization: Optional[str] = Field(default=None, description="Quantization (legacy)")
 
 
 class GPURecommendation(BaseModel):
     workload_type: str
     model_info: Optional[ModelInfo] = None
     gpu_options: Optional[List[GPUOption]] = None
+    optimization_tips: Optional[List[str]] = Field(default=None, description="Optimization tips")
     # Legacy fields for backward compatibility
     min_vram_gb: Optional[int] = None
     recommended_gpus: Optional[List[str]] = None
@@ -83,10 +90,10 @@ async def analyze_project(request: AnalyzeRequest):
 
     data = result.get("data", {})
 
+    # Retornar no novo formato com campo data completo
     return {
         "success": True,
-        "needs_more_info": data.get("needs_more_info", False),
-        "questions": data.get("questions", []),
-        "recommendation": data.get("recommendation"),
-        "model_used": result.get("model_used", "unknown")
+        "data": data,  # Incluir campo data completo com stage, questions, etc.
+        "model_used": result.get("model_used", "unknown"),
+        "attempts": result.get("attempts", 1)
     }

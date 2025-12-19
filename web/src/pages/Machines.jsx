@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog'
-import { ChevronDown, MoreVertical, Play, Plus, Server, Cpu, Clock, Activity, Code, Settings, Trash2, Copy, Key, Terminal, Pause, Save, RefreshCw, Upload, Database, ArrowLeftRight, Check } from 'lucide-react'
+import { ChevronDown, MoreVertical, Play, Plus, Server, Cpu, Clock, Activity, Code, Settings, Trash2, Copy, Key, Terminal, Pause, Save, RefreshCw, Upload, Database, ArrowLeftRight, Check, Cloud, Shield, Layers, X, MapPin, Globe, DollarSign } from 'lucide-react'
 import HibernationConfigModal from '../components/HibernationConfigModal'
 import MigrationModal from '../components/MigrationModal'
 import { ErrorState } from '../components/ErrorState'
@@ -77,6 +77,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
   const [alertDialog, setAlertDialog] = useState({ open: false, title: '', description: '', action: null })
   const [isCreatingSnapshot, setIsCreatingSnapshot] = useState(false)
   const [copiedField, setCopiedField] = useState(null) // Track which field was copied
+  const [showBackupInfo, setShowBackupInfo] = useState(false) // Show CPU backup info popover
 
   // Historical data for sparklines
   const [gpuHistory] = useState(() => Array.from({ length: 15 }, () => Math.random() * 40 + 30))
@@ -90,6 +91,12 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
   const isRunning = machine.actual_status === 'running'
   const costPerHour = machine.dph_total || 0
   const status = machine.actual_status || 'stopped'
+
+  // CPU Standby info
+  const cpuStandby = machine.cpu_standby
+  const hasCpuStandby = cpuStandby?.enabled
+  const cpuCostPerHour = cpuStandby?.dph_total || 0
+  const totalCostPerHour = machine.total_dph || (costPerHour + cpuCostPerHour)
 
   // Calcular uptime
   const formatUptime = (startTime) => {
@@ -176,6 +183,106 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
             <span className="status-indicator" />
             {isRunning ? 'Online' : status === 'stopped' ? 'Offline' : status}
           </span>
+          {/* Provider badges */}
+          <span className="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-400 border border-purple-500/30">
+            Vast.ai
+          </span>
+          {/* CPU Backup Mirror Icon - clickable */}
+          <div className="relative">
+            <button
+              onClick={() => setShowBackupInfo(!showBackupInfo)}
+              className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] border transition-all ${
+                hasCpuStandby
+                  ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30'
+                  : 'bg-gray-700/30 text-gray-500 border-gray-600/30 hover:bg-gray-700/50'
+              }`}
+              title={hasCpuStandby ? 'Ver backup CPU' : 'Backup CPU não configurado'}
+            >
+              <Layers className="w-2.5 h-2.5" />
+              {hasCpuStandby ? 'Backup' : 'Sem backup'}
+            </button>
+
+            {/* Backup Info Popover */}
+            {showBackupInfo && (
+              <div className="absolute top-full left-0 mt-2 z-50 w-64 p-3 rounded-lg border border-gray-700/50 bg-[#1a1f1a] shadow-xl">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-white flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-blue-400" />
+                    CPU Backup (Espelho)
+                  </span>
+                  <button
+                    onClick={() => setShowBackupInfo(false)}
+                    className="p-0.5 rounded hover:bg-gray-700/50 text-gray-500 hover:text-gray-300"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {hasCpuStandby ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Cloud className="w-3.5 h-3.5 text-blue-400" />
+                      <span className="text-gray-400">Provider:</span>
+                      <span className="text-white font-medium">{cpuStandby.provider?.toUpperCase() || 'GCP'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Server className="w-3.5 h-3.5 text-green-400" />
+                      <span className="text-gray-400">Máquina:</span>
+                      <span className="text-white font-medium">{cpuStandby.name || 'Provisionando...'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <MapPin className="w-3.5 h-3.5 text-yellow-400" />
+                      <span className="text-gray-400">Zona:</span>
+                      <span className="text-white font-medium">{cpuStandby.zone || 'europe-west1-b'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Globe className="w-3.5 h-3.5 text-purple-400" />
+                      <span className="text-gray-400">IP:</span>
+                      <span className="text-white font-medium font-mono">{cpuStandby.ip || 'Aguardando...'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <Cpu className="w-3.5 h-3.5 text-orange-400" />
+                      <span className="text-gray-400">Tipo:</span>
+                      <span className="text-white font-medium">{cpuStandby.machine_type || 'e2-medium'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <DollarSign className="w-3.5 h-3.5 text-green-400" />
+                      <span className="text-gray-400">Custo:</span>
+                      <span className="text-green-400 font-medium">${cpuStandby.dph_total?.toFixed(3) || '0.010'}/h</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <RefreshCw className="w-3.5 h-3.5 text-cyan-400" />
+                      <span className="text-gray-400">Syncs:</span>
+                      <span className="text-white font-medium">{cpuStandby.sync_count || 0}</span>
+                    </div>
+                    <div className="mt-2 pt-2 border-t border-gray-700/50">
+                      <div className={`text-xs px-2 py-1 rounded text-center ${
+                        cpuStandby.state === 'ready' ? 'bg-green-500/20 text-green-400' :
+                        cpuStandby.state === 'syncing' ? 'bg-blue-500/20 text-blue-400' :
+                        cpuStandby.state === 'failover_active' ? 'bg-yellow-500/20 text-yellow-400' :
+                        'bg-gray-700/30 text-gray-400'
+                      }`}>
+                        {cpuStandby.state === 'ready' ? '✓ Pronto para failover' :
+                         cpuStandby.state === 'syncing' ? '↻ Sincronizando...' :
+                         cpuStandby.state === 'failover_active' ? '⚡ Failover ativo' :
+                         '○ Provisionando...'}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-3">
+                    <Shield className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                    <p className="text-xs text-gray-400 mb-2">
+                      Nenhum backup CPU configurado para esta máquina.
+                    </p>
+                    <p className="text-[10px] text-gray-500">
+                      Ative o auto-standby nas configurações para criar backups automáticos.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -275,8 +382,13 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
               <div className="text-[9px] text-gray-500 uppercase">TEMP</div>
             </div>
             <div className="text-center">
-              <div className="text-yellow-400 font-mono text-sm font-bold">${costPerHour.toFixed(2)}</div>
+              <div className="text-yellow-400 font-mono text-sm font-bold" title={hasCpuStandby ? `GPU: $${costPerHour.toFixed(2)} + CPU: $${cpuCostPerHour.toFixed(3)}` : ''}>
+                ${totalCostPerHour.toFixed(2)}
+              </div>
               <div className="text-[9px] text-gray-500 uppercase">/hora</div>
+              {hasCpuStandby && (
+                <div className="text-[8px] text-blue-400 mt-0.5">+backup</div>
+              )}
             </div>
             {uptime && (
               <div className="text-center">
@@ -365,8 +477,13 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
               <div className="text-[9px] text-gray-500 uppercase">DISK</div>
             </div>
             <div>
-              <div className="text-yellow-400 font-mono text-sm font-bold">${costPerHour.toFixed(2)}</div>
+              <div className="text-yellow-400 font-mono text-sm font-bold" title={hasCpuStandby ? `GPU: $${costPerHour.toFixed(2)} + CPU: $${cpuCostPerHour.toFixed(3)}` : ''}>
+                ${totalCostPerHour.toFixed(2)}
+              </div>
               <div className="text-[9px] text-gray-500 uppercase">/hora</div>
+              {hasCpuStandby && (
+                <div className="text-[8px] text-blue-400 mt-0.5">+backup</div>
+              )}
             </div>
           </div>
 
@@ -461,7 +578,7 @@ export default function Machines() {
 
   const fetchMachines = async () => {
     try {
-      const res = await apiGet('/api/instances')
+      const res = await apiGet('/api/v1/instances')
       if (!res.ok) throw new Error('Erro ao buscar máquinas')
       const data = await res.json()
       setMachines(data.instances || [])
@@ -481,7 +598,7 @@ export default function Machines() {
     const { machineId } = destroyDialog
     setDestroyDialog({ open: false, machineId: null, machineName: '' })
     try {
-      const res = await apiDelete(`/api/instances/${machineId}`)
+      const res = await apiDelete(`/api/v1/instances/${machineId}`)
       if (!res.ok) throw new Error('Erro ao destruir máquina')
       fetchMachines()
     } catch (err) {
@@ -491,7 +608,7 @@ export default function Machines() {
 
   const handleStart = async (machineId) => {
     try {
-      const res = await apiPost(`/api/instances/${machineId}/resume`)
+      const res = await apiPost(`/api/v1/instances/${machineId}/resume`)
       if (!res.ok) throw new Error('Erro ao iniciar máquina')
       fetchMachines()
     } catch (err) {
@@ -501,7 +618,7 @@ export default function Machines() {
 
   const handlePause = async (machineId) => {
     try {
-      const res = await apiPost(`/api/instances/${machineId}/pause`)
+      const res = await apiPost(`/api/v1/instances/${machineId}/pause`)
       if (!res.ok) throw new Error('Erro ao pausar máquina')
       fetchMachines()
     } catch (err) {
@@ -514,7 +631,7 @@ export default function Machines() {
     try {
       setSyncStatus(prev => ({ ...prev, [machineId]: 'syncing' }))
       // Use new sync endpoint with force=true for manual sync
-      const res = await apiPost(`/api/instances/${machineId}/sync?force=true`)
+      const res = await apiPost(`/api/v1/instances/${machineId}/sync?force=true`)
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({}))
         throw new Error(errorData.detail || errorData.error || 'Erro ao sincronizar')
@@ -545,7 +662,7 @@ export default function Machines() {
     try {
       setSyncStatus(prev => ({ ...prev, [machineId]: 'syncing' }))
       // Use new sync endpoint (without force - respects 30s minimum interval)
-      const res = await apiPost(`/api/instances/${machineId}/sync`)
+      const res = await apiPost(`/api/v1/instances/${machineId}/sync`)
 
       if (res.ok) {
         const data = await res.json()
@@ -596,7 +713,8 @@ export default function Machines() {
       : [...activeMachines, ...inactiveMachines]
 
   const totalGpuMem = activeMachines.reduce((acc, m) => acc + (m.gpu_ram || 24000), 0)
-  const totalCostPerHour = activeMachines.reduce((acc, m) => acc + (m.dph_total || 0), 0)
+  const totalCostPerHour = activeMachines.reduce((acc, m) => acc + (m.total_dph || m.dph_total || 0), 0)
+  const totalCpuStandbyCount = activeMachines.filter(m => m.cpu_standby?.enabled).length
 
   if (loading) {
     return (
@@ -659,8 +777,14 @@ export default function Machines() {
           <div className="flex flex-wrap items-center gap-4 mb-4 text-sm">
             <div className="flex items-center gap-2">
               <Server className="w-4 h-4 text-green-400" />
-              <span className="text-gray-400">{activeMachines.length} ativas</span>
+              <span className="text-gray-400">{activeMachines.length} GPU ativas</span>
             </div>
+            {totalCpuStandbyCount > 0 && (
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-blue-400" />
+                <span className="text-gray-400">{totalCpuStandbyCount} CPU backup</span>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <Cpu className="w-4 h-4 text-yellow-400" />
               <span className="text-gray-400">{Math.round(totalGpuMem / 1024)} GB VRAM</span>

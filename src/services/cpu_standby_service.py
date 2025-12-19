@@ -22,6 +22,7 @@ from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
+from requests.exceptions import RequestException
 
 from src.infrastructure.providers.gcp_provider import GCPProvider, GCPInstanceConfig
 from src.services.vast_service import VastService
@@ -208,8 +209,8 @@ class CPUStandbyService:
                     # Aguardar mais um pouco para startup script completar
                     time.sleep(30)
                     return True
-            except:
-                pass
+            except (OSError, subprocess.TimeoutExpired) as e:
+                logger.debug(f"SSH not yet ready on {ip}:{port}: {e}")
 
             time.sleep(5)
 
@@ -418,8 +419,15 @@ class CPUStandbyService:
 
         try:
             status = self.vast_service.get_instance_status(self.gpu_instance_id)
-            return status.get('status') == 'running'
-        except:
+            is_healthy = status.get('status') == 'running'
+            if not is_healthy:
+                logger.debug(f"GPU {self.gpu_instance_id} unhealthy: status={status.get('status')}")
+            return is_healthy
+        except (RequestException, ValueError, KeyError) as e:
+            logger.error(f"Error checking GPU health: {e}")
+            return False
+        except Exception as e:
+            logger.error(f"Unexpected error checking GPU health: {e}")
             return False
 
     def _backup_loop(self):
@@ -618,18 +626,22 @@ echo "Backup completed"
         while time.time() - start_time < timeout:
             try:
                 status = self.vast_service.get_instance_status(instance_id)
-                if status.get('actual_status') == 'running':
+                if status and status.get('actual_status') == 'running':
                     ssh_host = status.get('ssh_host')
                     ssh_port = status.get('ssh_port')
                     if ssh_host and ssh_port:
                         # Testar conexão SSH
+                        logger.info(f"Instance {instance_id} ready at {ssh_host}:{ssh_port}")
                         time.sleep(10)  # Dar tempo para SSH iniciar
                         return True
-            except:
-                pass
+            except (RequestException, ValueError, KeyError, TypeError) as e:
+                logger.debug(f"Instance {instance_id} not yet ready: {e}")
+            except Exception as e:
+                logger.error(f"Unexpected error waiting for instance {instance_id}: {e}")
 
             time.sleep(5)
 
+        logger.error(f"Timeout waiting for instance {instance_id} to be ready")
         return False
 
     def restore_to_gpu(self, new_gpu_instance_id: int) -> Dict[str, Any]:
@@ -651,26 +663,57 @@ echo "Backup completed"
 
         # Sync reverso: CPU → GPU
         cpu_ip = self.cpu_instance.get('external_ip')
+        ssh_key = os.path.expanduser("~/.ssh/id_rsa")
 
-        rsync_cmd = [
+        # Build SSH command for rsync (CPU → GPU)
+        # Note: rsync can only use one -e SSH command, so we use a relay approach
+        # We need to first pull from CPU to local /tmp, then push to GPU
+
+        # Step 1: Pull from CPU
+        rsync_cmd_cpu = [
             "rsync", "-avz", "--delete",
-            "-e", f"ssh -o StrictHostKeyChecking=no",
+            "-e", f"ssh -o StrictHostKeyChecking=no -i {ssh_key}",
             f"root@{cpu_ip}:{self.config.sync_path}/",
+            "/tmp/dumont-restore-relay/",
         ]
 
-        # Adicionar destino
-        rsync_cmd.extend([
-            "-e", f"ssh -o StrictHostKeyChecking=no -p {self.gpu_ssh_port}",
+        logger.info(f"Pulling data from CPU standby...")
+        result = subprocess.run(rsync_cmd_cpu, capture_output=True, text=True, timeout=600)
+
+        if result.returncode != 0:
+            logger.error(f"Failed to pull from CPU: {result.stderr}")
+            return {
+                "success": False,
+                "message": f"Failed to pull data from CPU: {result.stderr}",
+                "timestamp": datetime.now().isoformat()
+            }
+
+        # Step 2: Push to new GPU
+        ssh_opts = f"ssh -o StrictHostKeyChecking=no -i {ssh_key} -p {self.gpu_ssh_port}"
+        rsync_cmd_gpu = [
+            "rsync", "-avz", "--delete",
+            "-e", ssh_opts,
+            "/tmp/dumont-restore-relay/",
             f"root@{self.gpu_ssh_host}:{self.config.sync_path}/"
-        ])
+        ]
 
-        logger.info(f"Restoring from CPU standby to GPU {new_gpu_instance_id}")
+        logger.info(f"Pushing data to new GPU {new_gpu_instance_id}...")
 
-        result = subprocess.run(rsync_cmd, capture_output=True, text=True, timeout=600)
+        result = subprocess.run(rsync_cmd_gpu, capture_output=True, text=True, timeout=600)
 
         if result.returncode == 0:
             self.state = StandbyState.SYNCING
             self.failed_health_checks = 0
+
+            logger.info(f"✓ Data restored successfully to GPU {new_gpu_instance_id}")
+
+            # Limparcache local de restore
+            try:
+                import shutil
+                shutil.rmtree("/tmp/dumont-restore-relay/", ignore_errors=True)
+                logger.debug("Cleaned up restore cache directory")
+            except (OSError, TypeError) as e:
+                logger.warning(f"Failed to cleanup restore cache: {e}")
 
             return {
                 "success": True,
@@ -679,8 +722,11 @@ echo "Backup completed"
                 "timestamp": datetime.now().isoformat()
             }
         else:
+            logger.error(f"✗ Restore failed: {result.stderr}")
             return {
-                "error": f"Restore failed: {result.stderr[:200]}"
+                "success": False,
+                "error": f"Restore failed: {result.stderr[:200]}",
+                "timestamp": datetime.now().isoformat()
             }
 
     def get_status(self) -> Dict[str, Any]:

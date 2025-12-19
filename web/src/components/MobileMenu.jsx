@@ -6,10 +6,10 @@ export default function MobileMenu({ onLogout }) {
   const [isOpen, setIsOpen] = useState(false)
 
   const links = [
-    { to: '/', icon: Home, label: 'Dashboard' },
-    { to: '/machines', icon: Server, label: 'Machines' },
-    { to: '/metrics', icon: BarChart3, label: 'Métricas' },
-    { to: '/settings', icon: Settings, label: 'Settings' },
+    { to: '/app', icon: Home, label: 'Dashboard' },
+    { to: '/app/machines', icon: Server, label: 'Machines' },
+    { to: '/app/metrics-hub', icon: BarChart3, label: 'Métricas' },
+    { to: '/app/settings', icon: Settings, label: 'Settings' },
   ]
 
   const closeMenu = () => setIsOpen(false)

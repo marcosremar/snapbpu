@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
 import { useToast } from '../components/Toast'
+import StandbyConfig from '../components/StandbyConfig'
 
 const API_BASE = ''
 
@@ -45,9 +46,8 @@ function ValidationIndicator({ validation }) {
   if (!validation) return null
 
   return (
-    <div className={`validation-indicator flex items-center gap-1.5 mt-1.5 text-xs ${
-      validation.valid ? 'text-green-400' : 'text-red-400'
-    }`}>
+    <div className={`validation-indicator flex items-center gap-1.5 mt-1.5 text-xs ${validation.valid ? 'text-green-400' : 'text-red-400'
+      }`}>
       {validation.valid ? (
         <Check className="w-3.5 h-3.5" />
       ) : (
@@ -191,7 +191,7 @@ function Toast({ message, title = 'Saldo Baixo!', type = 'warning', onClose }) {
           flexShrink: 0
         }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill={bgColor}>
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
           </svg>
         </div>
 
@@ -678,6 +678,14 @@ export default function Settings() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* CPU Standby / Failover Configuration */}
+      <div style={{ marginTop: '32px' }}>
+        <StandbyConfig getAuthHeaders={() => {
+          const token = localStorage.getItem('auth_token')
+          return token ? { 'Authorization': `Bearer ${token}` } : {}
+        }} />
       </div>
     </div>
   )

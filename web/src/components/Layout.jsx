@@ -1,6 +1,4 @@
 import { NavLink } from 'react-router-dom'
-import { useState } from 'react'
-import { ChevronDown, BarChart3 } from 'lucide-react'
 import MobileMenu from './MobileMenu'
 
 function DumontLogo() {
@@ -40,8 +38,6 @@ function DumontLogo() {
 }
 
 export default function Layout({ user, onLogout, children }) {
-  const [metricsOpen, setMetricsOpen] = useState(false)
-
   return (
     <div className="layout">
       <header className="header">
@@ -55,31 +51,22 @@ export default function Layout({ user, onLogout, children }) {
           </div>
           <div className="header-divider desktop-only"></div>
           <nav className="nav desktop-only">
-            <NavLink to="/" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/app" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Dashboard
             </NavLink>
-            <NavLink to="/machines" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/app/machines" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Machines
             </NavLink>
-            <div
-              className="nav-dropdown"
-              onMouseEnter={() => setMetricsOpen(true)}
-              onMouseLeave={() => setMetricsOpen(false)}
-            >
-              <span className="nav-link">
-                Métricas
-                <ChevronDown size={14} style={{ marginLeft: '4px' }} />
-              </span>
-              {metricsOpen && (
-                <div className="dropdown-menu">
-                  <NavLink to="/metrics" className="dropdown-item">
-                    <BarChart3 size={16} />
-                    Métricas de GPU
-                  </NavLink>
-                </div>
-              )}
-            </div>
-            <NavLink to="/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to="/app/advisor" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              AI Advisor
+            </NavLink>
+            <NavLink to="/app/metrics-hub" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Métricas
+            </NavLink>
+            <NavLink to="/app/savings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+              Economia
+            </NavLink>
+            <NavLink to="/app/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Settings
             </NavLink>
           </nav>
