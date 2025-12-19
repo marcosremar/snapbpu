@@ -316,6 +316,29 @@
             }
         }
 
+        // Clean name: remove numeric prefixes and underscores
+        function cleanName(name) {
+            return name
+                .replace(/^\d+_/, '')  // Remove leading numbers like "01_"
+                .replace(/_/g, ' ')     // Replace underscores with spaces
+                .trim();
+        }
+
+        // Get icon for section
+        function getSectionIcon(name) {
+            const icons = {
+                'Getting Started': '🚀',
+                'User Guide': '📖',
+                'Features': '⚡',
+                'API': '🔌',
+                'Engineering': '🛠️',
+                'Operations': '⚙️',
+                'Business': '💼'
+            };
+            const cleanedName = cleanName(name);
+            return icons[cleanedName] || '📁';
+        }
+
         // Recursive Menu Renderer
         function renderMenu(items, container) {
             container.innerHTML = '';
@@ -325,10 +348,11 @@
                 div.className = 'mb-6';
 
                 if (item.type === 'dir') {
-                    // Section Header
+                    // Section Header with icon
                     const header = document.createElement('p');
-                    header.className = 'text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2';
-                    header.textContent = item.name.replace(/_/g, ' ');
+                    header.className = 'text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3 px-2 flex items-center gap-2';
+                    const icon = getSectionIcon(item.name);
+                    header.innerHTML = `<span>${icon}</span> ${cleanName(item.name)}`;
                     div.appendChild(header);
 
                     // Recursive Children
@@ -359,7 +383,7 @@
             btn.onclick = () => loadDoc(item.id);
             btn.id = `nav-${item.id}`;
             btn.className = 'nav-item w-full text-left px-3 py-2 text-sm mb-1 flex items-center gap-2';
-            btn.innerHTML = `<span class="text-gray-400">📄</span> ${item.name}`;
+            btn.innerHTML = `<span class="text-emerald-500">•</span> ${cleanName(item.name)}`;
             container.appendChild(btn);
         }
 
