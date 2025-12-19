@@ -19,7 +19,7 @@ const AppLayout = ({ user, onLogout, children, isDemo = false }) => {
   const { isExpanded } = useSidebar();
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#0a0d0a]">
       {/* Sidebar */}
       <AppSidebar isDemo={isDemo} />
 

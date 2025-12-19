@@ -55,13 +55,13 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
   }, []);
 
   return (
-    <header className="sticky top-0 flex w-full bg-white border-b border-gray-200 z-[99999] dark:border-gray-800 dark:bg-[#131713]">
+    <header className="sticky top-0 flex w-full bg-white border-b border-gray-200 z-[99999] dark:border-[#1a1f1a] dark:bg-[#0f1210]">
       <div className="flex items-center justify-between w-full px-4 py-3 lg:px-6">
         {/* Left side */}
         <div className="flex items-center gap-4">
           {/* Sidebar Toggle */}
           <button
-            className="flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-surface-hover"
+            className="flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#1a1f1a]"
             onClick={handleToggle}
             aria-label="Toggle Sidebar"
           >
@@ -95,7 +95,7 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
           {/* Dark Mode Toggle */}
           <button
             onClick={toggleTheme}
-            className="flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-surface-hover"
+            className="flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#1a1f1a]"
             aria-label="Toggle Dark Mode"
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
@@ -105,7 +105,7 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
           <div className="relative" ref={notificationRef}>
             <button
               onClick={() => setNotificationOpen(!isNotificationOpen)}
-              className="relative flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-surface-hover"
+              className="relative flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#1a1f1a]"
               aria-label="Notifications"
             >
               <Bell size={20} />
@@ -119,11 +119,11 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
                   <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Notificações</h3>
                 </div>
                 <div className="max-h-80 overflow-y-auto">
-                  <div className="p-4 hover:bg-gray-50 dark:hover:bg-dark-surface-hover border-b border-gray-100 dark:border-gray-800">
+                  <div className="p-4 hover:bg-gray-50 dark:hover:bg-[#1a1f1a] border-b border-gray-100 dark:border-gray-800">
                     <p className="text-sm text-gray-800 dark:text-gray-200">Sua máquina GPU entrou em standby</p>
                     <p className="text-xs text-gray-500 mt-1">Há 2 minutos</p>
                   </div>
-                  <div className="p-4 hover:bg-gray-50 dark:hover:bg-dark-surface-hover">
+                  <div className="p-4 hover:bg-gray-50 dark:hover:bg-[#1a1f1a]">
                     <p className="text-sm text-gray-800 dark:text-gray-200">Economia de $12.50 hoje</p>
                     <p className="text-xs text-gray-500 mt-1">Há 1 hora</p>
                   </div>
@@ -145,7 +145,7 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen(!isUserMenuOpen)}
-              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover"
+              className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-[#1a1f1a]"
             >
               <div className="w-8 h-8 bg-brand-100 rounded-full flex items-center justify-center">
                 <User size={18} className="text-brand-600" />
@@ -175,7 +175,7 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
                 <div className="p-2">
                   <Link
                     to={`${basePath}/settings`}
-                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-surface-hover"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 rounded-lg hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-[#1a1f1a]"
                     onClick={() => setUserMenuOpen(false)}
                   >
                     <User size={16} />
