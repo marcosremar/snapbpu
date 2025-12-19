@@ -6146,54 +6146,7 @@ button, a, [role="button"] {
    STATUS BADGE MELHORADO
    ===================================================== */
 
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.status-badge-online {
-  background: rgba(74, 222, 128, 0.15);
-  color: #4ade80;
-}
-
-.status-badge-online .status-dot {
-  width: 8px;
-  height: 8px;
-  background: #4ade80;
-  border-radius: 50%;
-  animation: pulse-green 2s infinite;
-}
-
-.status-badge-offline {
-  background: rgba(156, 163, 175, 0.15);
-  color: #9ca3af;
-}
-
-.status-badge-offline .status-dot {
-  width: 8px;
-  height: 8px;
-  background: #9ca3af;
-  border-radius: 50%;
-}
-
-.status-badge-paused {
-  background: rgba(251, 191, 36, 0.15);
-  color: #fbbf24;
-}
-
-.status-badge-paused .status-dot {
-  width: 8px;
-  height: 8px;
-  background: #fbbf24;
-  border-radius: 50%;
-}
+/* Dumont UI StatusBadge replaces these CSS classes */
 
 
 /* =====================================================

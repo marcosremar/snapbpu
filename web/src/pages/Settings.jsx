@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
 import { useToast } from '../components/Toast'
 import StandbyConfig from '../components/StandbyConfig'
+import { AlertInline } from '../components/ui/dumont-ui'
 
 const API_BASE = ''
 
@@ -41,22 +42,6 @@ const validators = {
   }
 }
 
-// Indicador de validação
-function ValidationIndicator({ validation }) {
-  if (!validation) return null
-
-  return (
-    <div className={`validation-indicator flex items-center gap-1.5 mt-1.5 text-xs ${validation.valid ? 'text-green-400' : 'text-red-400'
-      }`}>
-      {validation.valid ? (
-        <Check className="w-3.5 h-3.5" />
-      ) : (
-        <AlertCircle className="w-3.5 h-3.5" />
-      )}
-      <span>{validation.message}</span>
-    </div>
-  )
-}
 
 // Componente para inputs de campos sensíveis com toggle show/hide e validação
 function SecretInput({ name, value, onChange, placeholder, validation }) {
@@ -84,7 +69,11 @@ function SecretInput({ name, value, onChange, placeholder, validation }) {
           {show ? <EyeOff size={18} /> : <Eye size={18} />}
         </button>
       </div>
-      <ValidationIndicator validation={validation} />
+      {validation && (
+        <AlertInline variant={validation.valid ? 'success' : 'error'}>
+          {validation.message}
+        </AlertInline>
+      )}
     </div>
   )
 }
@@ -102,7 +91,11 @@ function ValidatedInput({ name, value, onChange, placeholder, type = 'text', val
         placeholder={placeholder}
         style={validation ? { borderColor: validation.valid ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)' } : {}}
       />
-      <ValidationIndicator validation={validation} />
+      {validation && (
+        <AlertInline variant={validation.valid ? 'success' : 'error'}>
+          {validation.message}
+        </AlertInline>
+      )}
     </div>
   )
 }

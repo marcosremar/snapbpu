@@ -26,6 +26,7 @@ import {
   FleetStrategy
 } from '../components/spot'
 import RealSavingsDashboard from '../components/RealSavingsDashboard'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge } from '../components/ui/dumont-ui'
 
 ChartJS.register(
   CategoryScale,
@@ -485,43 +486,38 @@ export default function GPUMetrics() {
           {marketData.length > 0 && (
             <div className="history-section">
               <h2 className="section-title">Dados Detalhados</h2>
-              <div className="history-table-container">
-                <table className="history-table">
-                  <thead>
-                    <tr>
-                      <th>GPU</th>
-                      <th>Tipo</th>
-                      <th>Data/Hora</th>
-                      <th>Preço Médio</th>
-                      <th>Mínimo</th>
-                      <th>Máximo</th>
-                      <th>Ofertas</th>
-                      <th>$/TFLOPS</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {marketData.slice(0, 50).map((record, idx) => (
-                      <tr key={idx}>
-                        <td className="table-gpu">{record.gpu_name}</td>
-                        <td>
-                          <span
-                            className="type-badge-small"
-                            style={{ backgroundColor: getMachineTypeColor(record.machine_type) }}
-                          >
-                            {getMachineTypeLabel(record.machine_type)}
-                          </span>
-                        </td>
-                        <td className="table-time">{formatTime(record.timestamp)}</td>
-                        <td className="table-price-main">{formatPrice(record.avg_price)}</td>
-                        <td className="table-price green">{formatPrice(record.min_price)}</td>
-                        <td className="table-price red">{formatPrice(record.max_price)}</td>
-                        <td className="table-number">{record.total_offers}</td>
-                        <td className="table-number">{formatPrice(record.min_cost_per_tflops)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <Table>
+                <TableHeader>
+                  <TableRow hoverable={false}>
+                    <TableHead>GPU</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Data/Hora</TableHead>
+                    <TableHead align="right">Preço Médio</TableHead>
+                    <TableHead align="right">Mínimo</TableHead>
+                    <TableHead align="right">Máximo</TableHead>
+                    <TableHead align="right">Ofertas</TableHead>
+                    <TableHead align="right">$/TFLOPS</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {marketData.slice(0, 50).map((record, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>
+                        <Badge color="success">{record.gpu_name}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge color="info">{getMachineTypeLabel(record.machine_type)}</Badge>
+                      </TableCell>
+                      <TableCell>{formatTime(record.timestamp)}</TableCell>
+                      <TableCell align="right">{formatPrice(record.avg_price)}</TableCell>
+                      <TableCell align="right" className="text-green-400">{formatPrice(record.min_price)}</TableCell>
+                      <TableCell align="right" className="text-red-400">{formatPrice(record.max_price)}</TableCell>
+                      <TableCell align="right">{record.total_offers}</TableCell>
+                      <TableCell align="right">{formatPrice(record.min_cost_per_tflops)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </>
@@ -536,56 +532,58 @@ export default function GPUMetrics() {
           </h2>
 
           {providers.length > 0 ? (
-            <div className="providers-table-container">
-              <table className="providers-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Host</th>
-                    <th>Localização</th>
-                    <th>Confiabilidade</th>
-                    <th>Disponibilidade</th>
-                    <th>Estabilidade Preço</th>
-                    <th>Observações</th>
-                    <th>Verificado</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {providers.map((provider, idx) => (
-                    <tr key={provider.machine_id}>
-                      <td className="rank-number">{idx + 1}</td>
-                      <td className="provider-host">
-                        <Server size={16} style={{ marginRight: '8px', opacity: 0.6 }} />
+            <Table>
+              <TableHeader>
+                <TableRow hoverable={false}>
+                  <TableHead>#</TableHead>
+                  <TableHead>Host</TableHead>
+                  <TableHead>Localização</TableHead>
+                  <TableHead align="center">Confiabilidade</TableHead>
+                  <TableHead align="center">Disponibilidade</TableHead>
+                  <TableHead align="center">Estabilidade Preço</TableHead>
+                  <TableHead align="right">Observações</TableHead>
+                  <TableHead>Verificado</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {providers.map((provider, idx) => (
+                  <TableRow key={provider.machine_id}>
+                    <TableCell>{idx + 1}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Server size={16} />
                         {provider.hostname || `Host ${provider.machine_id}`}
-                      </td>
-                      <td>{provider.geolocation || '-'}</td>
-                      <td>
-                        <div className="score-bar">
+                      </div>
+                    </TableCell>
+                    <TableCell>{provider.geolocation || '-'}</TableCell>
+                    <TableCell align="center">
+                      <div className="flex items-center justify-center gap-2">
+                        <div className="w-24 h-2 rounded bg-gray-700">
                           <div
-                            className="score-fill"
+                            className="h-full rounded"
                             style={{
                               width: `${(provider.reliability_score || 0) * 100}%`,
                               backgroundColor: provider.reliability_score > 0.8 ? '#22c55e' : provider.reliability_score > 0.5 ? '#f59e0b' : '#ef4444'
                             }}
                           />
-                          <span>{formatPercent(provider.reliability_score)}</span>
                         </div>
-                      </td>
-                      <td>{formatPercent(provider.availability_score)}</td>
-                      <td>{formatPercent(provider.price_stability_score)}</td>
-                      <td className="table-number">{provider.total_observations}</td>
-                      <td>
-                        {provider.verified ? (
-                          <span className="verified-badge">Verificado</span>
-                        ) : (
-                          <span className="unverified-badge">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        <span className="text-sm">{formatPercent(provider.reliability_score)}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell align="center">{formatPercent(provider.availability_score)}</TableCell>
+                    <TableCell align="center">{formatPercent(provider.price_stability_score)}</TableCell>
+                    <TableCell align="right">{provider.total_observations}</TableCell>
+                    <TableCell>
+                      {provider.verified ? (
+                        <Badge color="success">Verificado</Badge>
+                      ) : (
+                        <span className="text-gray-500">-</span>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
             <div className="empty-state">
               <Shield size={64} style={{ opacity: 0.5 }} />

@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog'
+import { StatusBadge, ConfirmModal } from '../components/ui/dumont-ui'
 import { ChevronDown, MoreVertical, Play, Plus, Server, Cpu, Clock, Activity, Code, Settings, Trash2, Copy, Key, Terminal, Pause, Save, RefreshCw, Upload, Database, ArrowLeftRight, Check, Cloud, Shield, Layers, X, MapPin, Globe, DollarSign } from 'lucide-react'
 import HibernationConfigModal from '../components/HibernationConfigModal'
 import MigrationModal from '../components/MigrationModal'
@@ -179,10 +180,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-white font-semibold text-sm">{gpuName}</span>
-          <span className={`status-badge ${isRunning ? 'status-badge-online' : 'status-badge-offline'}`}>
-            <span className="status-indicator" />
-            {isRunning ? 'Online' : status === 'stopped' ? 'Offline' : status}
-          </span>
+          <StatusBadge status={isRunning ? 'running' : 'stopped'} />
           {/* Provider badges */}
           <span className="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-400 border border-purple-500/30">
             Vast.ai
@@ -1078,27 +1076,15 @@ export default function Machines() {
         </div>
       </div>
 
-      {/* Destroy Confirmation Dialog */}
-      <AlertDialog open={destroyDialog.open} onOpenChange={(open) => setDestroyDialog({ ...destroyDialog, open })}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-400">Destruir máquina?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja destruir a máquina <strong>{destroyDialog.machineName}</strong>?
-              Esta ação é irreversível e todos os dados não salvos serão perdidos.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={confirmDestroy}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              Destruir
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {/* Destroy Confirmation Modal */}
+      <ConfirmModal
+        isOpen={destroyDialog.open}
+        onClose={() => setDestroyDialog({ open: false, machineId: null, machineName: '' })}
+        onConfirm={confirmDestroy}
+        title="Destruir máquina?"
+        message={`Tem certeza que deseja destruir a máquina ${destroyDialog.machineName}? Esta ação é irreversível e todos os dados não salvos serão perdidos.`}
+        variant="danger"
+      />
 
       {/* Migration Modal */}
       <MigrationModal
