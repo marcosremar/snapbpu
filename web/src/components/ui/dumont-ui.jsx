@@ -44,6 +44,11 @@ export {
   MiniMetric,
 } from './metric-card';
 
+// New UI Components
+export { Progress } from './progress';
+export { Avatar, AvatarImage, AvatarFallback } from './avatar';
+export { Popover, PopoverTrigger, PopoverAnchor, PopoverContent } from './popover';
+
 // Re-export existing Shadcn components
 export { Button } from './button';
 export { Input } from './input';

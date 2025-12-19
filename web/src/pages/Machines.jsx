@@ -28,7 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '../components/ui/alert-dialog'
-import { StatusBadge, ConfirmModal } from '../components/ui/dumont-ui'
+import { StatusBadge, ConfirmModal, Popover, PopoverTrigger, PopoverContent } from '../components/ui/dumont-ui'
 import { ChevronDown, MoreVertical, Play, Plus, Server, Cpu, Clock, Activity, Code, Settings, Trash2, Copy, Key, Terminal, Pause, Save, RefreshCw, Upload, Database, ArrowLeftRight, Check, Cloud, Shield, Layers, X, MapPin, Globe, DollarSign } from 'lucide-react'
 import HibernationConfigModal from '../components/HibernationConfigModal'
 import MigrationModal from '../components/MigrationModal'
@@ -339,9 +339,77 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
             {copiedField === 'ip' ? 'Copiado!' : machine.public_ipaddr}
           </button>
         )}
-        <span className="px-1.5 py-0.5 rounded bg-gray-700/30 border border-gray-700/30">{gpuRam}GB</span>
-        <span className="px-1.5 py-0.5 rounded bg-gray-700/30 border border-gray-700/30">{cpuCores}CPU</span>
-        <span className="px-1.5 py-0.5 rounded bg-gray-700/30 border border-gray-700/30">{ram}GB RAM</span>
+
+        {/* GPU RAM Popover */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="px-1.5 py-0.5 rounded bg-gray-700/30 border border-gray-700/30 hover:bg-gray-700/50 hover:border-gray-600/50 transition-all cursor-help">
+              {gpuRam}GB
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-56">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-green-400" />
+                <span className="text-sm font-semibold text-white">GPU Memory</span>
+              </div>
+              <p className="text-xs text-gray-400">
+                <span className="text-green-400 font-semibold">{gpuRam}GB</span> VRAM disponível para processamento de IA e computação paralela.
+              </p>
+              {machine.gpu_name && (
+                <p className="text-xs text-gray-500 pt-1 border-t border-gray-700/30">
+                  <span className="text-gray-400">Modelo:</span> {machine.gpu_name}
+                </p>
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* CPU Cores Popover */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="px-1.5 py-0.5 rounded bg-gray-700/30 border border-gray-700/30 hover:bg-gray-700/50 hover:border-gray-600/50 transition-all cursor-help">
+              {cpuCores}CPU
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-56">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-orange-400" />
+                <span className="text-sm font-semibold text-white">CPU Cores</span>
+              </div>
+              <p className="text-xs text-gray-400">
+                <span className="text-orange-400 font-semibold">{cpuCores}</span> núcleos de processamento disponíveis para aplicações gerais.
+              </p>
+              <p className="text-xs text-gray-500 pt-1 border-t border-gray-700/30">
+                Ideal para tarefas multi-thread e processamento paralelo de dados.
+              </p>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        {/* System RAM Popover */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <button className="px-1.5 py-0.5 rounded bg-gray-700/30 border border-gray-700/30 hover:bg-gray-700/50 hover:border-gray-600/50 transition-all cursor-help">
+              {ram}GB RAM
+            </button>
+          </PopoverTrigger>
+          <PopoverContent align="start" className="w-56">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Database className="w-4 h-4 text-blue-400" />
+                <span className="text-sm font-semibold text-white">System RAM</span>
+              </div>
+              <p className="text-xs text-gray-400">
+                <span className="text-blue-400 font-semibold">{ram}GB</span> de memória do sistema para aplicações e dados em tempo de execução.
+              </p>
+              <p className="text-xs text-gray-500 pt-1 border-t border-gray-700/30">
+                Separado da VRAM - usado para código de aplicação, frameworks e datasets.
+              </p>
+            </div>
+          </PopoverContent>
+        </Popover>
         {isRunning && syncStatus && (
           <span
             className={`flex items-center gap-1 px-1.5 py-0.5 rounded border cursor-help ${

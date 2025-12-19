@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Eye, EyeOff, Check, X, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Check, X, AlertCircle, Key, Database, Lock, Server, DollarSign, Shield } from 'lucide-react'
 import { useToast } from '../components/Toast'
 import StandbyConfig from '../components/StandbyConfig'
-import { AlertInline } from '../components/ui/dumont-ui'
+import { AlertInline, Card, CardHeader, CardTitle, CardContent, Button } from '../components/ui/dumont-ui'
 
 const API_BASE = ''
 
@@ -223,8 +223,18 @@ function Toast({ message, title = 'Saldo Baixo!', type = 'warning', onClose }) {
   )
 }
 
+// Menu items para Settings
+const SETTINGS_MENU = [
+  { id: 'apis', label: 'APIs & Credenciais', icon: Key, color: 'green' },
+  { id: 'storage', label: 'Armazenamento', icon: Database, color: 'blue' },
+  { id: 'agent', label: 'Agent Sync', icon: Server, color: 'cyan' },
+  { id: 'notifications', label: 'Notificações', icon: AlertCircle, color: 'yellow' },
+  { id: 'failover', label: 'CPU Failover', icon: Shield, color: 'red' },
+]
+
 export default function Settings() {
   const toast = useToast()
+  const [activeTab, setActiveTab] = useState('apis')
   const [settings, setSettings] = useState({
     vast_api_key: '',
     r2_access_key: '',
@@ -393,7 +403,7 @@ export default function Settings() {
   }
 
   return (
-    <div className="container">
+    <div className="min-h-screen bg-gradient-to-b from-[#0e110e] to-[#131713]">
       {/* Toast de notificação */}
       {showToast && (
         <Toast
@@ -404,197 +414,351 @@ export default function Settings() {
         />
       )}
 
-      <h2 className="page-title">Settings</h2>
-
-      <form onSubmit={handleSubmit}>
-        {message && (
-          <div className={`alert alert-${message.type}`}>{message.text}</div>
-        )}
-
-        <div className="card">
-          <div className="card-header">
-            <span className="card-title">Vast.ai Configuration</span>
-          </div>
-          <div className="card-body">
-            <div className="form-group">
-              <label className="form-label">API Key</label>
-              <SecretInput
-                name="vast_api_key"
-                value={settings.vast_api_key}
-                onChange={handleChange}
-                placeholder="Enter your vast.ai API key"
-                validation={validations.vast_api_key}
-              />
-            </div>
-          </div>
+      <div className="max-w-7xl mx-auto p-6 md:p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Configurações</h1>
+          <p className="text-gray-400">Gerencie suas APIs, armazenamento e preferências</p>
         </div>
 
-        <div className="card" style={{ marginTop: '24px' }}>
-          <div className="card-header">
-            <span className="card-title">Cloudflare R2 Configuration</span>
-          </div>
-          <div className="card-body">
-            <div className="grid grid-2">
-              <div className="form-group">
-                <label className="form-label">Access Key</label>
-                <SecretInput
-                  name="r2_access_key"
-                  value={settings.r2_access_key}
-                  onChange={handleChange}
-                  validation={validations.r2_access_key}
-                />
-              </div>
-              <div className="form-group">
-                <label className="form-label">Secret Key</label>
-                <SecretInput
-                  name="r2_secret_key"
-                  value={settings.r2_secret_key}
-                  onChange={handleChange}
-                  validation={validations.r2_secret_key}
-                />
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">Endpoint URL</label>
-              <ValidatedInput
-                name="r2_endpoint"
-                value={settings.r2_endpoint}
-                onChange={handleChange}
-                placeholder="https://xxx.r2.cloudflarestorage.com"
-                validation={validations.r2_endpoint}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">Bucket Name</label>
-              <ValidatedInput
-                name="r2_bucket"
-                value={settings.r2_bucket}
-                onChange={handleChange}
-                validation={validations.r2_bucket}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Layout: Sidebar + Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar Menu */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-6 space-y-2">
+              {SETTINGS_MENU.map((item) => {
+                const MenuIcon = item.icon
+                const colorClasses = {
+                  green: 'border-green-500/20 hover:bg-green-500/10',
+                  blue: 'border-blue-500/20 hover:bg-blue-500/10',
+                  cyan: 'border-cyan-500/20 hover:bg-cyan-500/10',
+                  yellow: 'border-yellow-500/20 hover:bg-yellow-500/10',
+                  red: 'border-red-500/20 hover:bg-red-500/10',
+                }
+                const iconColorClasses = {
+                  green: 'text-green-400',
+                  blue: 'text-blue-400',
+                  cyan: 'text-cyan-400',
+                  yellow: 'text-yellow-400',
+                  red: 'text-red-400',
+                }
+                const isActive = activeTab === item.id
 
-        <div className="card" style={{ marginTop: '24px' }}>
-          <div className="card-header">
-            <span className="card-title">Restic Configuration</span>
-          </div>
-          <div className="card-body">
-            <div className="form-group">
-              <label className="form-label">Repository Password</label>
-              <SecretInput
-                name="restic_password"
-                value={settings.restic_password}
-                onChange={handleChange}
-                validation={validations.restic_password}
-              />
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveTab(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg border transition-all text-left ${
+                      isActive
+                        ? `${colorClasses[item.color]} border-opacity-50 bg-opacity-20`
+                        : 'border-gray-700/50 hover:border-gray-600/50'
+                    }`}
+                  >
+                    <MenuIcon className={`w-5 h-5 flex-shrink-0 ${isActive ? iconColorClasses[item.color] : 'text-gray-500'}`} />
+                    <div className="flex-1">
+                      <div className={`text-sm font-medium ${isActive ? 'text-white' : 'text-gray-400'}`}>
+                        {item.label}
+                      </div>
+                    </div>
+                    {isActive && (
+                      <div className={`w-1.5 h-1.5 rounded-full ${item.color === 'green' ? 'bg-green-400' : item.color === 'blue' ? 'bg-blue-400' : item.color === 'cyan' ? 'bg-cyan-400' : item.color === 'yellow' ? 'bg-yellow-400' : 'bg-red-400'}`} />
+                    )}
+                  </button>
+                )
+              })}
             </div>
           </div>
-        </div>
 
-        <div className="card" style={{ marginTop: '24px' }}>
-          <div className="card-header">
-            <span className="card-title">Notificações</span>
-          </div>
-          <div className="card-body">
-            <div className="form-group">
-              <label className="form-label">Alertas de Saldo Baixo</label>
-              <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '12px' }}>
-                Receba alertas visuais e sonoros quando seu saldo estiver abaixo de $1.00.
-              </p>
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={testNotification}
-              >
-                Testar Notificação
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button type="submit" className="btn btn-primary" disabled={saving || !isFormValid}>
-            {saving ? <span className="spinner" /> : 'Save Settings'}
-          </button>
-          {!isFormValid && (
-            <span className="text-red-400 text-sm flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4" />
-              Corrija os erros de validação antes de salvar
-            </span>
+          {/* Main Content */}
+          <div className="lg:col-span-3">
+            <form onSubmit={handleSubmit} className="space-y-6">
+          {message && (
+            <AlertInline variant={message.type === 'success' ? 'success' : 'error'}>
+              {message.text}
+            </AlertInline>
           )}
-        </div>
-      </form>
 
-      {/* DumontAgent Configuration - Separado do form principal */}
-      <div className="card" style={{ marginTop: '32px' }}>
-        <div className="card-header">
-          <span className="card-title">DumontAgent - Sincronizacao</span>
-        </div>
-        <div className="card-body">
-          <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '16px' }}>
-            Configure como o agente de sincronizacao funciona nas maquinas GPU.
-            Estas configuracoes serao aplicadas em novas maquinas.
-          </p>
-          <div className="grid grid-2">
-            <div className="form-group">
-              <label className="form-label">Intervalo de Sincronizacao</label>
-              <select
-                name="sync_interval"
-                className="form-input"
-                value={agentSettings.sync_interval}
-                onChange={handleAgentChange}
-                style={{ cursor: 'pointer' }}
-              >
-                <option value="30">30 segundos</option>
-                <option value="60">1 minuto</option>
-                <option value="120">2 minutos</option>
-                <option value="300">5 minutos</option>
-                <option value="600">10 minutos</option>
-              </select>
-              <small style={{ color: '#6e7681', marginTop: '4px', display: 'block' }}>
-                Tempo entre cada backup automatico
-              </small>
+          {/* APIs & Credenciais Tab */}
+          {activeTab === 'apis' && (
+            <div className="space-y-6">
+          {/* Vast.ai Configuration */}
+          <Card className="border-green-500/20 bg-gradient-to-br from-[#1a2418] to-[#161a16]">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-green-500/20">
+                  <Key className="w-5 h-5 text-green-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">Vast.ai</CardTitle>
+                  <p className="text-gray-400 text-sm mt-1">Configuração para acesso à plataforma Vast.ai</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">API Key</label>
+                <SecretInput
+                  name="vast_api_key"
+                  value={settings.vast_api_key}
+                  onChange={handleChange}
+                  placeholder="Enter your vast.ai API key"
+                  validation={validations.vast_api_key}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Cloudflare R2 Configuration */}
+          <Card className="border-blue-500/20 bg-gradient-to-br from-[#1a1f26] to-[#161a1f]">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-blue-500/20">
+                  <Database className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">Cloudflare R2</CardTitle>
+                  <p className="text-gray-400 text-sm mt-1">Armazenamento em nuvem para snapshots e backups</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-group">
+                  <label className="form-label text-gray-300 block mb-2">Access Key</label>
+                  <SecretInput
+                    name="r2_access_key"
+                    value={settings.r2_access_key}
+                    onChange={handleChange}
+                    validation={validations.r2_access_key}
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="form-label text-gray-300 block mb-2">Secret Key</label>
+                  <SecretInput
+                    name="r2_secret_key"
+                    value={settings.r2_secret_key}
+                    onChange={handleChange}
+                    validation={validations.r2_secret_key}
+                  />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">Endpoint URL</label>
+                <ValidatedInput
+                  name="r2_endpoint"
+                  value={settings.r2_endpoint}
+                  onChange={handleChange}
+                  placeholder="https://xxx.r2.cloudflarestorage.com"
+                  validation={validations.r2_endpoint}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">Bucket Name</label>
+                <ValidatedInput
+                  name="r2_bucket"
+                  value={settings.r2_bucket}
+                  onChange={handleChange}
+                  validation={validations.r2_bucket}
+                />
+              </div>
+            </CardContent>
+          </Card>
             </div>
-            <div className="form-group">
-              <label className="form-label">Retencao de Snapshots</label>
-              <select
-                name="keep_last"
-                className="form-input"
-                value={agentSettings.keep_last}
-                onChange={handleAgentChange}
-                style={{ cursor: 'pointer' }}
-              >
-                <option value="5">Ultimos 5</option>
-                <option value="10">Ultimos 10</option>
-                <option value="20">Ultimos 20</option>
-                <option value="50">Ultimos 50</option>
-              </select>
-              <small style={{ color: '#6e7681', marginTop: '4px', display: 'block' }}>
-                Quantidade de snapshots automaticos a manter
-              </small>
+          )}
+
+          {/* Storage Tab */}
+          {activeTab === 'storage' && (
+            <div className="space-y-6">
+          {/* Restic Configuration */}
+          <Card className="border-purple-500/20 bg-gradient-to-br from-[#1f1a26] to-[#161617]">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-purple-500/20">
+                  <Lock className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">Restic</CardTitle>
+                  <p className="text-gray-400 text-sm mt-1">Proteção e criptografia de repositórios</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">Repository Password</label>
+                <SecretInput
+                  name="restic_password"
+                  value={settings.restic_password}
+                  onChange={handleChange}
+                  validation={validations.restic_password}
+                />
+              </div>
+            </CardContent>
+          </Card>
             </div>
-          </div>
-          <div style={{ marginTop: '16px' }}>
+          )}
+
+          {/* Notifications Tab */}
+          {activeTab === 'notifications' && (
+            <div className="space-y-6">
+          {/* Notificações */}
+          <Card className="border-yellow-500/20 bg-gradient-to-br from-[#1f1a0f] to-[#161510]">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-yellow-500/20">
+                  <AlertCircle className="w-5 h-5 text-yellow-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-white">Notificações</CardTitle>
+                  <p className="text-gray-400 text-sm mt-1">Alertas visuais e sonoros do sistema</p>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">Alertas de Saldo Baixo</label>
+                <p className="text-gray-400 text-sm mb-4">
+                  Receba alertas visuais e sonoros quando seu saldo estiver abaixo de $1.00.
+                </p>
+                <Button
+                  type="button"
+                  onClick={testNotification}
+                  className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
+                >
+                  Testar Notificação
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+              {/* Save Button */}
+              <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={saving || !isFormValid}
+                  className="flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {saving ? (
+                    <>
+                      <span className="spinner" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4" />
+                      Salvar Configurações
+                    </>
+                  )}
+                </button>
+                {!isFormValid && (
+                  <div className="bg-red-500/10 border border-red-500/30 rounded-lg px-4 py-3 flex items-center gap-2 text-red-400 text-sm">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>Corrija os erros antes de salvar</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Agent Tab */}
+          {activeTab === 'agent' && (
+            <div className="space-y-6">
+        {/* DumontAgent Configuration */}
+        <Card className="border-cyan-500/20 bg-gradient-to-br from-[#1a262f] to-[#161a1f]">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-cyan-500/20">
+                <Server className="w-5 h-5 text-cyan-400" />
+              </div>
+              <div>
+                <CardTitle className="text-white">DumontAgent</CardTitle>
+                <p className="text-gray-400 text-sm mt-1">Sincronização automática em máquinas GPU</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <p className="text-gray-400 text-sm mb-6">
+              Configure como o agente de sincronização funciona nas máquinas GPU.
+              Estas configurações serão aplicadas em novas máquinas.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">Intervalo de Sincronização</label>
+                <select
+                  name="sync_interval"
+                  className="form-input w-full"
+                  value={agentSettings.sync_interval}
+                  onChange={handleAgentChange}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <option value="30">30 segundos</option>
+                  <option value="60">1 minuto</option>
+                  <option value="120">2 minutos</option>
+                  <option value="300">5 minutos</option>
+                  <option value="600">10 minutos</option>
+                </select>
+                <small className="text-gray-500 text-xs mt-1 block">
+                  Tempo entre cada backup automático
+                </small>
+              </div>
+              <div className="form-group">
+                <label className="form-label text-gray-300 block mb-2">Retenção de Snapshots</label>
+                <select
+                  name="keep_last"
+                  className="form-input w-full"
+                  value={agentSettings.keep_last}
+                  onChange={handleAgentChange}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <option value="5">Últimos 5</option>
+                  <option value="10">Últimos 10</option>
+                  <option value="20">Últimos 20</option>
+                  <option value="50">Últimos 50</option>
+                </select>
+                <small className="text-gray-500 text-xs mt-1 block">
+                  Quantidade de snapshots a manter
+                </small>
+              </div>
+            </div>
             <button
               type="button"
-              className="btn btn-primary"
               onClick={saveAgentSettings}
               disabled={savingAgent}
+              className="py-2 px-4 rounded-lg font-semibold transition-all flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {savingAgent ? <span className="spinner" /> : 'Salvar Configuracoes do Agente'}
+              {savingAgent ? (
+                <>
+                  <span className="spinner" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4" />
+                  Salvar Configurações
+                </>
+              )}
             </button>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
+            </div>
+          )}
 
-      {/* R2 Cost Estimator */}
-      <div className="card" style={{ marginTop: '24px' }}>
-        <div className="card-header">
-          <span className="card-title">Estimativa de Custo R2</span>
-        </div>
-        <div className="card-body">
+          {/* Failover Tab */}
+          {activeTab === 'failover' && (
+            <div className="space-y-6">
+        {/* R2 Cost Estimator */}
+        <Card className="border-orange-500/20 bg-gradient-to-br from-[#1f1510] to-[#161410]">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-orange-500/20">
+                <DollarSign className="w-5 h-5 text-orange-400" />
+              </div>
+              <div>
+                <CardTitle className="text-white">Estimativa de Custo</CardTitle>
+                <p className="text-gray-400 text-sm mt-1">Cloudflare R2 - Armazenamento em nuvem</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
           <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '16px' }}>
             Calcule o custo mensal estimado do armazenamento no Cloudflare R2.
           </p>
@@ -670,15 +834,19 @@ export default function Settings() {
               * Valores para 10GB de dados
             </div>
           </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
 
-      {/* CPU Standby / Failover Configuration */}
-      <div style={{ marginTop: '32px' }}>
+        {/* CPU Standby / Failover Configuration */}
         <StandbyConfig getAuthHeaders={() => {
           const token = localStorage.getItem('auth_token')
           return token ? { 'Authorization': `Bearer ${token}` } : {}
         }} />
+            </div>
+          )}
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   )

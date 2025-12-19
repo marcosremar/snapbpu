@@ -26,7 +26,7 @@ import {
   FleetStrategy
 } from '../components/spot'
 import RealSavingsDashboard from '../components/RealSavingsDashboard'
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge } from '../components/ui/dumont-ui'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Badge, Progress } from '../components/ui/dumont-ui'
 
 ChartJS.register(
   CategoryScale,
@@ -558,16 +558,8 @@ export default function GPUMetrics() {
                     <TableCell>{provider.geolocation || '-'}</TableCell>
                     <TableCell align="center">
                       <div className="flex items-center justify-center gap-2">
-                        <div className="w-24 h-2 rounded bg-gray-700">
-                          <div
-                            className="h-full rounded"
-                            style={{
-                              width: `${(provider.reliability_score || 0) * 100}%`,
-                              backgroundColor: provider.reliability_score > 0.8 ? '#22c55e' : provider.reliability_score > 0.5 ? '#f59e0b' : '#ef4444'
-                            }}
-                          />
-                        </div>
-                        <span className="text-sm">{formatPercent(provider.reliability_score)}</span>
+                        <Progress value={Math.min((provider.reliability_score || 0) * 100, 100)} className="w-24" />
+                        <span className="text-sm font-semibold min-w-[50px]">{formatPercent(provider.reliability_score)}</span>
                       </div>
                     </TableCell>
                     <TableCell align="center">{formatPercent(provider.availability_score)}</TableCell>
