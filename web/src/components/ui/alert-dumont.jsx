@@ -34,9 +34,9 @@ const Alert = ({
       title: "text-yellow-400",
     },
     info: {
-      container: "border-blue-500/30 bg-blue-500/10",
-      icon: "text-blue-400",
-      title: "text-blue-400",
+      container: "border-cyan-500/30 bg-cyan-500/10",
+      icon: "text-cyan-400",
+      title: "text-cyan-400",
     },
   };
 
@@ -99,7 +99,7 @@ export const AlertInline = ({ variant = "info", children }) => {
     success: "text-green-400",
     error: "text-red-400",
     warning: "text-yellow-400",
-    info: "text-blue-400",
+    info: "text-cyan-400",
   };
 
   const icons = {
@@ -122,17 +122,17 @@ export const AlertInline = ({ variant = "info", children }) => {
 // Toast-style Alert (para notificações)
 export const ToastAlert = ({ variant = "success", title, message, onClose }) => {
   const variantClasses = {
-    success: "border-green-500/50 bg-[#131713]",
-    error: "border-red-500/50 bg-[#131713]",
-    warning: "border-yellow-500/50 bg-[#131713]",
-    info: "border-blue-500/50 bg-[#131713]",
+    success: "border-green-500/50 bg-dark-surface-card",
+    error: "border-red-500/50 bg-dark-surface-card",
+    warning: "border-yellow-500/50 bg-dark-surface-card",
+    info: "border-cyan-500/50 bg-dark-surface-card",
   };
 
   const iconColors = {
     success: "text-green-400",
     error: "text-red-400",
     warning: "text-yellow-400",
-    info: "text-blue-400",
+    info: "text-cyan-400",
   };
 
   const icons = {

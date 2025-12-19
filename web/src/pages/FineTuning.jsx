@@ -26,7 +26,7 @@ import FineTuningModal from '../components/FineTuningModal';
 // Status configurations
 const STATUS_CONFIG = {
   pending: { icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-400/10', label: 'Pending' },
-  uploading: { icon: Loader2, color: 'text-blue-400', bg: 'bg-blue-400/10', label: 'Uploading', spin: true },
+  uploading: { icon: Loader2, color: 'text-cyan-400', bg: 'bg-cyan-400/10', label: 'Uploading', spin: true },
   queued: { icon: Clock, color: 'text-orange-400', bg: 'bg-orange-400/10', label: 'Queued' },
   running: { icon: Loader2, color: 'text-purple-400', bg: 'bg-purple-400/10', label: 'Running', spin: true },
   completed: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-400/10', label: 'Completed' },
@@ -155,7 +155,7 @@ function JobCard({ job, onRefresh, onViewLogs, onCancel, onDeploy, onDownload })
               variant="ghost"
               size="sm"
               onClick={() => onDownload(job)}
-              className="text-blue-400 hover:text-blue-300"
+              className="text-cyan-400 hover:text-cyan-300"
             >
               <Download className="w-4 h-4 mr-1" />
               Download

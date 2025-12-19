@@ -445,7 +445,7 @@ export default function FailoverReport({ isDemo = true }) {
       <Card className="border-gray-700/50 bg-gray-800/30">
         <CardHeader>
           <CardTitle className="text-white text-sm flex items-center gap-2">
-            <BarChart3 className="w-4 h-4 text-blue-400" />
+            <BarChart3 className="w-4 h-4 text-cyan-400" />
             Latência por Fase (Média)
           </CardTitle>
         </CardHeader>

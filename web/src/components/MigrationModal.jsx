@@ -143,10 +143,10 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg bg-[#1a1f2e] border-gray-700 text-white">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <RefreshCw className="w-5 h-5 text-blue-400" />
+            <RefreshCw className="w-5 h-5 text-emerald-400" />
             Migrar Instância
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -169,19 +169,19 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
                 {isCurrentlyGpu ? (
                   <Server className="w-6 h-6 text-green-400" />
                 ) : (
-                  <Cpu className="w-6 h-6 text-blue-400" />
+                  <Cpu className="w-6 h-6 text-emerald-400" />
                 )}
               </div>
               <p className="text-sm text-gray-300">{isCurrentlyGpu ? 'GPU' : 'CPU'}</p>
               <p className="text-xs text-gray-500">{currentGpuName}</p>
             </div>
 
-            <ArrowRight className="w-6 h-6 text-blue-400" />
+            <ArrowRight className="w-6 h-6 text-emerald-400" />
 
             <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mx-auto mb-2">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-2">
                 {targetType === 'cpu' ? (
-                  <Cpu className="w-6 h-6 text-blue-400" />
+                  <Cpu className="w-6 h-6 text-emerald-400" />
                 ) : (
                   <Server className="w-6 h-6 text-green-400" />
                 )}
@@ -202,11 +202,11 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
                   onClick={() => setTargetType('cpu')}
                   className={`p-3 rounded-lg border transition-all ${
                     targetType === 'cpu'
-                      ? 'border-blue-500 bg-blue-500/10'
+                      ? 'border-emerald-500 bg-emerald-500/10'
                       : 'border-gray-700 hover:border-gray-600'
                   }`}
                 >
-                  <Cpu className={`w-5 h-5 mx-auto mb-1 ${targetType === 'cpu' ? 'text-blue-400' : 'text-gray-500'}`} />
+                  <Cpu className={`w-5 h-5 mx-auto mb-1 ${targetType === 'cpu' ? 'text-emerald-400' : 'text-gray-500'}`} />
                   <p className={`text-sm font-medium ${targetType === 'cpu' ? 'text-white' : 'text-gray-400'}`}>CPU</p>
                   <p className="text-xs text-gray-500">~$0.02/h</p>
                 </button>
@@ -233,7 +233,7 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
               <select
                 value={gpuName}
                 onChange={(e) => setGpuName(e.target.value)}
-                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                className="w-full px-3 py-2 bg-white dark:bg-dark-surface-secondary border border-gray-200 dark:border-dark-surface-border rounded-lg text-gray-900 dark:text-white focus:outline-none focus:border-emerald-500"
               >
                 {GPU_OPTIONS.map((gpu) => (
                   <option key={gpu.value} value={gpu.value}>
@@ -287,7 +287,7 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
           {/* Migration Progress */}
           {migrationStarted && (
             <div className="space-y-3">
-              <div className="flex items-center gap-2 text-blue-400">
+              <div className="flex items-center gap-2 text-emerald-400">
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
@@ -309,9 +309,9 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
 
           {/* Warning */}
           {!migrationStarted && (
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-lg p-3">
-              <p className="text-xs text-gray-300">
-                <strong className="text-blue-400">Processo:</strong> Cria snapshot {'->'} Nova instância {'->'} Restaura {'->'} Destrói antiga
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-3">
+              <p className="text-xs text-gray-600 dark:text-gray-300">
+                <strong className="text-emerald-500 dark:text-emerald-400">Processo:</strong> Cria snapshot {'->'} Nova instância {'->'} Restaura {'->'} Destrói antiga
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 Tempo estimado: ~5 minutos. Seu workspace será preservado.
@@ -332,7 +332,7 @@ export default function MigrationModal({ instance, isOpen, onClose, onSuccess })
           <Button
             onClick={handleMigrate}
             disabled={loading || !estimate?.available || migrationStarted}
-            className="bg-blue-500 hover:bg-blue-600 text-white gap-2"
+            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
           >
             {loading ? (
               <>

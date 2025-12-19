@@ -176,7 +176,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
     if (!isInFailover) return ''
     if (failoverProgress.phase === 'gpu_lost') return 'border-red-500/50 bg-[#1f1414]'
     if (failoverProgress.phase === 'failover_active') return 'border-yellow-500/50 bg-[#1f1a14]'
-    if (failoverProgress.phase === 'searching') return 'border-blue-500/50 bg-[#14171f]'
+    if (failoverProgress.phase === 'searching') return 'border-cyan-500/50 bg-[#14171f]'
     if (failoverProgress.phase === 'provisioning') return 'border-purple-500/50 bg-[#1a141f]'
     if (failoverProgress.phase === 'restoring') return 'border-cyan-500/50 bg-[#141f1f]'
     if (failoverProgress.phase === 'complete') return 'border-green-500/50 bg-[#141f14]'
@@ -242,12 +242,12 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
             </div>
 
             <div className={`flex items-center gap-2 ${
-              failoverProgress.phase === 'searching' ? 'text-blue-400' :
+              failoverProgress.phase === 'searching' ? 'text-cyan-400' :
               ['provisioning', 'restoring', 'complete'].includes(failoverProgress.phase) ? 'text-green-400' :
               'text-gray-500'
             }`} data-testid="failover-step-searching">
               <div className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
-                failoverProgress.phase === 'searching' ? 'border-blue-400 bg-blue-500/20' :
+                failoverProgress.phase === 'searching' ? 'border-blue-400 bg-cyan-500/20' :
                 ['provisioning', 'restoring', 'complete'].includes(failoverProgress.phase) ? 'border-green-400 bg-green-500/20' :
                 'border-gray-600'
               }`}>
@@ -375,7 +375,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
                 {hasCpuStandby ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-xs">
-                      <Cloud className="w-3.5 h-3.5 text-blue-400" />
+                      <Cloud className="w-3.5 h-3.5 text-cyan-400" />
                       <span className="text-gray-400">Provider:</span>
                       <span className="text-white font-medium">{cpuStandby.provider?.toUpperCase() || 'GCP'}</span>
                     </div>
@@ -412,7 +412,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
                     <div className="mt-2 pt-2 border-t border-gray-700/50">
                       <div className={`text-xs px-2 py-1 rounded text-center ${
                         cpuStandby.state === 'ready' ? 'bg-green-500/20 text-green-400' :
-                        cpuStandby.state === 'syncing' ? 'bg-blue-500/20 text-blue-400' :
+                        cpuStandby.state === 'syncing' ? 'bg-cyan-500/20 text-cyan-400' :
                         cpuStandby.state === 'failover_active' ? 'bg-yellow-500/20 text-yellow-400' :
                         'bg-gray-700/30 text-gray-400'
                       }`}>
@@ -488,7 +488,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
             className={`px-1.5 py-0.5 rounded border transition-all ${
               copiedField === 'ip'
                 ? 'bg-green-500/20 text-green-400 border-green-500/30'
-                : 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20'
+                : 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20 hover:bg-cyan-500/20'
             }`}
             title="Clique para copiar IP"
           >
@@ -554,11 +554,11 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
           <PopoverContent align="start" className="w-56">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Database className="w-4 h-4 text-blue-400" />
+                <Database className="w-4 h-4 text-cyan-400" />
                 <span className="text-sm font-semibold text-white">System RAM</span>
               </div>
               <p className="text-xs text-gray-400">
-                <span className="text-blue-400 font-semibold">{ram}GB</span> de memória do sistema para aplicações e dados em tempo de execução.
+                <span className="text-cyan-400 font-semibold">{ram}GB</span> de memória do sistema para aplicações e dados em tempo de execução.
               </p>
               <p className="text-xs text-gray-500 pt-1 border-t border-gray-700/30">
                 Separado da VRAM - usado para código de aplicação, frameworks e datasets.
@@ -570,7 +570,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
           <span
             className={`flex items-center gap-1 px-1.5 py-0.5 rounded border cursor-help ${
               syncStatus === 'syncing'
-                ? 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                ? 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20'
                 : syncStatus === 'synced'
                 ? 'bg-green-500/10 text-green-400 border-green-500/20'
                 : 'bg-gray-700/30 text-gray-400 border-gray-700/30'
@@ -609,12 +609,12 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
               </div>
               <div className="text-[9px] text-gray-500 uppercase">/hora</div>
               {hasCpuStandby && (
-                <div className="text-[8px] text-blue-400 mt-0.5">+backup</div>
+                <div className="text-[8px] text-cyan-400 mt-0.5">+backup</div>
               )}
             </div>
             {uptime && (
               <div className="text-center">
-                <div className="text-blue-400 font-mono text-sm font-bold">{uptime}</div>
+                <div className="text-cyan-400 font-mono text-sm font-bold">{uptime}</div>
                 <div className="text-[9px] text-gray-500 uppercase">UPTIME</div>
               </div>
             )}
@@ -660,7 +660,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
             {/* Migration Button */}
             <button
               onClick={() => onMigrate && onMigrate(machine)}
-              className="flex-1 py-2 rounded-lg bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-blue-600/30 transition-colors"
+              className="flex-1 py-2 rounded-lg bg-cyan-600/20 border border-cyan-500/30 text-cyan-400 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-cyan-600/30 transition-colors"
             >
               <ArrowLeftRight className="w-3.5 h-3.5" />
               Migrar p/ CPU
@@ -716,7 +716,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
               </div>
               <div className="text-[9px] text-gray-500 uppercase">/hora</div>
               {hasCpuStandby && (
-                <div className="text-[8px] text-blue-400 mt-0.5">+backup</div>
+                <div className="text-[8px] text-cyan-400 mt-0.5">+backup</div>
               )}
             </div>
           </div>
@@ -748,7 +748,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
 
       {/* SSH copied notification */}
       {showSSHInstructions && (
-        <div className="mt-2 p-2 rounded bg-blue-500/10 border border-blue-500/20 text-[10px] text-blue-300 text-center">
+        <div className="mt-2 p-2 rounded bg-cyan-500/10 border border-cyan-500/20 text-[10px] text-cyan-300 text-center">
           SSH Config copiado! Cole em ~/.ssh/config
         </div>
       )}
@@ -1602,8 +1602,8 @@ export default function Machines() {
                     </div>
                   </div>
                 )}
-                <div className="p-3 rounded-lg border border-blue-700/50 bg-blue-900/20">
-                  <div className="flex items-center gap-2 text-blue-300 text-sm">
+                <div className="p-3 rounded-lg border border-cyan-700/50 bg-cyan-900/20">
+                  <div className="flex items-center gap-2 text-cyan-300 text-sm">
                     <Shield className="w-4 h-4" />
                     <span>CPU Standby será criado automaticamente</span>
                   </div>
@@ -1649,7 +1649,7 @@ export default function Machines() {
           demoToast.type === 'success' ? 'bg-green-900/90 border-green-500/50 text-green-100' :
           demoToast.type === 'warning' ? 'bg-yellow-900/90 border-yellow-500/50 text-yellow-100' :
           demoToast.type === 'error' ? 'bg-red-900/90 border-red-500/50 text-red-100' :
-          'bg-blue-900/90 border-blue-500/50 text-blue-100'
+          'bg-cyan-900/90 border-cyan-500/50 text-cyan-100'
         }`}>
           {demoToast.type === 'success' && <Check className="w-5 h-5" />}
           {demoToast.type === 'warning' && <RefreshCw className="w-5 h-5 animate-spin" />}

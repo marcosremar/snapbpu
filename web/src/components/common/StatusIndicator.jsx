@@ -10,7 +10,7 @@ export const StatusIndicator = ({ status, variant = 'badge', showLabel = true })
     running: { dot: 'bg-green-400', label: 'Rodando', text: 'text-green-400' },
     stopped: { dot: 'bg-gray-400', label: 'Parado', text: 'text-gray-400' },
     hibernating: { dot: 'bg-yellow-400', label: 'Hibernando', text: 'text-yellow-400' },
-    paused: { dot: 'bg-blue-400', label: 'Pausado', text: 'text-blue-400' },
+    paused: { dot: 'bg-cyan-400', label: 'Pausado', text: 'text-cyan-400' },
     error: { dot: 'bg-red-400', label: 'Erro', text: 'text-red-400' },
     starting: { dot: 'bg-green-400', label: 'Iniciando', text: 'text-green-400' },
     stopping: { dot: 'bg-yellow-400', label: 'Parando', text: 'text-yellow-400' },

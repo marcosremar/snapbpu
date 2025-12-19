@@ -28,10 +28,10 @@ const variants = {
   },
   info: {
     icon: Info,
-    bg: 'bg-blue-500/10',
-    border: 'border-blue-500/30',
-    iconColor: 'text-blue-400',
-    textColor: 'text-blue-300'
+    bg: 'bg-cyan-500/10',
+    border: 'border-cyan-500/30',
+    iconColor: 'text-cyan-400',
+    textColor: 'text-cyan-300'
   }
 }
 

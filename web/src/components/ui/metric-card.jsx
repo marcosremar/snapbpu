@@ -66,10 +66,10 @@ export const MetricCard = ({
       text: 'text-green-600 dark:text-green-400',
     },
     blue: {
-      bg: 'bg-white dark:bg-dark-surface-card from-blue-50 to-white dark:from-blue-500/10 dark:to-dark-surface-card',
-      border: 'border-blue-200 dark:border-dark-surface-border',
-      icon: 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400',
-      text: 'text-blue-600 dark:text-blue-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-cyan-50 to-white dark:from-cyan-500/10 dark:to-dark-surface-card',
+      border: 'border-cyan-200 dark:border-dark-surface-border',
+      icon: 'bg-cyan-100 dark:bg-cyan-500/20 text-cyan-600 dark:text-cyan-400',
+      text: 'text-cyan-600 dark:text-cyan-400',
     },
     purple: {
       bg: 'bg-white dark:bg-dark-surface-card from-purple-50 to-white dark:from-purple-500/10 dark:to-dark-surface-card',
@@ -189,7 +189,7 @@ export const MetricsGrid = ({ children, columns = 4 }) => {
 export const MiniMetric = ({ label, value, trend, color = "green" }) => {
   const colorClass = {
     green: "text-green-400",
-    blue: "text-blue-400",
+    blue: "text-cyan-400",
     yellow: "text-yellow-400",
     red: "text-red-400",
     gray: "text-gray-400",

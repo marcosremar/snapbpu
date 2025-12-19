@@ -502,11 +502,11 @@ export default function Settings() {
           </Card>
 
           {/* Cloudflare R2 Configuration */}
-          <Card className="border-blue-500/20 bg-gradient-to-br from-[#1a1f26] to-[#161a1f]">
+          <Card className="border-cyan-500/20 bg-gradient-to-br from-cyan-900/10 to-dark-surface-card">
             <CardHeader>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/20">
-                  <Database className="w-5 h-5 text-blue-400" />
+                <div className="p-2 rounded-lg bg-cyan-500/20">
+                  <Database className="w-5 h-5 text-cyan-400" />
                 </div>
                 <div>
                   <CardTitle className="text-white">Cloudflare R2</CardTitle>
