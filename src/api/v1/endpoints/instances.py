@@ -2,7 +2,7 @@
 Instance management API endpoints
 """
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, Query, BackgroundTasks, Request
 from typing import Optional
 from pydantic import BaseModel
 
@@ -98,14 +98,119 @@ async def search_offers(
 
 @router.get("", response_model=ListInstancesResponse)
 async def list_instances(
+    request: Request,
     instance_service: InstanceService = Depends(get_instance_service),
 ):
     """
     List all user instances
 
     Returns all GPU instances owned by the user, including CPU standby info if enabled.
+    In demo mode, returns sample machines for demonstration.
     """
     from ..schemas.response import CPUStandbyInfo
+    from datetime import datetime, timedelta
+    from ....core.config import get_settings
+
+    # Check if demo mode
+    settings = get_settings()
+    demo_param = request.query_params.get("demo", "").lower() == "true"
+    is_demo = settings.app.demo_mode or demo_param
+
+    # Demo machines for demonstration
+    if is_demo:
+        demo_instances = [
+            InstanceResponse(
+                id=12345678,
+                status="running",
+                actual_status="running",
+                gpu_name="RTX 4090",
+                num_gpus=1,
+                gpu_ram=24.0,
+                cpu_cores=16,
+                cpu_ram=64.0,
+                disk_space=500.0,
+                dph_total=0.45,
+                public_ipaddr="203.0.113.45",
+                ssh_host="ssh4.vast.ai",
+                ssh_port=22345,
+                start_date=(datetime.now() - timedelta(hours=3)).isoformat(),
+                label="dev-workspace-01",
+                ports={"22": 22345, "8080": 8080, "3000": 3000},
+                gpu_util=45.2,
+                gpu_temp=62.0,
+                cpu_util=28.5,
+                ram_used=24.3,
+                ram_total=64.0,
+                provider="vast.ai",
+                cpu_standby=None,
+                total_dph=0.45,
+            ),
+            InstanceResponse(
+                id=87654321,
+                status="stopped",
+                actual_status="stopped",
+                gpu_name="A100 80GB",
+                num_gpus=1,
+                gpu_ram=80.0,
+                cpu_cores=32,
+                cpu_ram=128.0,
+                disk_space=1000.0,
+                dph_total=1.25,
+                public_ipaddr=None,
+                ssh_host="ssh7.vast.ai",
+                ssh_port=22789,
+                start_date=(datetime.now() - timedelta(days=2)).isoformat(),
+                label="ml-training-large",
+                ports={"22": 22789},
+                gpu_util=0.0,
+                gpu_temp=0.0,
+                cpu_util=0.0,
+                ram_used=0.0,
+                ram_total=128.0,
+                provider="vast.ai",
+                cpu_standby=None,
+                total_dph=1.25,
+            ),
+            InstanceResponse(
+                id=55555555,
+                status="running",
+                actual_status="running",
+                gpu_name="RTX 3090",
+                num_gpus=2,
+                gpu_ram=48.0,
+                cpu_cores=24,
+                cpu_ram=96.0,
+                disk_space=250.0,
+                dph_total=0.68,
+                public_ipaddr="198.51.100.78",
+                ssh_host="ssh2.vast.ai",
+                ssh_port=22123,
+                start_date=(datetime.now() - timedelta(hours=12)).isoformat(),
+                label="inference-server",
+                ports={"22": 22123, "8000": 8000, "5000": 5000},
+                gpu_util=78.3,
+                gpu_temp=71.0,
+                cpu_util=42.1,
+                ram_used=58.7,
+                ram_total=96.0,
+                provider="vast.ai",
+                cpu_standby=CPUStandbyInfo(
+                    enabled=True,
+                    provider="gcp",
+                    name="standby-inference-eu",
+                    zone="europe-west1-b",
+                    ip="35.204.123.45",
+                    machine_type="e2-medium",
+                    status="running",
+                    dph_total=0.01,
+                    sync_enabled=True,
+                    sync_count=847,
+                    state="syncing",
+                ),
+                total_dph=0.69,
+            ),
+        ]
+        return ListInstancesResponse(instances=demo_instances, count=len(demo_instances))
 
     instances = instance_service.list_instances()
     standby_manager = get_standby_manager()

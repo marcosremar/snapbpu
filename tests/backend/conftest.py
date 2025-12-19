@@ -41,7 +41,7 @@ logger = logging.getLogger(__name__)
 # Configurações padrão
 DEFAULT_CONFIG = {
     "BASE_URL": os.environ.get("TEST_BASE_URL", "http://localhost:8766"),
-    "TEST_USER": os.environ.get("TEST_USER", "test@example.com"),
+    "TEST_USER": os.environ.get("TEST_USER", "test@test.com"),
     "TEST_PASS": os.environ.get("TEST_PASS", "test123"),
     "TIMEOUT": int(os.environ.get("TEST_TIMEOUT", "30")),
     "RETRY_ATTEMPTS": int(os.environ.get("TEST_RETRY", "3")),
@@ -83,7 +83,15 @@ class TestCache:
     def get_cache_key(self, test_file: Path, test_params: Dict = None) -> str:
         """Gera chave única para o cache"""
         file_hash = self.get_file_hash(test_file)
-        params_str = json.dumps(test_params or {}, sort_keys=True)
+        # Convert non-serializable types (like PosixPath) to strings
+        serializable_params = {}
+        if test_params:
+            for k, v in test_params.items():
+                if isinstance(v, Path):
+                    serializable_params[k] = str(v)
+                else:
+                    serializable_params[k] = v
+        params_str = json.dumps(serializable_params, sort_keys=True)
         params_hash = hashlib.sha256(params_str.encode()).hexdigest()[:8]
         return f"{test_file.stem}_{file_hash}_{params_hash}"
     
@@ -143,24 +151,25 @@ class APIClient:
         try:
             resp = self.session.post(
                 f"{self.base_url}/api/v1/auth/login",
-                json={"email": username, "password": password},
+                json={"username": username, "password": password},
                 timeout=self.timeout
             )
-            
+
             self.last_response = resp
-            
+
             if resp.status_code == 200:
                 data = resp.json()
-                token = data.get("access_token")
+                # API returns "token" not "access_token"
+                token = data.get("token") or data.get("access_token")
                 if token:
                     self.token = token
                     self.session.headers.update({"Authorization": f"Bearer {token}"})
                     logger.info(f"Login OK: {username}")
                     return True
-            
+
             logger.warning(f"Login falhou: {resp.status_code}")
             return False
-            
+
         except Exception as e:
             logger.error(f"Login erro: {e}")
             return False
@@ -235,10 +244,10 @@ class BaseTestCase:
     def setup_method(self, method):
         """Setup executado antes de cada método de teste"""
         self.method_name = method.__name__
-        
-        # Se tem cache, pula teste
-        if hasattr(self, '_cached_result') and self._cached_result:
-            pytest.skip(f"Teste em cache: {self.method_name}")
+
+        # Cache desabilitado - estava causando problemas de skip incorreto
+        # if hasattr(self, '_cached_result') and self._cached_result:
+        #     pytest.skip(f"Teste em cache: {self.method_name}")
     
     def log_success(self, message: str):
         """Log de sucesso"""

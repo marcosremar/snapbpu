@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, createContext, useContext } from 'react'
 import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import Settings from './pages/Settings'
@@ -15,16 +15,29 @@ import './styles/landing.css'
 
 const API_BASE = ''
 
+// Context para modo demo
+export const DemoContext = createContext(false)
+export const useDemoMode = () => useContext(DemoContext)
+
 // Componente para rotas protegidas (requer login)
 function ProtectedRoute({ user, children }) {
   const location = useLocation()
-  
+
   if (!user) {
     // Redireciona para login, salvando a página que o usuário tentou acessar
     return <Navigate to="/login" state={{ from: location }} replace />
   }
-  
+
   return children
+}
+
+// Componente wrapper para rotas demo (não requer login)
+function DemoRoute({ children }) {
+  return (
+    <DemoContext.Provider value={true}>
+      {children}
+    </DemoContext.Provider>
+  )
 }
 
 export default function App() {
@@ -32,10 +45,12 @@ export default function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if demo mode
+    // Check if demo mode via URL param or /demo-app path
     const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('demo') === 'true') {
-      setUser({ username: 'marcosremar@gmail.com' })
+    const isDemoPath = window.location.pathname.startsWith('/demo-app')
+
+    if (urlParams.get('demo') === 'true' || isDemoPath) {
+      setUser({ username: 'demo@dumont.cloud', isDemo: true })
       setLoading(false)
       return
     }
@@ -169,7 +184,7 @@ export default function App() {
         <Route path="/login" element={
           user ? <Navigate to="/app" replace /> : <Login onLogin={handleLogin} />
         } />
-        
+
         {/* Rotas Protegidas (requer login) */}
         <Route path="/app" element={
           <ProtectedRoute user={user}>
@@ -216,7 +231,54 @@ export default function App() {
             </Layout>
           </ProtectedRoute>
         } />
-        
+
+        {/* Rotas Demo - não requer login, dados fictícios */}
+        <Route path="/demo-app" element={
+          <DemoRoute>
+            <Layout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+              <Dashboard />
+            </Layout>
+          </DemoRoute>
+        } />
+        <Route path="/demo-app/machines" element={
+          <DemoRoute>
+            <Layout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+              <Machines />
+            </Layout>
+          </DemoRoute>
+        } />
+        <Route path="/demo-app/advisor" element={
+          <DemoRoute>
+            <AdvisorPage user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} />
+          </DemoRoute>
+        } />
+        <Route path="/demo-app/metrics-hub" element={
+          <DemoRoute>
+            <Layout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+              <MetricsHub />
+            </Layout>
+          </DemoRoute>
+        } />
+        <Route path="/demo-app/metrics" element={
+          <DemoRoute>
+            <Layout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+              <GPUMetrics />
+            </Layout>
+          </DemoRoute>
+        } />
+        <Route path="/demo-app/savings" element={
+          <DemoRoute>
+            <SavingsPage user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} />
+          </DemoRoute>
+        } />
+        <Route path="/demo-app/settings" element={
+          <DemoRoute>
+            <Layout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+              <Settings />
+            </Layout>
+          </DemoRoute>
+        } />
+
         {/* Fallback - redireciona para landing page */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

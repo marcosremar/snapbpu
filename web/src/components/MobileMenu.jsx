@@ -1,15 +1,25 @@
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { Menu, X, Home, Server, Settings, BarChart3, LogOut } from 'lucide-react'
+import { Menu, X, Home, Server, Settings, BarChart3, LogOut, PiggyBank, Bot, ChevronDown } from 'lucide-react'
 
-export default function MobileMenu({ onLogout }) {
+export default function MobileMenu({ onLogout, basePath = '/app' }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [analyticsOpen, setAnalyticsOpen] = useState(false)
+  const isDemoMode = basePath === '/demo-app'
 
-  const links = [
-    { to: '/app', icon: Home, label: 'Dashboard' },
-    { to: '/app/machines', icon: Server, label: 'Machines' },
-    { to: '/app/metrics-hub', icon: BarChart3, label: 'Métricas' },
-    { to: '/app/settings', icon: Settings, label: 'Settings' },
+  const mainLinks = [
+    { to: basePath, icon: Home, label: 'Dashboard', end: true },
+    { to: `${basePath}/machines`, icon: Server, label: 'Machines' },
+  ]
+
+  const analyticsLinks = [
+    { to: `${basePath}/metrics-hub`, icon: BarChart3, label: 'Métricas' },
+    { to: `${basePath}/savings`, icon: PiggyBank, label: 'Economia' },
+    { to: `${basePath}/advisor`, icon: Bot, label: 'AI Advisor' },
+  ]
+
+  const bottomLinks = [
+    { to: `${basePath}/settings`, icon: Settings, label: 'Settings' },
   ]
 
   const closeMenu = () => setIsOpen(false)
@@ -40,7 +50,53 @@ export default function MobileMenu({ onLogout }) {
         </div>
 
         <nav className="mobile-menu-nav">
-          {links.map(link => (
+          {/* Main links */}
+          {mainLinks.map(link => (
+            <NavLink
+              key={link.to}
+              to={link.to}
+              end={link.end}
+              onClick={closeMenu}
+              className={({ isActive }) =>
+                `mobile-menu-link ${isActive ? 'active' : ''}`
+              }
+            >
+              <link.icon size={20} />
+              {link.label}
+            </NavLink>
+          ))}
+
+          {/* Analytics dropdown */}
+          <div className="mobile-menu-section">
+            <button
+              className={`mobile-menu-link mobile-menu-dropdown-trigger ${analyticsOpen ? 'open' : ''}`}
+              onClick={() => setAnalyticsOpen(!analyticsOpen)}
+            >
+              <BarChart3 size={20} />
+              Analytics
+              <ChevronDown size={16} className={`ml-auto transition-transform ${analyticsOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {analyticsOpen && (
+              <div className="mobile-menu-submenu">
+                {analyticsLinks.map(link => (
+                  <NavLink
+                    key={link.to}
+                    to={link.to}
+                    onClick={closeMenu}
+                    className={({ isActive }) =>
+                      `mobile-menu-link mobile-menu-sublink ${isActive ? 'active' : ''}`
+                    }
+                  >
+                    <link.icon size={18} />
+                    {link.label}
+                  </NavLink>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Bottom links */}
+          {bottomLinks.map(link => (
             <NavLink
               key={link.to}
               to={link.to}
@@ -64,7 +120,7 @@ export default function MobileMenu({ onLogout }) {
             }}
           >
             <LogOut size={20} />
-            Logout
+            {isDemoMode ? 'Sair do Demo' : 'Logout'}
           </button>
         </div>
       </div>

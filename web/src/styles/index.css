@@ -378,6 +378,23 @@ a:hover {
   background-clip: text;
 }
 
+.demo-badge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #000;
+  font-size: 0.6em;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 8px;
+  letter-spacing: 0.05em;
+  animation: pulse-demo 2s ease-in-out infinite;
+}
+
+@keyframes pulse-demo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 .logo {
   font-size: 1.25em;
   font-weight: 700;
@@ -3308,6 +3325,122 @@ a:hover {
   opacity: 1;
 }
 
+/* Nav Dropdown Menu (new component) */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  min-height: 44px; /* Touch target */
+}
+
+.nav-dropdown-trigger svg {
+  flex-shrink: 0;
+}
+
+.nav-dropdown-arrow {
+  transition: transform 0.2s ease;
+  margin-left: 2px;
+}
+
+.nav-dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 200px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  padding: 8px;
+  z-index: 1000;
+  animation: navDropdownFadeIn 0.15s ease-out;
+}
+
+@keyframes navDropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  min-height: 44px; /* Touch target */
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-dropdown-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.nav-dropdown-item.active {
+  background: rgba(74, 93, 74, 0.4);
+  color: #a8c4a8;
+}
+
+.nav-dropdown-item svg {
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.nav-dropdown-item:hover svg,
+.nav-dropdown-item.active svg {
+  opacity: 1;
+}
+
+/* Mobile touch targets improvement */
+@media (max-width: 768px) {
+  .btn, button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .nav-link {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  /* Region selector buttons */
+  .region-btn,
+  [class*="region"] button {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+
+  /* Tab buttons */
+  [role="tab"],
+  .tab-btn {
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+}
+
 
 /* ===================================
    GPU METRICS PAGE - IMPROVED
@@ -5296,6 +5429,37 @@ button, a, [role="button"] {
   color: #4ade80;
 }
 
+/* Mobile menu dropdown */
+.mobile-menu-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-menu-dropdown-trigger {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  min-height: 44px;
+}
+
+.mobile-menu-dropdown-trigger.open {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.mobile-menu-submenu {
+  margin-left: 16px;
+  border-left: 2px solid var(--border);
+  padding-left: 8px;
+}
+
+.mobile-menu-sublink {
+  font-size: 13px;
+  padding: 10px 12px;
+  min-height: 44px;
+}
+
 .mobile-menu-footer {
   padding: 16px;
   border-top: 1px solid var(--border);
@@ -6247,6 +6411,212 @@ button, a, [role="button"] {
   background: #7f1d1d !important;
   color: #fecaca !important;
   border: 1px solid #ef4444 !important;
+}
+
+/* ================================================
+   DUMONT UI - Design System Animations
+   Baseado no TailAdmin (https://tailadmin.com)
+   ================================================ */
+
+/* Modal Animation */
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-modal-in {
+  animation: modal-in 0.2s ease-out;
+}
+
+/* Slide Up Animation (for toasts) */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* Slide Down Animation (for dropdowns) */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 0.2s ease-out;
+}
+
+/* Scale In Animation */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* Pulse Glow Animation (for status indicators) */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(74, 222, 128, 0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Shimmer Animation (for loading states) */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Dumont UI CSS Variables */
+:root {
+  /* Backgrounds */
+  --dumont-bg-primary: #0e110e;
+  --dumont-bg-secondary: #131713;
+  --dumont-bg-tertiary: #1a1f1a;
+  --dumont-bg-card: #1c211c;
+
+  /* Accent Green */
+  --dumont-green: #4ade80;
+  --dumont-green-dark: #22c55e;
+  --dumont-green-glow: rgba(74, 222, 128, 0.2);
+
+  /* Status Colors */
+  --dumont-status-online: #4ade80;
+  --dumont-status-offline: #6b7280;
+  --dumont-status-warning: #f59e0b;
+  --dumont-status-error: #ef4444;
+
+  /* Tier Colors */
+  --dumont-tier-slow: #22c55e;
+  --dumont-tier-medium: #84cc16;
+  --dumont-tier-fast: #f97316;
+  --dumont-tier-ultra: #ef4444;
+
+  /* Borders */
+  --dumont-border: #2a352a;
+  --dumont-border-card: rgba(55, 65, 55, 0.5);
+
+  /* Text */
+  --dumont-text-primary: #ffffff;
+  --dumont-text-secondary: #9ca3af;
+  --dumont-text-muted: #6b7280;
+
+  /* Buttons */
+  --dumont-btn-primary: #4a5d4a;
+  --dumont-btn-primary-hover: #5a6d5a;
+}
+
+/* Dumont Card Base Style */
+.dumont-card {
+  background: var(--dumont-bg-secondary);
+  border: 1px solid var(--dumont-border-card);
+  border-radius: 1rem;
+  padding: 1.25rem;
+}
+
+/* Dumont Button Styles */
+.dumont-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.dumont-btn-primary {
+  background: var(--dumont-btn-primary);
+  color: white;
+  border: none;
+}
+
+.dumont-btn-primary:hover {
+  background: var(--dumont-btn-primary-hover);
+}
+
+.dumont-btn-cta {
+  background: linear-gradient(to right, var(--dumont-green-dark), var(--dumont-green));
+  color: white;
+  border: none;
+}
+
+.dumont-btn-cta:hover {
+  filter: brightness(1.1);
+}
+
+.dumont-btn-outline {
+  background: transparent;
+  color: var(--dumont-green);
+  border: 1px solid var(--dumont-green);
+}
+
+.dumont-btn-outline:hover {
+  background: var(--dumont-green-glow);
+}
+
+.dumont-btn-ghost {
+  background: transparent;
+  color: var(--dumont-text-secondary);
+  border: none;
+}
+
+.dumont-btn-ghost:hover {
+  background: var(--dumont-bg-tertiary);
+  color: white;
 }
 
 

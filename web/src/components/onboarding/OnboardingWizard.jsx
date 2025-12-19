@@ -107,8 +107,9 @@ export default function OnboardingWizard({ user, onClose, onComplete }) {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 3000;
+                    z-index: 1500;
                     padding: 20px;
+                    cursor: pointer;
                 }
                 .onboarding-modal {
                     background: var(--bg-secondary);
@@ -125,19 +126,24 @@ export default function OnboardingWizard({ user, onClose, onComplete }) {
                 }
                 .close-btn {
                     position: absolute;
-                    top: 20px;
-                    right: 20px;
-                    background: transparent;
-                    border: none;
-                    color: var(--text-muted);
+                    top: 16px;
+                    right: 16px;
+                    background: var(--bg-tertiary);
+                    border: 1px solid var(--border);
+                    color: var(--text-secondary);
                     cursor: pointer;
                     transition: all 0.2s;
-                    padding: 4px;
-                    border-radius: 4px;
+                    padding: 8px;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
                 .close-btn:hover {
-                    background: var(--bg-tertiary);
-                    color: var(--text-primary);
+                    background: #ef4444;
+                    border-color: #ef4444;
+                    color: white;
+                    transform: scale(1.05);
                 }
                 .onboarding-progress {
                     display: flex;

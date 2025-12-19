@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { Line } from 'react-chartjs-2'
-import { apiGet, apiPost, apiDelete } from '../utils/api'
+import { apiGet, apiPost, apiDelete, isDemoMode } from '../utils/api'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -542,8 +542,151 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
   )
 }
 
+// Demo machines data with rich details
+const DEMO_MACHINES = [
+  {
+    id: 12345678,
+    gpu_name: 'RTX 4090',
+    actual_status: 'running',
+    status: 'running',
+    gpu_ram: 24576,
+    cpu_cores: 16,
+    cpu_ram: 64,
+    disk_space: 500,
+    dph_total: 0.45,
+    total_dph: 0.46,
+    public_ipaddr: '203.0.113.45',
+    ssh_host: 'ssh4.vast.ai',
+    ssh_port: 22345,
+    start_date: new Date(Date.now() - 3600000 * 5).toISOString(),
+    label: 'dev-workspace-01',
+    gpu_util: 45.2,
+    gpu_temp: 62,
+    ports: { '22': 22345, '8080': 8080 },
+    provider: 'vast.ai',
+    cpu_standby: {
+      enabled: true,
+      provider: 'gcp',
+      name: 'standby-dev-us',
+      zone: 'us-central1-a',
+      ip: '35.192.45.123',
+      machine_type: 'e2-medium',
+      status: 'running',
+      dph_total: 0.01,
+      sync_enabled: true,
+      sync_count: 234,
+      state: 'ready'
+    }
+  },
+  {
+    id: 23456789,
+    gpu_name: 'A100 80GB',
+    actual_status: 'running',
+    status: 'running',
+    gpu_ram: 81920,
+    cpu_cores: 32,
+    cpu_ram: 128,
+    disk_space: 1000,
+    dph_total: 2.10,
+    total_dph: 2.11,
+    public_ipaddr: '198.51.100.78',
+    ssh_host: 'ssh7.vast.ai',
+    ssh_port: 22789,
+    start_date: new Date(Date.now() - 3600000 * 12).toISOString(),
+    label: 'ml-training-large',
+    gpu_util: 92.5,
+    gpu_temp: 71,
+    ports: { '22': 22789, '8080': 8080, '6006': 6006 },
+    provider: 'vast.ai',
+    cpu_standby: {
+      enabled: true,
+      provider: 'gcp',
+      name: 'standby-ml-eu',
+      zone: 'europe-west1-b',
+      ip: '35.204.123.45',
+      machine_type: 'e2-medium',
+      status: 'running',
+      dph_total: 0.01,
+      sync_enabled: true,
+      sync_count: 567,
+      state: 'syncing'
+    }
+  },
+  {
+    id: 34567890,
+    gpu_name: 'RTX 3090',
+    actual_status: 'stopped',
+    status: 'stopped',
+    gpu_ram: 24576,
+    cpu_cores: 12,
+    cpu_ram: 48,
+    disk_space: 250,
+    dph_total: 0.35,
+    total_dph: 0.35,
+    ssh_host: 'ssh2.vast.ai',
+    ssh_port: 22123,
+    label: 'stable-diffusion-dev',
+    provider: 'vast.ai',
+    cpu_standby: null
+  },
+  {
+    id: 45678901,
+    gpu_name: 'RTX 4080',
+    actual_status: 'stopped',
+    status: 'stopped',
+    gpu_ram: 16384,
+    cpu_cores: 8,
+    cpu_ram: 32,
+    disk_space: 200,
+    dph_total: 0.28,
+    total_dph: 0.28,
+    ssh_host: 'ssh5.vast.ai',
+    ssh_port: 22456,
+    label: 'inference-api',
+    provider: 'vast.ai',
+    cpu_standby: null
+  },
+  {
+    id: 56789012,
+    gpu_name: 'H100 80GB',
+    actual_status: 'running',
+    status: 'running',
+    gpu_ram: 81920,
+    cpu_cores: 64,
+    cpu_ram: 256,
+    disk_space: 2000,
+    dph_total: 3.50,
+    total_dph: 3.51,
+    public_ipaddr: '192.0.2.100',
+    ssh_host: 'ssh9.vast.ai',
+    ssh_port: 22999,
+    start_date: new Date(Date.now() - 3600000 * 2).toISOString(),
+    label: 'llm-finetuning',
+    gpu_util: 78.3,
+    gpu_temp: 68,
+    ports: { '22': 22999, '8080': 8080 },
+    provider: 'vast.ai',
+    cpu_standby: {
+      enabled: true,
+      provider: 'gcp',
+      name: 'standby-llm-us',
+      zone: 'us-east1-b',
+      ip: '35.231.89.123',
+      machine_type: 'e2-standard-4',
+      status: 'running',
+      dph_total: 0.02,
+      sync_enabled: true,
+      sync_count: 89,
+      state: 'ready'
+    }
+  }
+]
+
 // Main Machines Page
 export default function Machines() {
+  const location = useLocation()
+  const isDemo = isDemoMode()
+
   const [machines, setMachines] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -553,11 +696,20 @@ export default function Machines() {
   const [destroyDialog, setDestroyDialog] = useState({ open: false, machineId: null, machineName: '' })
   const [migrationTarget, setMigrationTarget] = useState(null) // machine to migrate
   const [syncStats, setSyncStats] = useState({}) // machineId -> { files_new, files_changed, data_added, ... }
+  const [demoToast, setDemoToast] = useState(null) // Toast message for demo actions
+
+  // Show demo toast
+  const showDemoToast = (message, type = 'success') => {
+    setDemoToast({ message, type })
+    setTimeout(() => setDemoToast(null), 3000)
+  }
 
   useEffect(() => {
     fetchMachines()
-    const interval = setInterval(fetchMachines, 5000)
-    return () => clearInterval(interval)
+    if (!isDemo) {
+      const interval = setInterval(fetchMachines, 5000)
+      return () => clearInterval(interval)
+    }
   }, [])
 
   // Auto-sync every 30 seconds for running machines
@@ -578,6 +730,16 @@ export default function Machines() {
 
   const fetchMachines = async () => {
     try {
+      // In demo mode, use local demo data for more interactivity
+      if (isDemo) {
+        // Simulate loading delay
+        await new Promise(r => setTimeout(r, 500))
+        setMachines(DEMO_MACHINES)
+        setError(null)
+        setLoading(false)
+        return
+      }
+
       const res = await apiGet('/api/v1/instances')
       if (!res.ok) throw new Error('Erro ao buscar máquinas')
       const data = await res.json()
@@ -595,8 +757,18 @@ export default function Machines() {
   }
 
   const confirmDestroy = async () => {
-    const { machineId } = destroyDialog
+    const { machineId, machineName } = destroyDialog
     setDestroyDialog({ open: false, machineId: null, machineName: '' })
+
+    if (isDemo) {
+      // Demo mode: simulate destruction with animation
+      showDemoToast(`Destruindo ${machineName}...`, 'warning')
+      await new Promise(r => setTimeout(r, 1500))
+      setMachines(prev => prev.filter(m => m.id !== machineId))
+      showDemoToast(`${machineName} destruída com sucesso!`, 'success')
+      return
+    }
+
     try {
       const res = await apiDelete(`/api/v1/instances/${machineId}`)
       if (!res.ok) throw new Error('Erro ao destruir máquina')
@@ -607,6 +779,28 @@ export default function Machines() {
   }
 
   const handleStart = async (machineId) => {
+    if (isDemo) {
+      // Demo mode: simulate starting
+      const machine = machines.find(m => m.id === machineId)
+      showDemoToast(`Iniciando ${machine?.gpu_name || 'máquina'}...`, 'info')
+      await new Promise(r => setTimeout(r, 2000))
+      setMachines(prev => prev.map(m =>
+        m.id === machineId
+          ? {
+              ...m,
+              actual_status: 'running',
+              status: 'running',
+              start_date: new Date().toISOString(),
+              public_ipaddr: `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`,
+              gpu_util: Math.floor(Math.random() * 30) + 10,
+              gpu_temp: Math.floor(Math.random() * 15) + 55
+            }
+          : m
+      ))
+      showDemoToast(`${machine?.gpu_name || 'Máquina'} iniciada!`, 'success')
+      return
+    }
+
     try {
       const res = await apiPost(`/api/v1/instances/${machineId}/resume`)
       if (!res.ok) throw new Error('Erro ao iniciar máquina')
@@ -617,6 +811,27 @@ export default function Machines() {
   }
 
   const handlePause = async (machineId) => {
+    if (isDemo) {
+      // Demo mode: simulate pausing
+      const machine = machines.find(m => m.id === machineId)
+      showDemoToast(`Pausando ${machine?.gpu_name || 'máquina'}...`, 'info')
+      await new Promise(r => setTimeout(r, 1500))
+      setMachines(prev => prev.map(m =>
+        m.id === machineId
+          ? {
+              ...m,
+              actual_status: 'stopped',
+              status: 'stopped',
+              public_ipaddr: null,
+              gpu_util: 0,
+              gpu_temp: 0
+            }
+          : m
+      ))
+      showDemoToast(`${machine?.gpu_name || 'Máquina'} pausada!`, 'success')
+      return
+    }
+
     try {
       const res = await apiPost(`/api/v1/instances/${machineId}/pause`)
       if (!res.ok) throw new Error('Erro ao pausar máquina')
@@ -628,6 +843,29 @@ export default function Machines() {
 
   // Create manual snapshot (using new incremental sync endpoint)
   const handleSnapshot = async (machineId) => {
+    if (isDemo) {
+      // Demo mode: simulate snapshot
+      const machine = machines.find(m => m.id === machineId)
+      setSyncStatus(prev => ({ ...prev, [machineId]: 'syncing' }))
+      showDemoToast(`Criando snapshot de ${machine?.gpu_name}...`, 'info')
+      await new Promise(r => setTimeout(r, 2500))
+
+      const demoStats = {
+        files_new: Math.floor(Math.random() * 50) + 5,
+        files_changed: Math.floor(Math.random() * 100) + 20,
+        files_unmodified: Math.floor(Math.random() * 500) + 200,
+        data_added: `${(Math.random() * 500 + 50).toFixed(1)} MB`,
+        duration_seconds: (Math.random() * 10 + 2).toFixed(1),
+        is_incremental: true
+      }
+
+      setSyncStatus(prev => ({ ...prev, [machineId]: 'synced' }))
+      setLastSyncTime(prev => ({ ...prev, [machineId]: Date.now() }))
+      setSyncStats(prev => ({ ...prev, [machineId]: demoStats }))
+      showDemoToast(`Snapshot concluído! ${demoStats.data_added} sincronizados`, 'success')
+      return
+    }
+
     try {
       setSyncStatus(prev => ({ ...prev, [machineId]: 'syncing' }))
       // Use new sync endpoint with force=true for manual sync
@@ -763,7 +1001,7 @@ export default function Machines() {
               </button>
             ))}
             <Link
-              to="/"
+              to={isDemo ? "/demo-app" : "/app"}
               className="ml-2 px-3 py-1.5 md:px-4 md:py-2 rounded-lg bg-gray-600/50 hover:bg-gray-600/70 text-gray-200 text-xs md:text-sm font-medium flex items-center gap-1.5 transition-all border border-gray-500/40"
             >
               <Plus className="w-3.5 h-3.5" />
@@ -869,6 +1107,31 @@ export default function Machines() {
         onClose={() => setMigrationTarget(null)}
         onSuccess={handleMigrationSuccess}
       />
+
+      {/* Demo Toast Notification */}
+      {demoToast && (
+        <div className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-lg shadow-xl border flex items-center gap-3 animate-slide-up ${
+          demoToast.type === 'success' ? 'bg-green-900/90 border-green-500/50 text-green-100' :
+          demoToast.type === 'warning' ? 'bg-yellow-900/90 border-yellow-500/50 text-yellow-100' :
+          demoToast.type === 'error' ? 'bg-red-900/90 border-red-500/50 text-red-100' :
+          'bg-blue-900/90 border-blue-500/50 text-blue-100'
+        }`}>
+          {demoToast.type === 'success' && <Check className="w-5 h-5" />}
+          {demoToast.type === 'warning' && <RefreshCw className="w-5 h-5 animate-spin" />}
+          {demoToast.type === 'info' && <RefreshCw className="w-5 h-5 animate-spin" />}
+          <span className="text-sm font-medium">{demoToast.message}</span>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes slide-up {
+          from { transform: translateY(20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .animate-slide-up {
+          animation: slide-up 0.3s ease-out;
+        }
+      `}</style>
     </div>
   )
 }

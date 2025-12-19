@@ -351,8 +351,67 @@ class DemoProvider(IGpuProvider):
         raise NotImplementedError("Demo mode: Instance details not available")
 
     def list_instances(self) -> List[Instance]:
-        """List all user instances (demo mode - returns empty)"""
-        return []
+        """List all user instances (demo mode - returns demo instances)"""
+        demo_instances = [
+            Instance(
+                id=12345678,
+                machine_id=12345678,
+                status="running",
+                gpu_name="RTX 4090",
+                num_gpus=1,
+                gpu_ram=24,
+                cpu_cores=16,
+                cpu_ram=64,
+                disk_space=200,
+                inet_down=1000,
+                inet_up=500,
+                dph_total=0.65,
+                geolocation="US",
+                label="ml-training-demo",
+                ssh_host="demo-ssh.vast.ai",
+                ssh_port=22,
+                created_at=datetime.now().isoformat(),
+            ),
+            Instance(
+                id=23456789,
+                machine_id=23456789,
+                status="running",
+                gpu_name="A100",
+                num_gpus=1,
+                gpu_ram=80,
+                cpu_cores=32,
+                cpu_ram=128,
+                disk_space=500,
+                inet_down=2000,
+                inet_up=1000,
+                dph_total=2.10,
+                geolocation="EU",
+                label="llm-inference-demo",
+                ssh_host="demo-ssh2.vast.ai",
+                ssh_port=22,
+                created_at=datetime.now().isoformat(),
+            ),
+            Instance(
+                id=34567890,
+                machine_id=34567890,
+                status="stopped",
+                gpu_name="RTX 3090",
+                num_gpus=1,
+                gpu_ram=24,
+                cpu_cores=12,
+                cpu_ram=48,
+                disk_space=150,
+                inet_down=800,
+                inet_up=400,
+                dph_total=0.35,
+                geolocation="US",
+                label="stable-diffusion-demo",
+                ssh_host="demo-ssh3.vast.ai",
+                ssh_port=22,
+                created_at=datetime.now().isoformat(),
+            ),
+        ]
+        return demo_instances
 
     def destroy_instance(self, instance_id: int) -> bool:
         """Destroy an instance (demo mode - not implemented)"""

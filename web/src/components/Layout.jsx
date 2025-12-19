@@ -1,5 +1,65 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
+import { useState, useRef, useEffect } from 'react'
+import { ChevronDown, BarChart3, PiggyBank, Bot } from 'lucide-react'
 import MobileMenu from './MobileMenu'
+
+// Helper to get base path based on demo mode
+function useBasePath() {
+  const location = useLocation()
+  return location.pathname.startsWith('/demo-app') ? '/demo-app' : '/app'
+}
+
+// Dropdown menu component
+function NavDropdown({ label, icon: Icon, children, basePath }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef(null)
+  const location = useLocation()
+
+  // Check if any child route is active
+  const isChildActive = children.some(child =>
+    location.pathname === `${basePath}${child.path}` ||
+    location.pathname.startsWith(`${basePath}${child.path}/`)
+  )
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="nav-dropdown" ref={dropdownRef}>
+      <button
+        className={`nav-link nav-dropdown-trigger ${isChildActive ? 'active' : ''}`}
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {Icon && <Icon size={16} />}
+        <span>{label}</span>
+        <ChevronDown size={14} className={`nav-dropdown-arrow ${isOpen ? 'open' : ''}`} />
+      </button>
+      {isOpen && (
+        <div className="nav-dropdown-menu">
+          {children.map(child => (
+            <NavLink
+              key={child.path}
+              to={`${basePath}${child.path}`}
+              className={({ isActive }) => `nav-dropdown-item ${isActive ? 'active' : ''}`}
+              onClick={() => setIsOpen(false)}
+            >
+              {child.icon && <child.icon size={16} />}
+              <span>{child.label}</span>
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function DumontLogo() {
   return (
@@ -37,43 +97,48 @@ function DumontLogo() {
   )
 }
 
-export default function Layout({ user, onLogout, children }) {
+export default function Layout({ user, onLogout, children, isDemo = false }) {
+  const basePath = useBasePath()
+  const isDemoMode = isDemo || basePath === '/demo-app'
+
   return (
     <div className="layout">
       <header className="header">
         <div className="header-left">
           {/* Mobile Menu - visível apenas em telas pequenas */}
-          <MobileMenu onLogout={onLogout} />
+          <MobileMenu onLogout={onLogout} basePath={basePath} />
 
           <div className="logo-container">
             <DumontLogo />
             <span className="logo-text">Dumont <span className="logo-highlight">Cloud</span></span>
+            {isDemoMode && <span className="demo-badge">DEMO</span>}
           </div>
           <div className="header-divider desktop-only"></div>
           <nav className="nav desktop-only">
-            <NavLink to="/app" end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to={basePath} end className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Dashboard
             </NavLink>
-            <NavLink to="/app/machines" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavLink to={`${basePath}/machines`} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Machines
             </NavLink>
-            <NavLink to="/app/advisor" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              AI Advisor
-            </NavLink>
-            <NavLink to="/app/metrics-hub" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Métricas
-            </NavLink>
-            <NavLink to="/app/savings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
-              Economia
-            </NavLink>
-            <NavLink to="/app/settings" className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
+            <NavDropdown
+              label="Analytics"
+              icon={BarChart3}
+              basePath={basePath}
+              children={[
+                { path: '/metrics-hub', label: 'Métricas', icon: BarChart3 },
+                { path: '/savings', label: 'Economia', icon: PiggyBank },
+                { path: '/advisor', label: 'AI Advisor', icon: Bot },
+              ]}
+            />
+            <NavLink to={`${basePath}/settings`} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>
               Settings
             </NavLink>
           </nav>
         </div>
         <div className="header-right">
           <span className="user-name">{user?.username}</span>
-          <button className="btn btn-sm" onClick={onLogout}>Logout</button>
+          <button className="btn btn-sm" onClick={onLogout}>{isDemoMode ? 'Sair do Demo' : 'Logout'}</button>
         </div>
       </header>
       <main className="main">

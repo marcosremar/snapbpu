@@ -201,6 +201,16 @@ def create_app() -> FastAPI:
     static_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "web", "build")
     index_path = os.path.join(static_path, "index.html")
 
+    # Marketing Live Docs (Standalone HTML)
+    @app.get("/admin/doc/live", response_class=HTMLResponse)
+    async def admin_doc_live():
+        """Serve separate Marketing Live Docs"""
+        template_path = os.path.join(os.path.dirname(__file__), "templates", "marketing_doc.html")
+        if os.path.exists(template_path):
+            with open(template_path, "r", encoding="utf-8") as f:
+                return f.read()
+        return "<h1>Template not found</h1>", 404
+
     # Mount static files (React build) - for JS, CSS, images
     assets_path = os.path.join(static_path, "assets")
     if os.path.exists(assets_path):

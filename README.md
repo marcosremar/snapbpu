@@ -113,6 +113,18 @@ sequenceDiagram
 
 ---
 
+## 📚 LIVE DOCUMENTATION (CMS)
+
+O Dumont Cloud possui um sistema de documentação viva, desacoplado do frontend principal, garantindo acesso à informação estratégica mesmo em janelas de manutenção.
+
+- **Acesso**: [`/admin/doc/live`](https://dumontcloud.com/admin/doc/live)
+- **Engine**: Micro-servidor dedicado (FastAPI + Uvicorn) rodando na porta `8081`.
+- **Formato**: Renderização dinâmica de Markdown com suporte a **Mermaid** e **GitHub Flavored CSS**.
+- **Estrutura**: Baseada em sistema de arquivos. Basta criar pastas e arquivos `.md` em `Live-Doc/content/` para gerar menus automaticamente.
+- **Tema**: "Paper Reading" otimizado para leitura prolongada (fundo pastel, tipografia serifada).
+
+---
+
 ## 🛠️ ESTRUTURA DO CÓDIGO (SOLID)
 
 ```text
@@ -125,7 +137,8 @@ src/
 │   └── telemetry_service     # Exportador de métricas
 ├── core/            # Configurações globais e JWT
 ├── infrastructure/  # Providers (GCP, Vast, S3)
-└── ml/              # Modelos de predição de custo
+├── ml/              # Modelos de predição de custo
+└── Live-Doc/        # 🆕 CMS de Documentação Viva (Micro-servidor)
 ```
 
 ---
@@ -145,10 +158,37 @@ src/
     # Backend
     pip install -r requirements.txt
     python -m uvicorn src.main:app --port 8766
-    
+
     # Frontend
     cd web && npm install && npm run dev
     ```
+
+4.  **Modo Demo** (sem credenciais):
+    ```bash
+    # Backend em modo demo
+    DEMO_MODE=true python -m uvicorn src.main:app --port 8000
+
+    # Acesse: http://localhost:8000/demo-app
+    ```
+    O modo demo permite testar a interface completa com dados fictícios, sem necessidade de configurar APIs externas.
+
+---
+
+## 🎭 MODO DEMO
+
+Para testar a plataforma sem credenciais, use a URL `/demo-app`:
+
+| URL | Descrição |
+|-----|-----------|
+| `/demo-app` | Dashboard com cards de status e wizard de deploy |
+| `/demo-app/machines` | Lista de máquinas demo (RTX 4090, A100, RTX 3090) |
+| `/demo-app/metrics-hub` | Hub de métricas e relatórios |
+| `/demo-app/settings` | Configurações do sistema |
+
+Todas as rotas `/demo-app/*` automaticamente:
+- Usam dados fictícios nas APIs
+- Não requerem login
+- Mostram badge "DEMO" no header
 
 ---
 

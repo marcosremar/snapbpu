@@ -5,8 +5,17 @@
 const API_BASE = ''
 
 /**
+ * Check if currently in demo mode
+ */
+export function isDemoMode() {
+  return window.location.pathname.startsWith('/demo-app') ||
+         new URLSearchParams(window.location.search).get('demo') === 'true'
+}
+
+/**
  * Fetch with authentication
  * Automatically adds JWT token from localStorage
+ * In demo mode, adds ?demo=true to API calls
  */
 export async function apiFetch(endpoint, options = {}) {
   let token = localStorage.getItem('auth_token')
@@ -29,7 +38,14 @@ export async function apiFetch(endpoint, options = {}) {
     options.body = JSON.stringify(options.body)
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+  // Add demo param if in demo mode
+  let finalEndpoint = endpoint
+  if (isDemoMode()) {
+    const separator = endpoint.includes('?') ? '&' : '?'
+    finalEndpoint = `${endpoint}${separator}demo=true`
+  }
+
+  const response = await fetch(`${API_BASE}${finalEndpoint}`, {
     ...options,
     headers,
     credentials: 'include',
