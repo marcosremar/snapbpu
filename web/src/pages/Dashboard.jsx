@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ComposableMap, Geographies, Geography, Marker } from 'react-simple-maps';
+import { VectorMap } from '@react-jvectormap/core';
+import { worldMill } from '@react-jvectormap/world';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import OnboardingWizard from '../components/onboarding/OnboardingWizard';
@@ -13,8 +14,9 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
 import { Checkbox } from '../components/ui/checkbox';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Button } from '../components/ui/button';
+import { Tabs as TabsUI, TabsList as TabsListUI, TabsTrigger as TabsTriggerUI } from '../components/ui/tabs';
 import { Label } from '../components/ui/label';
 import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Slider } from '../components/ui/slider';
@@ -23,23 +25,8 @@ import { MetricCard, MetricsGrid, Avatar, AvatarImage, AvatarFallback, Popover, 
 import { ErrorState } from '../components/ErrorState';
 import { EmptyState } from '../components/EmptyState';
 import { SkeletonList } from '../components/Skeleton';
-
-const geoUrl = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+import { useTheme } from '../context/ThemeContext';
 const API_BASE = import.meta.env.VITE_API_URL || '';
-
-const regionCountries = {
-  'EUA': ['USA'],
-  'Europa': ['GBR', 'FRA', 'DEU', 'ITA', 'ESP', 'PRT', 'NLD', 'BEL', 'CHE', 'AUT', 'POL', 'CZE', 'SVK', 'HUN', 'ROU', 'BGR', 'GRC', 'SWE', 'NOR', 'DNK', 'FIN', 'IRL'],
-  'Asia': ['CHN', 'JPN', 'KOR', 'IND', 'THA', 'VNM', 'SGP', 'MYS', 'IDN', 'PHL', 'PAK', 'BGD'],
-  'AmericaDoSul': ['BRA', 'ARG', 'CHL', 'COL', 'PER', 'VEN', 'ECU', 'BOL', 'PRY', 'URY']
-};
-
-const markers = [
-  { name: 'EUA', coordinates: [-95, 37], region: 'EUA' },
-  { name: 'Europa', coordinates: [10, 50], region: 'Europa' },
-  { name: 'Asia', coordinates: [105, 35], region: 'Asia' },
-  { name: 'Brasil', coordinates: [-52, -15], region: 'AmericaDoSul' }
-];
 
 const regionToApiRegion = { 'EUA': 'US', 'Europa': 'EU', 'Asia': 'ASIA', 'AmericaDoSul': 'SA', 'Global': '' };
 
@@ -155,85 +142,68 @@ const RENTAL_TYPE_OPTIONS = [
   { value: 'bid', label: 'Bid/Interruptible' },
 ];
 
-const WorldMap = ({ activeRegion, onRegionClick }) => {
-  const getRegionForCountry = (countryCode) => {
-    for (const [region, countries] of Object.entries(regionCountries)) {
-      if (countries.includes(countryCode)) return region;
-    }
-    return null;
-  };
+const WorldMap = ({ activeRegion }) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  // Datacenter markers for each region
+  const datacenterMarkers = [
+    { latLng: [37.77, -122.42], name: 'San Francisco, EUA', region: 'EUA' },
+    { latLng: [40.71, -74.01], name: 'New York, EUA', region: 'EUA' },
+    { latLng: [51.51, -0.13], name: 'London, UK', region: 'Europa' },
+    { latLng: [48.86, 2.35], name: 'Paris, França', region: 'Europa' },
+    { latLng: [52.52, 13.40], name: 'Berlin, Alemanha', region: 'Europa' },
+    { latLng: [35.68, 139.69], name: 'Tokyo, Japão', region: 'Asia' },
+    { latLng: [1.35, 103.82], name: 'Singapore', region: 'Asia' },
+    { latLng: [-23.55, -46.63], name: 'São Paulo, Brasil', region: 'AmericaDoSul' },
+  ];
+
+  // Filter markers based on active region
+  const visibleMarkers = activeRegion === 'Global'
+    ? datacenterMarkers
+    : datacenterMarkers.filter(m => m.region === activeRegion);
 
   return (
-    <div className="relative w-full h-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-      <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: 0 }}>
-        <defs>
-          <pattern id="dotGrid" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
-            <circle cx="4" cy="4" r="0.8" fill="#d1d5db" />
-          </pattern>
-        </defs>
-        <rect width="100%" height="100%" fill="url(#dotGrid)" />
-      </svg>
-
-      <div className="relative w-full h-full" style={{ zIndex: 1 }}>
-        <ComposableMap
-          projection="geoMercator"
-          projectionConfig={{ scale: 100, center: [0, 20] }}
-          width={800}
-          height={400}
-          style={{ width: '100%', height: '100%' }}
-        >
-          <Geographies geography={geoUrl}>
-            {({ geographies }) => {
-              const regions = { EUA: [], Europa: [], Asia: [], AmericaDoSul: [] };
-              geographies.forEach((geo) => {
-                const region = getRegionForCountry(geo.id);
-                if (region && regions[region]) regions[region].push(geo);
-              });
-
-              return (
-                <>
-                  {Object.entries(regions).map(([regionName, geos]) => {
-                    const isActive = regionName === activeRegion || activeRegion === 'Global';
-                    return (
-                      <g key={regionName} onClick={() => onRegionClick(regionName)} style={{ cursor: 'pointer' }}>
-                        {geos.map((geo) => (
-                          <Geography
-                            key={geo.rsmKey}
-                            geography={geo}
-                            fill={isActive ? '#22c55e' : '#f3f4f6'}
-                            stroke="#d1d5db"
-                            strokeWidth={0.3}
-                            style={{
-                              default: { outline: 'none' },
-                              hover: { fill: '#22c55e', outline: 'none' },
-                              pressed: { fill: '#4ade80', outline: 'none' }
-                            }}
-                          />
-                        ))}
-                      </g>
-                    );
-                  })}
-                  {geographies.filter((geo) => !getRegionForCountry(geo.id)).map((geo) => (
-                    <Geography key={geo.rsmKey} geography={geo} fill="#e5e7eb" stroke="#d1d5db" strokeWidth={0.5}
-                      style={{ default: { outline: 'none', pointerEvents: 'none' } }} />
-                  ))}
-                </>
-              );
-            }}
-          </Geographies>
-          {markers.map(({ name, coordinates, region }) => {
-            const isActive = activeRegion === region || activeRegion === 'Global';
-            return isActive ? (
-              <Marker key={name} coordinates={coordinates}>
-                <circle r={8} fill="#22c55e" opacity={0.25}>
-                  <animate attributeName="r" values="8;12;8" dur="1.5s" repeatCount="indefinite" />
-                </circle>
-                <circle r={3} fill="#4ade80" />
-              </Marker>
-            ) : null;
-          })}
-        </ComposableMap>
-      </div>
+    <div className="relative w-full h-full">
+      <VectorMap
+        map={worldMill}
+        backgroundColor="transparent"
+        markerStyle={{
+          initial: {
+            fill: '#3b82f6',
+            r: 5,
+          },
+          hover: {
+            fill: '#60a5fa',
+            r: 7,
+          },
+        }}
+        markers={visibleMarkers.map(m => ({
+          latLng: m.latLng,
+          name: m.name,
+          style: { fill: '#3b82f6', borderWidth: 1, borderColor: 'white' },
+        }))}
+        zoomOnScroll={false}
+        zoomMax={12}
+        zoomMin={1}
+        regionStyle={{
+          initial: {
+            fill: isDark ? '#374151' : '#e2e8f0',
+            fillOpacity: 1,
+            stroke: isDark ? '#4b5563' : '#cbd5e1',
+            strokeWidth: 0.5,
+            strokeOpacity: 1,
+          },
+          hover: {
+            fillOpacity: 0.8,
+            cursor: 'pointer',
+            fill: '#3b82f6',
+          },
+          selected: {
+            fill: '#3b82f6',
+          },
+        }}
+      />
     </div>
   );
 };
@@ -253,11 +223,11 @@ const TierCard = ({ tier, isSelected, onClick }) => (
   <Popover>
     <PopoverTrigger asChild>
       <button onClick={onClick}
-        className={`flex flex-col p-3 md:p-4 rounded-lg border text-left transition-all shadow-theme-sm ${isSelected ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-brand-300 dark:hover:border-brand-500/50'}`}
+        className={`flex flex-col p-3 md:p-4 rounded-lg border text-left transition-all shadow-theme-sm ${isSelected ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-gray-200 dark:border-dark-surface-border bg-white dark:bg-dark-surface-card hover:border-brand-300 dark:hover:border-brand-500/50'}`}
         style={{ minHeight: '160px' }}
       >
         <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-900 dark:text-gray-900 dark:text-white font-semibold text-xs md:text-sm tracking-tight">{tier.name}</span>
+          <span className="text-gray-900 dark:text-white font-semibold text-xs md:text-sm tracking-tight">{tier.name}</span>
           <SpeedBars level={tier.level} color={tier.color} />
         </div>
         <div className="text-green-400 text-[10px] md:text-xs font-mono font-medium tracking-tight">{tier.speed}</div>
@@ -265,7 +235,7 @@ const TierCard = ({ tier, isSelected, onClick }) => (
         <div className="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] leading-relaxed">{tier.gpu}</div>
         <div className="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] leading-relaxed">{tier.vram}</div>
         <div className="text-yellow-400/80 text-[9px] md:text-[10px] font-mono font-medium mt-1.5">{tier.priceRange}</div>
-        <div className="mt-auto pt-2 border-t border-gray-200 dark:border-gray-200 dark:border-gray-700/30">
+        <div className="mt-auto pt-2 border-t border-gray-200 dark:border-gray-700/30">
           <p className="text-gray-500 dark:text-gray-400 text-[8px] md:text-[9px] leading-relaxed">{tier.description}</p>
         </div>
       </button>
@@ -333,7 +303,7 @@ const GPUSelector = ({ selectedGPU, onSelectGPU, selectedCategory, onSelectCateg
   };
 
   const getCategoryBgColor = (color, isActive) => {
-    if (!isActive) return 'bg-gray-100 dark:bg-gray-800';
+    if (!isActive) return 'bg-gray-100 dark:bg-dark-surface-secondary';
     switch (color) {
       case 'green': return 'bg-success-50 dark:bg-success-600/30 border-success-500';
       case 'blue': return 'bg-brand-50 dark:bg-brand-600/30 border-brand-500';
@@ -355,27 +325,27 @@ const GPUSelector = ({ selectedGPU, onSelectGPU, selectedCategory, onSelectCateg
     : [];
 
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 overflow-hidden shadow-theme-sm">
+    <Card className="overflow-hidden">
       {/* Header */}
-      <div className="px-4 py-3 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
+      <CardHeader className="flex-row items-center justify-between space-y-0 py-3 border-b border-gray-100 dark:border-gray-800">
         <div className="flex items-center gap-2">
-          <div className="stat-card-icon stat-card-icon-success">
-            <Cpu className="w-4 h-4" />
+          <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
+            <Cpu className="w-4 h-4 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <p className="text-gray-900 dark:text-gray-900 dark:text-white text-sm font-medium">GPU</p>
-            <p className="text-gray-500 dark:text-gray-400 text-[10px]">Selecione o tipo</p>
+            <CardTitle className="text-sm">GPU</CardTitle>
+            <CardDescription className="text-[10px]">Selecione o tipo</CardDescription>
           </div>
         </div>
         {selectedGPU !== 'any' && (
-          <span className="px-2 py-1 rounded-full bg-green-500/20 text-green-400 text-[10px] font-medium">
+          <span className="px-2 py-1 rounded-full bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-[10px] font-medium">
             {GPU_OPTIONS.find(g => g.value === selectedGPU)?.label}
           </span>
         )}
-      </div>
+      </CardHeader>
 
       {/* Category Grid */}
-      <div className="p-3">
+      <CardContent className="p-3">
         <div className="grid grid-cols-2 gap-2">
           {GPU_CATEGORIES.map((cat) => {
             const isActive = selectedCategory === cat.id;
@@ -394,7 +364,7 @@ const GPUSelector = ({ selectedGPU, onSelectGPU, selectedCategory, onSelectCateg
                 className={`p-3 rounded-lg border transition-all text-left ${
                   isActive
                     ? getCategoryBgColor(cat.color, true)
-                    : 'border-gray-800/50 hover:border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800'
+                    : 'border-gray-200 hover:border-gray-300 dark:border-dark-surface-border bg-gray-100 dark:bg-dark-surface-secondary'
                 }`}
               >
                 <div className="flex items-center gap-2 mb-1">
@@ -415,10 +385,10 @@ const GPUSelector = ({ selectedGPU, onSelectGPU, selectedCategory, onSelectCateg
 
         {/* GPU Dropdown - aparece quando categoria específica selecionada */}
         {isExpanded && selectedCategory !== 'any' && availableGPUs.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-gray-800/50">
-            <Label className="text-[10px] text-gray-400 mb-2 block">Modelo Específico (opcional)</Label>
+          <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700/50">
+            <Label className="text-[10px] text-gray-500 dark:text-gray-400 mb-2 block">Modelo Específico (opcional)</Label>
             <Select value={selectedGPU} onValueChange={onSelectGPU}>
-              <SelectTrigger className="bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700/50 h-9 text-xs">
+              <SelectTrigger className="bg-gray-100 dark:bg-dark-surface-secondary border-gray-200 dark:border-dark-surface-border h-9 text-xs">
                 <SelectValue placeholder="Qualquer modelo da categoria" />
               </SelectTrigger>
               <SelectContent>
@@ -430,8 +400,8 @@ const GPUSelector = ({ selectedGPU, onSelectGPU, selectedCategory, onSelectCateg
             </Select>
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
 
@@ -1320,64 +1290,63 @@ const GPUCarousel = ({ options, onSearch }) => {
 };
 
 const OfferCard = ({ offer, onSelect }) => (
-  <div className="p-4 rounded-lg border border-gray-200 dark:border-gray-700/40 bg-white dark:bg-gray-900 hover:border-green-500/30 transition-all">
-    <div className="flex items-center justify-between mb-3">
-      <div className="flex items-center gap-2">
-        <Cpu className="w-5 h-5 text-green-400" />
-        <span className="text-gray-900 dark:text-white font-semibold text-sm">{offer.gpu_name}</span>
-        {offer.num_gpus > 1 && <span className="text-xs text-gray-400">x{offer.num_gpus}</span>}
+  <Card className="hover:border-green-300 dark:hover:border-green-500/30 transition-all">
+    <CardContent className="p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Cpu className="w-5 h-5 text-green-600 dark:text-green-400" />
+          <span className="text-gray-900 dark:text-white font-semibold text-sm">{offer.gpu_name}</span>
+          {offer.num_gpus > 1 && <span className="text-xs text-gray-500 dark:text-gray-400">x{offer.num_gpus}</span>}
+        </div>
+        <div className="text-green-600 dark:text-green-400 font-mono font-semibold text-sm">
+          ${offer.dph_total?.toFixed(3)}/hr
+        </div>
       </div>
-      <div className="text-green-400 font-mono font-semibold text-sm">
-        ${offer.dph_total?.toFixed(3)}/hr
+      <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
+        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">VRAM:</span> {offer.gpu_ram?.toFixed(0) || '-'} GB</div>
+        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">CPU:</span> {offer.cpu_cores_effective || '-'} cores</div>
+        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">Disco:</span> {offer.disk_space?.toFixed(0) || '-'} GB</div>
+        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">Rede:</span> {offer.inet_down?.toFixed(0) || '-'} Mbps</div>
+        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">DLPerf:</span> {offer.dlperf?.toFixed(1) || '-'}</div>
+        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">PCIe:</span> {offer.pcie_bw?.toFixed(1) || '-'} GB/s</div>
       </div>
-    </div>
-    <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
-      <div className="text-gray-400"><span className="text-gray-500">VRAM:</span> {offer.gpu_ram?.toFixed(0) || '-'} GB</div>
-      <div className="text-gray-400"><span className="text-gray-500">CPU:</span> {offer.cpu_cores_effective || '-'} cores</div>
-      <div className="text-gray-400"><span className="text-gray-500">Disco:</span> {offer.disk_space?.toFixed(0) || '-'} GB</div>
-      <div className="text-gray-400"><span className="text-gray-500">Rede:</span> {offer.inet_down?.toFixed(0) || '-'} Mbps</div>
-      <div className="text-gray-400"><span className="text-gray-500">DLPerf:</span> {offer.dlperf?.toFixed(1) || '-'}</div>
-      <div className="text-gray-400"><span className="text-gray-500">PCIe:</span> {offer.pcie_bw?.toFixed(1) || '-'} GB/s</div>
-    </div>
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <div className={`w-2 h-2 rounded-full ${(offer.reliability || 0) >= 0.9 ? 'bg-green-400' : (offer.reliability || 0) >= 0.7 ? 'bg-yellow-400' : 'bg-red-400'}`} />
-        <span className="text-[10px] text-gray-400">{((offer.reliability || 0) * 100).toFixed(0)}%</span>
-        {offer.verified && <span className="text-[9px] text-green-400 px-1.5 py-0.5 bg-green-500/10 rounded">Verificado</span>}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${(offer.reliability || 0) >= 0.9 ? 'bg-green-500' : (offer.reliability || 0) >= 0.7 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+          <span className="text-[10px] text-gray-500 dark:text-gray-400">{((offer.reliability || 0) * 100).toFixed(0)}%</span>
+          {offer.verified && <span className="text-[9px] text-green-600 dark:text-green-400 px-1.5 py-0.5 bg-green-100 dark:bg-green-500/10 rounded">Verificado</span>}
+        </div>
+        <Button onClick={() => onSelect(offer)} size="sm">
+          Selecionar
+        </Button>
       </div>
-      <button
-        onClick={() => onSelect(offer)}
-        className="px-3 py-1.5 text-xs font-medium text-white bg-[#4a5d4a] hover:bg-[#5a6d5a] rounded transition-colors"
-      >
-        Selecionar
-      </button>
-    </div>
-  </div>
+    </CardContent>
+  </Card>
 );
 
 // Collapsible Filter Section
 const FilterSection = ({ title, icon: Icon, children, defaultOpen = true }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
-    <div className="border border-gray-200 dark:border-gray-700/40 rounded-lg bg-[#0f1210] overflow-hidden hover:border-gray-600/50 transition-all">
+    <Card className="overflow-hidden hover:border-gray-300 dark:hover:border-dark-surface-hover transition-all">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-3.5 text-left hover:bg-gray-900/30 transition-colors group"
+        className="w-full flex items-center justify-between p-3.5 text-left hover:bg-gray-50 dark:hover:bg-dark-surface-hover transition-colors group"
       >
         <div className="flex items-center gap-3">
-          <div className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800/50 group-hover:bg-gray-200 dark:bg-gray-700/50 transition-colors">
-            <Icon className="w-4 h-4 text-gray-400" />
+          <div className="p-1.5 rounded-md bg-gray-100 dark:bg-dark-surface-secondary group-hover:bg-gray-200 dark:group-hover:bg-dark-surface-hover transition-colors">
+            <Icon className="w-4 h-4 text-gray-500 dark:text-gray-400" />
           </div>
-          <span className="text-sm font-medium text-gray-200">{title}</span>
+          <span className="text-sm font-medium text-gray-900 dark:text-gray-200">{title}</span>
         </div>
         <ChevronDown className={`w-4 h-4 text-gray-500 transition-all ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       {isOpen && (
-        <div className="p-3.5 pt-2 border-t border-gray-200 dark:border-gray-700/30 bg-gray-900/10">
+        <CardContent className="pt-2 border-t border-gray-100 dark:border-gray-700/30">
           {children}
-        </div>
+        </CardContent>
       )}
-    </div>
+    </Card>
   );
 };
 
@@ -1625,7 +1594,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-gray-950" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-dark-surface-bg" style={{ fontFamily: "'Inter', sans-serif" }}>
       {showOnboarding && (
         <OnboardingWizard
           user={user}
@@ -1634,25 +1603,15 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Welcome Header with Avatar */}
-      {user && (
-        <div className="max-w-6xl mx-auto mb-8 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={user.avatar_url} alt={user.name} />
-              <AvatarFallback>{user.name?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
-            </Avatar>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Bem-vindo, {user.name || 'User'}</h1>
-              <p className="text-gray-400 mt-1">Aqui está um resumo das suas máquinas</p>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Page Header */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Visão geral das suas máquinas GPU</p>
+      </div>
 
       {/* Dashboard Stats Cards */}
-      <div className="max-w-6xl mx-auto mb-6">
-        <MetricsGrid columns={4}>
+      <div className="max-w-7xl mx-auto mb-6">
+        <MetricsGrid columns={3}>
           <MetricCard
             icon={Server}
             title="Máquinas Ativas"
@@ -1684,76 +1643,62 @@ export default function Dashboard() {
       </div>
 
       {/* Deploy Wizard */}
-      <div className="flex items-center justify-center">
-      <div className="w-full max-w-md md:max-w-2xl lg:max-w-4xl xl:max-w-6xl rounded-xl overflow-hidden border border-gray-800/50 shadow-2xl" style={{ backgroundColor: '#131713' }}>
-
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 md:px-6 py-3 border-b border-gray-800/50">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-green-500/20 flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <span className="text-white text-lg font-semibold tracking-tight">Deploy</span>
-          </div>
-
-          <div className="flex gap-1 p-1 rounded-lg bg-gray-100 dark:bg-gray-800">
-            <button
-              onClick={() => { setMode('wizard'); setShowResults(false); }}
-              className={`px-3 py-1.5 text-xs font-medium rounded transition-all flex items-center gap-1.5 ${
-                mode === 'wizard' ? 'bg-[#4a5d4a] text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Wand2 className="w-3.5 h-3.5" />
-              Wizard
-            </button>
-            <button
-              onClick={() => { setMode('ai'); setShowResults(false); }}
-              className={`px-3 py-1.5 text-xs font-medium rounded transition-all flex items-center gap-1.5 ${
-                mode === 'ai' ? 'bg-blue-600/50 text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              AI
-            </button>
-            <button
-              onClick={() => { setMode('advanced'); setShowResults(false); }}
-              className={`px-3 py-1.5 text-xs font-medium rounded transition-all flex items-center gap-1.5 ${
-                mode === 'advanced' ? 'bg-[#4a5d4a] text-white' : 'text-gray-400 hover:text-white'
-              }`}
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              Avançado
-            </button>
-          </div>
-        </div>
-
-        {/* WIZARD MODE */}
-        {mode === 'wizard' && !showResults && (
-          <>
-            <div className="flex flex-wrap gap-1 px-4 md:px-6 py-3 border-b border-gray-800/50">
-              {tabs.map((tab, i) => (
-                <button key={tab} onClick={() => setActiveTab(tabIds[i])}
-                  className={`px-3 py-1.5 text-xs font-medium transition-all rounded border ${activeTab === tabIds[i] ? 'text-gray-200 bg-gray-600/30 border-gray-500/40' : 'text-gray-500 hover:text-gray-300 border-transparent'}`}>
-                  {tab}
-                </button>
-              ))}
+      <div className="max-w-7xl mx-auto">
+        <Card>
+          <CardHeader className="flex-row items-center justify-between space-y-0 pb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                <Cpu className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <CardTitle>Deploy GPU</CardTitle>
+                <CardDescription>Crie uma nova instância</CardDescription>
+              </div>
             </div>
 
-            <div className="p-4 md:p-6 lg:p-8">
+            <TabsUI value={mode} onValueChange={(v) => { setMode(v); setShowResults(false); }}>
+              <TabsListUI>
+                <TabsTriggerUI value="wizard" className="gap-1.5">
+                  <Wand2 className="w-3.5 h-3.5" />
+                  Wizard
+                </TabsTriggerUI>
+                <TabsTriggerUI value="advanced" className="gap-1.5">
+                  <Sliders className="w-3.5 h-3.5" />
+                  Avançado
+                </TabsTriggerUI>
+              </TabsListUI>
+            </TabsUI>
+          </CardHeader>
+
+          {/* WIZARD MODE */}
+          {mode === 'wizard' && !showResults && (
+            <>
+              <div className="flex flex-wrap gap-2 px-5 py-3 border-y border-gray-100 dark:border-dark-surface-border bg-gray-50 dark:bg-dark-surface-secondary">
+                {tabs.map((tab, i) => (
+                  <Button
+                    key={tab}
+                    variant={activeTab === tabIds[i] ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setActiveTab(tabIds[i])}
+                  >
+                    {tab}
+                  </Button>
+                ))}
+              </div>
+
+              <CardContent className="pt-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                 {/* Main Wizard - 2 cols */}
                 <div className="lg:col-span-2">
                   <div className="flex flex-col gap-4">
                     <div>
-                      <Label className="text-gray-400 text-xs mb-2 block">Região</Label>
-                      <div className="h-40 md:h-48 rounded-lg overflow-hidden border border-gray-800/40">
+                      <Label className="text-gray-600 dark:text-gray-400 text-xs mb-2 block">Região</Label>
+                      <div className="h-44 md:h-52 rounded-xl overflow-hidden shadow-sm">
                         <WorldMap activeRegion={activeTab} onRegionClick={setActiveTab} />
                       </div>
                     </div>
                     <div>
-                      <Label className="text-gray-400 text-xs mb-2 block">GPU (opcional)</Label>
+                      <Label className="text-gray-600 dark:text-gray-400 text-xs mb-2 block">GPU (opcional)</Label>
                       <GPUSelector
                         selectedGPU={selectedGPU}
                         onSelectGPU={setSelectedGPU}
@@ -1764,19 +1709,19 @@ export default function Dashboard() {
                   </div>
                 </div>
 
-                {/* AI Advisor Compact - 1 col */}
+                {/* AI Advisor - 1 col */}
                 <div className="lg:col-span-1">
-                  <div className="border border-blue-600/30 rounded-lg bg-gradient-to-br from-blue-600/10 to-transparent overflow-hidden h-full flex flex-col">
-                    <div className="p-3 border-b border-blue-600/20 bg-blue-600/5">
-                      <div className="flex items-center gap-2 mb-1">
-                        <Sparkles className="w-4 h-4 text-blue-400" />
-                        <h3 className="text-sm font-semibold text-white">AI Advisor</h3>
+                  <Card className="border-blue-200 dark:border-blue-600/30 bg-gradient-to-br from-blue-50 dark:from-blue-600/10 to-transparent overflow-hidden h-full flex flex-col min-h-[280px]">
+                    <CardHeader className="py-3 border-b border-blue-100 dark:border-blue-600/20 bg-blue-50/50 dark:bg-blue-600/5">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                        <CardTitle className="text-sm">AI Advisor</CardTitle>
                       </div>
-                      <p className="text-xs text-gray-400">Recomendações inteligentes</p>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-3">
+                      <CardDescription>Pergunte sobre GPUs para seu projeto</CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 overflow-hidden p-0">
                       <AIWizardChat
-                        compact={true}
+                        compact={false}
                         onRecommendation={(rec) => {
                           console.log('AI Recommendation:', rec);
                         }}
@@ -1796,20 +1741,20 @@ export default function Dashboard() {
                           });
                         }}
                       />
-                    </div>
-                  </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </div>
 
               <div className="mb-6">
-                <Label className="text-gray-500 text-xs mb-3 block">Velocidade & Custo</Label>
+                <Label className="text-gray-600 dark:text-gray-500 text-xs mb-3 block">Velocidade & Custo</Label>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-6">
                   {tiers.map((tier) => (
                     <TierCard key={tier.name} tier={tier} isSelected={selectedTier === tier.name} onClick={() => setSelectedTier(tier.name)} />
                   ))}
                 </div>
 
-                <div className="relative h-2.5 rounded-full mb-6 mx-1" style={{ backgroundColor: '#252a25' }}>
+                <div className="relative h-2.5 rounded-full mb-6 mx-1 bg-gray-200 dark:bg-dark-surface-secondary">
                   <div className="absolute inset-y-0 left-0 rounded-full"
                     style={{ width: `${tiers.findIndex(t => t.name === selectedTier) * 25 + 25}%`, background: 'linear-gradient(to right, #4b5563, #ca8a04, #ea580c, #22c55e)' }} />
                   <div className="absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white rounded-full border-2 border-green-500 shadow-lg"
@@ -1817,72 +1762,43 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              <button
+              <Button
                 onClick={handleWizardSearch}
-                className="w-full py-3 md:py-4 rounded-lg text-white text-sm font-semibold transition-all bg-[#4a5d4a] hover:bg-[#5a6d5a] flex items-center justify-center gap-2"
+                className="w-full"
+                size="lg"
               >
                 <Search className="w-4 h-4" />
                 Buscar Máquinas Disponíveis
-              </button>
-            </div>
-          </>
-        )}
-
-        {/* AI MODE */}
-        {mode === 'ai' && !showResults && (
-          <div className="p-4 md:p-6 lg:p-8">
-            <div className="max-w-2xl mx-auto">
-              <div className="rounded-xl border border-gray-800/50 bg-white dark:bg-gray-900 overflow-hidden">
-                <AIWizardChat
-                  onRecommendation={(rec) => {
-                    console.log('AI Recommendation:', rec);
-                  }}
-                  onSearchWithFilters={(filters) => {
-                    // Apply AI recommendation to search
-                    const tierMap = {
-                      'Lento': tiers[0],
-                      'Medio': tiers[1],
-                      'Rapido': tiers[2],
-                      'Ultra': tiers[3]
-                    };
-                    const tier = tierMap[filters.tier] || tiers[2];
-                    searchOffers({
-                      ...tier.filter,
-                      gpu_name: filters.gpu_name !== 'any' ? filters.gpu_name : '',
-                      min_gpu_ram: filters.min_gpu_ram || tier.filter.min_gpu_ram,
-                      region: ''
-                    });
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+              </Button>
+              </CardContent>
+            </>
+          )}
 
         {/* ADVANCED MODE */}
         {mode === 'advanced' && !showResults && (
-          <div className="p-4 md:p-6 lg:p-8">
+          <CardContent className="pt-6">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-600/20">
-                    <Sliders className="w-6 h-6 text-emerald-400" />
+                  <div className="p-3 rounded-lg bg-green-100 dark:bg-gradient-to-br dark:from-emerald-500/20 dark:to-emerald-600/20">
+                    <Sliders className="w-6 h-6 text-green-600 dark:text-emerald-400" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Busca Avançada</h2>
-                    <p className="text-gray-400 text-sm mt-0.5">Ajuste os filtros para encontrar as melhores máquinas disponíveis</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">Ajuste os filtros para encontrar as melhores máquinas disponíveis</p>
                   </div>
                 </div>
-                <button
+                <Button
+                  variant="outline"
                   onClick={resetAdvancedFilters}
-                  className="px-4 py-2 text-sm text-gray-300 hover:text-white border border-gray-600/50 hover:border-emerald-500/50 rounded-lg transition-all bg-gray-900/40 hover:bg-emerald-500/5 flex items-center gap-2 whitespace-nowrap"
+                  className="gap-2"
                 >
                   <RotateCcw className="w-4 h-4" />
                   Resetar Filtros
-                </button>
+                </Button>
               </div>
-              <div className="h-0.5 bg-gradient-to-r from-emerald-500/30 to-transparent rounded-full"></div>
+              <div className="h-0.5 bg-gradient-to-r from-green-500/30 dark:from-emerald-500/30 to-transparent rounded-full"></div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
@@ -2388,38 +2304,42 @@ export default function Dashboard() {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3">
-              <button
+              <Button
                 onClick={handleAdvancedSearch}
-                className="flex-1 py-3 px-6 rounded-lg text-white text-sm font-semibold transition-all bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 shadow-lg hover:shadow-emerald-500/30 flex items-center justify-center gap-2"
+                className="flex-1"
+                size="lg"
               >
                 <Search className="w-4 h-4" />
                 Buscar Máquinas
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="outline"
                 onClick={() => setMode('wizard')}
-                className="px-6 py-3 rounded-lg text-gray-300 hover:text-white text-sm font-semibold transition-all border border-gray-600/40 hover:border-gray-500/40 bg-gray-900/50 hover:bg-gray-100 dark:bg-gray-800/50 flex items-center justify-center gap-2"
+                size="lg"
               >
                 <ChevronLeft className="w-4 h-4" />
                 Voltar ao Wizard
-              </button>
+              </Button>
             </div>
-          </div>
+          </CardContent>
         )}
 
         {/* RESULTS VIEW */}
         {showResults && (
-          <div className="p-4 md:p-6 lg:p-8">
+          <CardContent className="pt-6">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h2 className="text-white text-lg font-semibold">Máquinas Disponíveis</h2>
+                <h2 className="text-gray-900 dark:text-white text-lg font-semibold">Máquinas Disponíveis</h2>
                 <p className="text-gray-500 text-xs">{offers.length} resultados encontrados</p>
               </div>
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setShowResults(false)}
-                className="px-3 py-1.5 text-xs text-gray-400 hover:text-white border border-gray-200 dark:border-gray-700 rounded transition-colors"
               >
-                ← Voltar
-              </button>
+                <ChevronLeft className="w-4 h-4" />
+                Voltar
+              </Button>
             </div>
 
             {loading && (
@@ -2454,9 +2374,9 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-          </div>
+          </CardContent>
         )}
-      </div>
+        </Card>
       </div>
     </div>
   );

@@ -96,6 +96,15 @@ export default {
           950: '#0c111d',
           dark: '#1a2231',
         },
+        // Landing Page Dark Theme Colors (greenish dark tones)
+        'dark-surface': {
+          DEFAULT: '#131713',
+          bg: '#0a0d0a',
+          card: '#131713',
+          secondary: '#1a1f1a',
+          border: '#2a352a',
+          hover: '#232923',
+        },
         // TailAdmin Blue Light
         'blue-light': {
           25: '#f5fbff',

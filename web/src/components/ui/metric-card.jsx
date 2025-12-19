@@ -60,40 +60,40 @@ export const MetricCard = ({
 
   const colorClasses = {
     green: {
-      bg: 'from-green-500/20 to-green-600/10',
-      border: 'border-green-500/30',
-      icon: 'bg-green-500/20 text-green-400',
-      text: 'text-green-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-green-50 to-white dark:from-green-500/10 dark:to-dark-surface-card',
+      border: 'border-green-200 dark:border-dark-surface-border',
+      icon: 'bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400',
+      text: 'text-green-600 dark:text-green-400',
     },
     blue: {
-      bg: 'from-blue-500/20 to-blue-600/10',
-      border: 'border-blue-500/30',
-      icon: 'bg-blue-500/20 text-blue-400',
-      text: 'text-blue-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-blue-50 to-white dark:from-blue-500/10 dark:to-dark-surface-card',
+      border: 'border-blue-200 dark:border-dark-surface-border',
+      icon: 'bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400',
+      text: 'text-blue-600 dark:text-blue-400',
     },
     purple: {
-      bg: 'from-purple-500/20 to-purple-600/10',
-      border: 'border-purple-500/30',
-      icon: 'bg-purple-500/20 text-purple-400',
-      text: 'text-purple-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-purple-50 to-white dark:from-purple-500/10 dark:to-dark-surface-card',
+      border: 'border-purple-200 dark:border-dark-surface-border',
+      icon: 'bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400',
+      text: 'text-purple-600 dark:text-purple-400',
     },
     yellow: {
-      bg: 'from-yellow-500/20 to-yellow-600/10',
-      border: 'border-yellow-500/30',
-      icon: 'bg-yellow-500/20 text-yellow-400',
-      text: 'text-yellow-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-yellow-50 to-white dark:from-yellow-500/10 dark:to-dark-surface-card',
+      border: 'border-yellow-200 dark:border-dark-surface-border',
+      icon: 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-600 dark:text-yellow-400',
+      text: 'text-yellow-600 dark:text-yellow-400',
     },
     red: {
-      bg: 'from-red-500/20 to-red-600/10',
-      border: 'border-red-500/30',
-      icon: 'bg-red-500/20 text-red-400',
-      text: 'text-red-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-red-50 to-white dark:from-red-500/10 dark:to-dark-surface-card',
+      border: 'border-red-200 dark:border-dark-surface-border',
+      icon: 'bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400',
+      text: 'text-red-600 dark:text-red-400',
     },
     gray: {
-      bg: 'from-gray-500/20 to-gray-600/10',
-      border: 'border-gray-500/30',
-      icon: 'bg-gray-500/20 text-gray-400',
-      text: 'text-gray-400',
+      bg: 'bg-white dark:bg-dark-surface-card from-gray-50 to-white dark:from-gray-500/10 dark:to-dark-surface-card',
+      border: 'border-gray-200 dark:border-dark-surface-border',
+      icon: 'bg-gray-100 dark:bg-gray-500/20 text-gray-600 dark:text-gray-400',
+      text: 'text-gray-600 dark:text-gray-400',
     },
   };
 
@@ -126,9 +126,9 @@ export const MetricCard = ({
     >
       {/* Tooltip */}
       {tooltip && showTooltip && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg text-xs text-gray-300 whitespace-nowrap z-50 shadow-lg">
+        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-700 dark:text-gray-300 whitespace-nowrap z-50 shadow-lg">
           {tooltip}
-          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-white dark:border-t-gray-900" />
         </div>
       )}
 
@@ -142,12 +142,12 @@ export const MetricCard = ({
       {/* Content */}
       <div className="flex items-end justify-between">
         <div>
-          <span className="text-sm text-gray-400">{title}</span>
-          <h4 className="mt-1 text-2xl font-bold text-white">
+          <span className="text-sm text-gray-500 dark:text-gray-400">{title}</span>
+          <h4 className="mt-1 text-2xl font-bold text-gray-900 dark:text-white">
             {animate ? displayValue : value}
           </h4>
           {subtext && (
-            <span className="text-xs text-gray-500 mt-1 block">{subtext}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-500 mt-1 block">{subtext}</span>
           )}
           {comparison && (
             <span className={`text-xs mt-1 block ${colors.text}`}>{comparison}</span>
@@ -158,7 +158,7 @@ export const MetricCard = ({
         {trend !== null && (
           <div className={`
             flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium
-            ${trend >= 0 ? 'bg-green-500/15 text-green-400' : 'bg-red-500/15 text-red-400'}
+            ${trend >= 0 ? 'bg-green-100 dark:bg-green-500/15 text-green-600 dark:text-green-400' : 'bg-red-100 dark:bg-red-500/15 text-red-600 dark:text-red-400'}
           `}>
             {trend >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
             {Math.abs(trend)}%

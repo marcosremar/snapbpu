@@ -185,17 +185,17 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
 
   return (
     <div
-      className={`flex flex-col p-4 md:p-5 rounded-xl border transition-all bg-white dark:bg-gray-900 shadow-theme-sm ${
+      className={`flex flex-col p-4 md:p-5 rounded-xl border transition-all bg-white dark:bg-dark-surface-card shadow-theme-sm ${
         isInFailover
           ? getFailoverBorderColor()
           : isRunning
             ? 'border-success-200 dark:border-success-500/30'
-            : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+            : 'border-gray-200 dark:border-dark-surface-border hover:border-gray-300 dark:hover:border-dark-surface-hover'
       }`}
     >
       {/* Failover Progress Panel - Shows during failover */}
       {isInFailover && (
-        <div className="mb-3 p-3 rounded-lg bg-gray-900/50 border border-gray-700/50" data-testid="failover-progress-panel">
+        <div className="mb-3 p-3 rounded-lg bg-dark-surface-secondary border border-dark-surface-border" data-testid="failover-progress-panel">
           <div className="flex items-center gap-2 mb-3">
             <Zap className={`w-4 h-4 ${
               failoverProgress.phase === 'gpu_lost' ? 'text-red-400 animate-pulse' :
@@ -358,7 +358,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
 
             {/* Backup Info Popover */}
             {showBackupInfo && (
-              <div className="absolute top-full left-0 mt-2 z-50 w-72 ta-dropdown p-4">
+              <div className="absolute top-full left-0 mt-2 z-50 w-72 p-4 bg-white dark:bg-dark-surface-card border border-gray-200 dark:border-dark-surface-border rounded-xl shadow-xl">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                     <Layers className="w-4 h-4 text-brand-500" />
@@ -366,7 +366,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
                   </span>
                   <button
                     onClick={() => setShowBackupInfo(false)}
-                    className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
                   >
                     <X className="w-4 h-4" />
                   </button>

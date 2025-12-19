@@ -55,7 +55,7 @@ function JobCard({ job, onRefresh, onViewLogs, onCancel, onDeploy, onDownload })
   const isCompleted = job.status === 'completed';
 
   return (
-    <div className="bg-[#1e2536] rounded-xl border border-gray-700/50 p-5 hover:border-gray-600/50 transition-all">
+    <div className="bg-white dark:bg-dark-surface-card rounded-xl border border-gray-200 dark:border-dark-surface-border p-5 hover:border-gray-300 dark:hover:border-dark-surface-hover transition-all">
       {/* Header */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -448,6 +448,30 @@ export default function FineTuning() {
     setShowLogs(true);
   };
 
+  // Deploy model
+  const handleDeploy = (job) => {
+    setSelectedJob(job);
+    setShowDeploy(true);
+  };
+
+  // Download model
+  const handleDownload = async (job) => {
+    try {
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch(`/api/finetune/jobs/${job.id}/download`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      });
+      const data = await res.json();
+      if (data.download_url) {
+        window.open(data.download_url, '_blank');
+      } else if (data.message) {
+        alert(data.message);
+      }
+    } catch (err) {
+      alert('Failed to download: ' + err.message);
+    }
+  };
+
   // Filter jobs
   const filteredJobs = jobs.filter(job => {
     if (filter === 'all') return true;
@@ -564,6 +588,8 @@ export default function FineTuning() {
               onRefresh={handleRefresh}
               onViewLogs={handleViewLogs}
               onCancel={handleCancel}
+              onDeploy={handleDeploy}
+              onDownload={handleDownload}
             />
           ))}
         </div>
@@ -584,6 +610,17 @@ export default function FineTuning() {
         job={selectedJob}
         isOpen={showLogs}
         onClose={() => setShowLogs(false)}
+      />
+
+      {/* Deploy Modal */}
+      <DeployModal
+        job={selectedJob}
+        isOpen={showDeploy}
+        onClose={() => setShowDeploy(false)}
+        onSuccess={(data) => {
+          alert(`Deployment started! Instance: ${data.instance_name || 'Creating...'}`);
+          fetchJobs();
+        }}
       />
     </div>
   );

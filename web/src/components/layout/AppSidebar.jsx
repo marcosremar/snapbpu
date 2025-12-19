@@ -130,7 +130,7 @@ const AppSidebar = ({ isDemo = false }) => {
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                   isItemActive
                     ? "bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400"
-                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
+                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-surface-hover"
                 } ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
@@ -161,7 +161,7 @@ const AppSidebar = ({ isDemo = false }) => {
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive(nav.path)
                     ? "bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400"
-                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5"
+                    : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-surface-hover"
                 } ${
                   !isExpanded && !isHovered
                     ? "lg:justify-center"
@@ -200,7 +200,7 @@ const AppSidebar = ({ isDemo = false }) => {
                           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
                             isActive(subItem.path)
                               ? "bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400"
-                              : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5"
+                              : "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-dark-surface-hover"
                           }`}
                         >
                           {SubIcon && <SubIcon size={16} />}
@@ -220,7 +220,7 @@ const AppSidebar = ({ isDemo = false }) => {
 
   return (
     <aside
-      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-4 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200
+      className={`fixed mt-16 flex flex-col lg:mt-0 top-0 px-4 left-0 bg-white dark:bg-dark-surface-card dark:border-dark-surface-border text-gray-900 h-screen transition-all duration-300 ease-in-out z-50 border-r border-gray-200
         ${
           isExpanded || isMobileOpen
             ? "w-[260px]"
