@@ -513,7 +513,7 @@ class FailoverService:
                 ],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=60  # Increased from 10s to handle large buckets
             )
 
             if result.returncode == 0:

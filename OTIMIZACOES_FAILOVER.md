@@ -382,6 +382,18 @@ def upgrade():
 
 ---
 
+## ✅ Correções Pós-Implementação
+
+### Fix: Timeout do s5cmd (2025-12-20)
+**Problema:** `_find_latest_base_snapshot()` tinha timeout de 10s, insuficiente para listar buckets B2 grandes
+**Solução:** Aumentado de 10s → 60s em `src/services/standby/failover.py:516`
+**Status:** ✅ Corrigido
+
+**Arquivo:** `src/services/standby/failover.py` linha 516
+**Commit:** Próximo commit
+
+---
+
 **Última atualização:** 2025-12-20
 **Responsável:** Claude + Marcos
-**Status:** 🟡 Planejamento completo - Pronto para execução
+**Status:** ✅ Implementação completa - 10/10 otimizações funcionais
