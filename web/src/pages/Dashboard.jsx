@@ -1986,7 +1986,10 @@ export default function Dashboard() {
 
               {/* Step 2: Hardware & Performance */}
               <div className="relative p-6 rounded-2xl border-2 border-gray-300 dark:border-white/10 bg-gradient-to-br from-gray-100 dark:from-white/[0.03] to-white dark:to-transparent backdrop-blur-sm shadow-sm">
-                <div className="space-y-6">
+                {/* Connector Line */}
+                <div className="absolute left-10 top-[72px] bottom-6 w-0.5 bg-gradient-to-b from-emerald-600/40 via-emerald-500/20 dark:from-emerald-500/30 dark:via-emerald-500/10 to-transparent z-0" />
+
+                <div className="space-y-6 relative z-10">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-500/10 border-2 border-emerald-600 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-base shadow-lg shadow-emerald-500/20">2</div>
                     <div>
