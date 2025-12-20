@@ -48,7 +48,7 @@ async def lifespan(app: FastAPI):
         settings = get_settings()
         
         # Initialize Auto-Hibernation Manager
-        from .services.auto_hibernation_manager import init_auto_hibernation_manager
+        from .services.standby.hibernation import init_auto_hibernation_manager
         
         vast_api_key = os.environ.get("VAST_API_KEY", "")
         r2_endpoint = os.environ.get("R2_ENDPOINT", "")
@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
         
         # Initialize CPU Standby Manager
         try:
-            from .services.standby_manager import get_standby_manager
+            from .services.standby.manager import get_standby_manager
             gcp_credentials_json = os.environ.get("GCP_CREDENTIALS", "")
 
             if gcp_credentials_json and vast_api_key:
@@ -121,6 +121,34 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.warning(f"⚠ MarketMonitorAgent not started: {e}")
 
+        # Initialize Periodic Snapshot Service
+        try:
+            from .services.standby.periodic_snapshots import get_periodic_snapshot_service
+            from .services.gpu.snapshot import GPUSnapshotService
+
+            b2_endpoint = os.environ.get("B2_ENDPOINT", "")
+            b2_bucket = os.environ.get("B2_BUCKET", "")
+            snapshot_interval = int(os.environ.get("PERIODIC_SNAPSHOT_INTERVAL_MINUTES", "60"))
+
+            if b2_endpoint and b2_bucket:
+                snapshot_service = GPUSnapshotService(
+                    r2_endpoint=b2_endpoint,
+                    r2_bucket=b2_bucket
+                )
+                periodic_snapshot = get_periodic_snapshot_service(
+                    snapshot_service=snapshot_service,
+                    interval_minutes=snapshot_interval,
+                    keep_last_n=24  # Keep last 24 snapshots (1 day at 1/hour)
+                )
+                # Note: start() is async, will be called separately if needed
+                # For now, the service is created and ready to use via API
+                agents_started.append(f"PeriodicSnapshotService ({snapshot_interval}min)")
+                logger.info(f"✓ PeriodicSnapshotService configured (interval: {snapshot_interval}min)")
+            else:
+                logger.warning("⚠ PeriodicSnapshotService not started (missing B2_ENDPOINT or B2_BUCKET)")
+        except Exception as e:
+            logger.warning(f"⚠ PeriodicSnapshotService not started: {e}")
+
         logger.info(f"   Started agents: {', '.join(agents_started) if agents_started else 'None'}")
         
     except Exception as e:
@@ -133,7 +161,7 @@ async def lifespan(app: FastAPI):
     
     # Stop background agents
     try:
-        from .services.auto_hibernation_manager import get_auto_hibernation_manager
+        from .services.standby.hibernation import get_auto_hibernation_manager
         manager = get_auto_hibernation_manager()
         if manager:
             manager.stop()

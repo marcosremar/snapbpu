@@ -2,7 +2,7 @@
 Modelos de banco de dados para status de instâncias e auto-hibernação.
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Index, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, Index, ForeignKey, BigInteger, Text
 from datetime import datetime
 from src.config.database import Base
 
@@ -148,5 +148,128 @@ class HibernationEvent(Base):
             'idle_hours': self.idle_hours,
             'savings_usd': self.savings_usd,
             'metadata': self.event_metadata,
+        }
+
+
+class FailoverTestEvent(Base):
+    """Tabela para armazenar resultados de testes de failover realistas."""
+
+    __tablename__ = "failover_test_events"
+
+    id = Column(Integer, primary_key=True, index=True)
+    failover_id = Column(String(50), unique=True, nullable=False, index=True)
+    gpu_instance_id = Column(Integer, nullable=False, index=True)
+    user_id = Column(String(100), nullable=False, index=True)
+
+    # Timestamps
+    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+
+    # Snapshot - criação
+    snapshot_id = Column(String(200), nullable=True)
+    snapshot_size_bytes = Column(BigInteger, nullable=True)
+    snapshot_creation_time_ms = Column(Integer, nullable=True)
+    snapshot_files_count = Column(Integer, nullable=True)
+    snapshot_compression = Column(String(20), default="lz4")
+    snapshot_storage = Column(String(50), default="backblaze_b2")
+    snapshot_type = Column(String(20), nullable=True)  # "full" or "incremental"
+    base_snapshot_id = Column(String(200), nullable=True)  # For incremental snapshots
+    files_changed = Column(Integer, nullable=True)  # For incremental snapshots
+
+    # Restauração
+    restore_time_ms = Column(Integer, nullable=True)
+    restore_download_time_ms = Column(Integer, nullable=True)
+    restore_decompress_time_ms = Column(Integer, nullable=True)
+    data_restored_bytes = Column(BigInteger, nullable=True)
+
+    # Inferência (Ollama)
+    inference_model = Column(String(100), nullable=True)
+    inference_test_prompt = Column(String(500), nullable=True)
+    inference_response = Column(Text, nullable=True)
+    inference_ready_time_ms = Column(Integer, nullable=True)
+    inference_success = Column(Boolean, nullable=True)
+
+    # GPU info
+    original_gpu_type = Column(String(100), nullable=True)
+    original_ssh_host = Column(String(100), nullable=True)  # Original GPU SSH host
+    original_ssh_port = Column(Integer, nullable=True)  # Original GPU SSH port
+    new_gpu_type = Column(String(100), nullable=True)
+    new_gpu_instance_id = Column(Integer, nullable=True)
+    gpu_search_time_ms = Column(Integer, nullable=True)
+    gpu_provision_time_ms = Column(Integer, nullable=True)
+
+    # Totais
+    total_time_ms = Column(Integer, nullable=True)
+    success = Column(Boolean, default=False)
+    failure_reason = Column(String(500), nullable=True)
+    failure_phase = Column(String(50), nullable=True)
+
+    # Breakdown detalhado (JSON)
+    phase_timings_json = Column(Text, nullable=True)
+
+    # Índices
+    __table_args__ = (
+        Index('idx_failover_user', 'user_id', 'started_at'),
+        Index('idx_failover_success', 'success', 'started_at'),
+    )
+
+    def __repr__(self):
+        return f"<FailoverTestEvent(id={self.failover_id}, gpu={self.gpu_instance_id}, success={self.success})>"
+
+    def to_dict(self):
+        """Converte para dicionário para API responses."""
+        import json
+
+        phase_timings = {}
+        if self.phase_timings_json:
+            try:
+                phase_timings = json.loads(self.phase_timings_json)
+            except:
+                pass
+
+        return {
+            'failover_id': self.failover_id,
+            'gpu_instance_id': self.gpu_instance_id,
+            'user_id': self.user_id,
+            'started_at': self.started_at.isoformat() if self.started_at else None,
+            'completed_at': self.completed_at.isoformat() if self.completed_at else None,
+            'snapshot': {
+                'id': self.snapshot_id,
+                'size_bytes': self.snapshot_size_bytes,
+                'size_mb': round(self.snapshot_size_bytes / (1024*1024), 2) if self.snapshot_size_bytes else None,
+                'creation_time_ms': self.snapshot_creation_time_ms,
+                'files_count': self.snapshot_files_count,
+                'compression': self.snapshot_compression,
+                'storage': self.snapshot_storage,
+            },
+            'restore': {
+                'time_ms': self.restore_time_ms,
+                'download_time_ms': self.restore_download_time_ms,
+                'decompress_time_ms': self.restore_decompress_time_ms,
+                'data_bytes': self.data_restored_bytes,
+                'data_mb': round(self.data_restored_bytes / (1024*1024), 2) if self.data_restored_bytes else None,
+            },
+            'inference': {
+                'model': self.inference_model,
+                'prompt': self.inference_test_prompt,
+                'response': self.inference_response,
+                'ready_time_ms': self.inference_ready_time_ms,
+                'success': self.inference_success,
+            },
+            'gpu': {
+                'original_type': self.original_gpu_type,
+                'new_type': self.new_gpu_type,
+                'new_instance_id': self.new_gpu_instance_id,
+                'search_time_ms': self.gpu_search_time_ms,
+                'provision_time_ms': self.gpu_provision_time_ms,
+            },
+            'totals': {
+                'total_time_ms': self.total_time_ms,
+                'total_time_seconds': round(self.total_time_ms / 1000, 2) if self.total_time_ms else None,
+                'success': self.success,
+                'failure_reason': self.failure_reason,
+                'failure_phase': self.failure_phase,
+            },
+            'phase_timings': phase_timings,
         }
 
