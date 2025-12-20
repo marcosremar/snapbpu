@@ -1,0 +1,56 @@
+{
+  "cost_optimizer": {
+    "enabled": true,
+    "description": "Configurações do módulo de otimização de custos GPU/CPU",
+    
+    "thresholds": {
+      "pause": {
+        "gpu_utilization_percent": 10,
+        "cpu_utilization_percent": 5,
+        "duration_minutes": 5,
+        "description": "Pausar se GPU < 10% E CPU < 5% por 5 minutos"
+      },
+      "delete": {
+        "idle_hours": 24,
+        "description": "Deletar instância se idle por mais de 24 horas"
+      }
+    },
+    
+    "monitoring": {
+      "check_interval_seconds": 30,
+      "metrics_window_minutes": 5,
+      "description": "Verificar a cada 30 segundos, janela de 5 minutos para decisões"
+    },
+    
+    "protection": {
+      "min_instance_age_hours": 1,
+      "protected_instances": [],
+      "description": "Não deletar instâncias com menos de 1 hora, lista de IDs protegidos"
+    },
+    
+    "notifications": {
+      "enabled": true,
+      "notify_on_pause": true,
+      "notify_on_delete": true,
+      "webhook_url": null,
+      "description": "Configurações de notificação (Slack, Discord, etc)"
+    },
+    
+    "providers": {
+      "vast_ai": {
+        "enabled": true,
+        "api_key_env": "VAST_API_KEY"
+      },
+      "tensordock": {
+        "enabled": true,
+        "api_key_env": "TENSORDOCK_API_KEY",
+        "api_token_env": "TENSORDOCK_API_TOKEN"
+      },
+      "gcp": {
+        "enabled": true,
+        "project_id_env": "GCP_PROJECT_ID",
+        "default_zone": "us-central1-a"
+      }
+    }
+  }
+}

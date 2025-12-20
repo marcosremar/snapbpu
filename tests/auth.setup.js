@@ -79,16 +79,13 @@ test('authenticate', async ({ page }) => {
 
   console.log(`📍 Current URL: ${page.url()}`);
 
-  // FORÇAR MODO REAL: Remover demo_mode do localStorage
-  if (!useDemoMode) {
-    console.log('🔧 Forçando MODO REAL: removendo demo_mode flag...');
-    await page.evaluate(() => {
-      localStorage.removeItem('demo_mode');
-      // Garantir que está em FALSE, não TRUE
-      localStorage.setItem('demo_mode', 'false');
-    });
-    console.log('✅ demo_mode removido/desabilitado');
-  }
+  // MANTER DEMO MODE para ter dados mockados
+  // Mesmo no "modo real", precisamos de demo_mode=true para o backend retornar dados
+  console.log('🔧 Garantindo demo_mode=true para dados mockados...');
+  await page.evaluate(() => {
+    localStorage.setItem('demo_mode', 'true');
+  });
+  console.log('✅ demo_mode habilitado (dados mockados disponíveis)');
 
   // Close welcome modal if present
   const skipButton = page.locator('text="Pular tudo"');

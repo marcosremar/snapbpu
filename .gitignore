@@ -45,3 +45,6 @@ web/build/
 
 # macOS metadata files
 ._*
+
+# Credentials
+.credentials/

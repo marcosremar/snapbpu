@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { DollarSign, Calculator, TrendingDown } from 'lucide-react'
+import { DollarSign, Calculator } from 'lucide-react'
 
 const API_BASE = ''
 
@@ -36,78 +36,89 @@ export default function SavingsCalculator({ getAuthHeaders, selectedGPU = 'all' 
   const formatPercent = (value) => `${value?.toFixed(1) || '0'}%`
 
   const getRiskColor = (risk) => {
-    const colors = { low: '#22c55e', medium: '#f59e0b', high: '#ef4444' }
-    return colors[risk] || '#6b7280'
+    const colors = { low: 'bg-emerald-500', medium: 'bg-yellow-500', high: 'bg-red-500' }
+    return colors[risk] || 'bg-gray-500'
   }
 
   if (loading) {
-    return <div className="spot-card loading">Calculando economia...</div>
+    return (
+      <div className="ta-card">
+        <div className="ta-card-body flex items-center justify-center min-h-[200px]">
+          <div className="ta-spinner" />
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="spot-card savings-calculator">
-      <div className="spot-card-header">
-        <h3><Calculator size={20} /> Calculadora de Economia Spot</h3>
+    <div className="ta-card hover-glow">
+      <div className="ta-card-header">
+        <h3 className="ta-card-title flex items-center gap-2">
+          <div className="stat-card-icon stat-card-icon-success">
+            <Calculator size={18} />
+          </div>
+          Calculadora de Economia Spot
+        </h3>
       </div>
 
-      <div className="savings-summary">
-        <div className="savings-big-number">
-          <span className="amount">{formatPrice(data?.total_potential_savings_month || 0)}</span>
-          <span className="period">economia potencial/mês</span>
+      <div className="ta-card-body">
+        <div className="spot-highlight mb-5">
+          <div className="spot-highlight-value">
+            {formatPrice(data?.total_potential_savings_month || 0)}
+          </div>
+          <div className="spot-highlight-label">economia potencial/mês</div>
+          <div className="text-sm text-emerald-300/70 mt-2 relative z-10">
+            Economia média: <strong className="text-emerald-300">{formatPercent(data?.avg_savings_percent)}</strong>
+          </div>
         </div>
-        <div className="savings-avg">
-          Economia média: <strong>{formatPercent(data?.avg_savings_percent)}</strong>
+
+        <div className="flex items-center gap-3 mb-4 p-3 bg-white/5 rounded-xl">
+          <label className="text-sm text-gray-400">Horas de uso por dia:</label>
+          <input
+            type="range"
+            min="1"
+            max="24"
+            value={hoursPerDay}
+            onChange={(e) => setHoursPerDay(parseInt(e.target.value))}
+            className="flex-1 accent-emerald-500"
+          />
+          <span className="text-white font-semibold min-w-[60px]">{hoursPerDay}h/dia</span>
         </div>
-      </div>
 
-      <div className="hours-selector">
-        <label>Horas de uso por dia:</label>
-        <input
-          type="range"
-          min="1"
-          max="24"
-          value={hoursPerDay}
-          onChange={(e) => setHoursPerDay(parseInt(e.target.value))}
-        />
-        <span>{hoursPerDay}h/dia</span>
-      </div>
-
-      <div className="savings-table">
-        <table>
-          <thead>
-            <tr>
-              <th>GPU</th>
-              <th>Spot</th>
-              <th>On-Demand</th>
-              <th>Economia/Mês</th>
-              <th>Risco</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.items?.slice(0, 6).map((item, idx) => {
-              const monthlySavings = item.savings_per_hour * hoursPerDay * 30
-              return (
-                <tr key={idx}>
-                  <td className="gpu-name">{item.gpu_name}</td>
-                  <td className="price spot">${item.spot_price?.toFixed(3)}/h</td>
-                  <td className="price">${item.ondemand_price?.toFixed(3)}/h</td>
-                  <td className="savings">
-                    <DollarSign size={14} />
-                    {monthlySavings.toFixed(2)}
-                  </td>
-                  <td>
-                    <span
-                      className="risk-badge"
-                      style={{ backgroundColor: getRiskColor(item.reliability_risk) }}
-                    >
-                      {item.reliability_risk}
-                    </span>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="ta-table">
+            <thead>
+              <tr>
+                <th>GPU</th>
+                <th>Spot</th>
+                <th>On-Demand</th>
+                <th>Economia/Mês</th>
+                <th>Risco</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.items?.slice(0, 6).map((item, idx) => {
+                const monthlySavings = item.savings_per_hour * hoursPerDay * 30
+                return (
+                  <tr key={idx}>
+                    <td className="font-semibold text-white">{item.gpu_name}</td>
+                    <td className="text-emerald-400">${item.spot_price?.toFixed(2)}/h</td>
+                    <td className="text-gray-300">${item.ondemand_price?.toFixed(2)}/h</td>
+                    <td className="text-emerald-400 flex items-center gap-1">
+                      <DollarSign size={14} />
+                      {monthlySavings.toFixed(2)}
+                    </td>
+                    <td>
+                      <span className={`ta-badge ${getRiskColor(item.reliability_risk)} text-white`}>
+                        {item.reliability_risk}
+                      </span>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )

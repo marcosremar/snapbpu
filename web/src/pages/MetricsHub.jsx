@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   BarChart3,
   Sparkles,
@@ -16,7 +16,13 @@ import {
   ArrowRight
 } from 'lucide-react'
 
-const metricsCategories = [
+// Helper to get the base path (demo-app or app)
+const getBasePath = (pathname) => {
+  if (pathname.startsWith('/demo-app')) return '/demo-app'
+  return '/app'
+}
+
+const getMetricsCategories = (basePath) => [
   {
     title: 'Visão Geral',
     description: 'Métricas gerais do mercado de GPUs',
@@ -27,7 +33,7 @@ const metricsCategories = [
         title: 'Mercado de GPUs',
         description: 'Histórico de preços, tendências e comparação entre tipos de máquinas (On-Demand, Spot, Bid)',
         color: 'brand',
-        link: '/metrics?tab=market'
+        link: `${basePath}/metrics?tab=market`
       },
       {
         id: 'providers',
@@ -35,7 +41,7 @@ const metricsCategories = [
         title: 'Ranking de Provedores',
         description: 'Classificação de provedores por confiabilidade, disponibilidade e estabilidade de preços',
         color: 'primary',
-        link: '/metrics?tab=providers'
+        link: `${basePath}/metrics?tab=providers`
       },
       {
         id: 'efficiency',
@@ -43,7 +49,7 @@ const metricsCategories = [
         title: 'Eficiência de Custo',
         description: 'Rankings de custo-benefício considerando $/TFLOPS, $/VRAM e performance',
         color: 'warning',
-        link: '/metrics?tab=efficiency'
+        link: `${basePath}/metrics?tab=efficiency`
       }
     ]
   },
@@ -57,7 +63,7 @@ const metricsCategories = [
         title: 'Monitor de Preços Spot',
         description: 'Acompanhamento em tempo real dos preços Spot com tendências e comparação vs On-Demand',
         color: 'success',
-        link: '/metrics?tab=spot&report=monitor'
+        link: `${basePath}/metrics?tab=spot&report=monitor`
       },
       {
         id: 'savings',
@@ -65,7 +71,7 @@ const metricsCategories = [
         title: 'Calculadora de Economia',
         description: 'Calcule quanto você pode economizar usando Spot ao invés de On-Demand por GPU',
         color: 'success',
-        link: '/metrics?tab=spot&report=savings'
+        link: `${basePath}/metrics?tab=spot&report=savings`
       },
       {
         id: 'availability',
@@ -73,7 +79,7 @@ const metricsCategories = [
         title: 'Disponibilidade Instantânea',
         description: 'Visualize quais GPUs estão disponíveis agora no mercado Spot com preços atuais',
         color: 'primary',
-        link: '/metrics?tab=spot&report=availability'
+        link: `${basePath}/metrics?tab=spot&report=availability`
       },
       {
         id: 'prediction',
@@ -81,7 +87,7 @@ const metricsCategories = [
         title: 'Previsão de Preços',
         description: 'Previsões de preço por hora e dia da semana usando Machine Learning para encontrar o melhor momento',
         color: 'primary',
-        link: '/metrics?tab=spot&report=prediction'
+        link: `${basePath}/metrics?tab=spot&report=prediction`
       },
       {
         id: 'safe-windows',
@@ -89,7 +95,7 @@ const metricsCategories = [
         title: 'Janelas Seguras',
         description: 'Identifique os horários com menor risco de interrupção para rodar workloads Spot',
         color: 'brand',
-        link: '/metrics?tab=spot&report=safe-windows'
+        link: `${basePath}/metrics?tab=spot&report=safe-windows`
       }
     ]
   },
@@ -103,7 +109,7 @@ const metricsCategories = [
         title: 'Score de Confiabilidade',
         description: 'Avaliação detalhada de provedores com scores de disponibilidade, estabilidade e verificação',
         color: 'success',
-        link: '/metrics?tab=spot&report=reliability'
+        link: `${basePath}/metrics?tab=spot&report=reliability`
       },
       {
         id: 'interruption',
@@ -111,7 +117,7 @@ const metricsCategories = [
         title: 'Taxa de Interrupção',
         description: 'Histórico de interrupções por provedor para escolher os mais estáveis para Spot',
         color: 'warning',
-        link: '/metrics?tab=spot&report=interruption'
+        link: `${basePath}/metrics?tab=spot&report=interruption`
       },
       {
         id: 'llm',
@@ -119,7 +125,7 @@ const metricsCategories = [
         title: 'Melhor GPU para LLM',
         description: 'Ranking de GPUs por $/token para inferência de modelos como Llama, Mistral e outros',
         color: 'error',
-        link: '/metrics?tab=spot&report=llm'
+        link: `${basePath}/metrics?tab=spot&report=llm`
       },
       {
         id: 'training',
@@ -127,7 +133,7 @@ const metricsCategories = [
         title: 'Custo por Treinamento',
         description: 'Estime o custo total de treinamento por horas, comparando Spot vs On-Demand',
         color: 'primary',
-        link: '/metrics?tab=spot&report=training'
+        link: `${basePath}/metrics?tab=spot&report=training`
       },
       {
         id: 'fleet',
@@ -135,7 +141,7 @@ const metricsCategories = [
         title: 'Estratégia de Fleet',
         description: 'Recomendações de composição de fleet Spot com diversificação e análise de risco',
         color: 'gray',
-        link: '/metrics?tab=spot&report=fleet'
+        link: `${basePath}/metrics?tab=spot&report=fleet`
       }
     ]
   },
@@ -149,7 +155,7 @@ const metricsCategories = [
         title: 'Relatório de Failover',
         description: 'Histórico completo de failovers: taxa de sucesso, MTTR, latências e detalhes de cada recuperação',
         color: 'error',
-        link: '/app/failover-report'
+        link: `${basePath}/failover-report`
       },
       {
         id: 'cpu-standby',
@@ -157,7 +163,7 @@ const metricsCategories = [
         title: 'CPU Standby Status',
         description: 'Status das máquinas CPU backup: sincronização, custos e prontidão para failover',
         color: 'brand',
-        link: '/app/machines'
+        link: `${basePath}/machines`
       },
       {
         id: 'failover-config',
@@ -165,7 +171,7 @@ const metricsCategories = [
         title: 'Configurar Failover',
         description: 'Configure auto-failover, auto-recovery e políticas de backup para suas máquinas GPU',
         color: 'warning',
-        link: '/app/failover-report'
+        link: `${basePath}/failover-report`
       }
     ]
   }
@@ -178,12 +184,15 @@ const getIconColorClass = (color) => {
     case 'success': return 'stat-card-icon-success'
     case 'warning': return 'stat-card-icon-warning'
     case 'error': return 'stat-card-icon-error'
-    default: return 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+    default: return 'bg-white/10 text-gray-400'
   }
 }
 
 export default function MetricsHub() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const basePath = getBasePath(location.pathname)
+  const metricsCategories = getMetricsCategories(basePath)
 
   return (
     <div className="page-container">
@@ -219,21 +228,21 @@ export default function MetricsHub() {
                     <div
                       key={item.id}
                       onClick={() => navigate(item.link)}
-                      className="group p-4 rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 hover:border-brand-300 dark:hover:border-brand-500/50 hover:shadow-lg transition-all cursor-pointer"
+                      className="group p-4 rounded-xl border border-white/10 bg-white/5 hover:border-emerald-500/50 hover:shadow-lg transition-all cursor-pointer"
                     >
                       <div className="flex items-start gap-4">
                         <div className={`stat-card-icon ${getIconColorClass(item.color)} flex-shrink-0`}>
                           <Icon className="w-5 h-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1 group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
+                          <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-emerald-400 transition-colors">
                             {item.title}
                           </h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                          <p className="text-xs text-gray-400 line-clamp-2">
                             {item.description}
                           </p>
                         </div>
-                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-brand-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
+                        <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all flex-shrink-0" />
                       </div>
                     </div>
                   )
@@ -245,7 +254,7 @@ export default function MetricsHub() {
       </div>
 
       {/* Footer Stats */}
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-400">
         <div className="flex items-center gap-2">
           <Sparkles className="w-4 h-4 text-brand-500" />
           <span>10 Relatórios Spot disponíveis</span>

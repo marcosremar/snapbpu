@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+"""Dumont Cloud CLI - Entry Point
+
+Requirements:
+    pip install requests
+
+Or use the install script which handles dependencies:
+    cd /home/marcos/dumontcloud/cli
+    ./scripts/install.sh
+"""
+import sys
+import os
+
+# Check for required dependencies
+try:
+    import requests
+except ImportError:
+    print("❌ Error: 'requests' module not installed")
+    print("")
+    print("Install dependencies:")
+    print("  pip install requests")
+    print("")
+    print("Or install the CLI properly:")
+    print("  cd /home/marcos/dumontcloud/cli")
+    print("  pip install -e .")
+    print("")
+    sys.exit(1)
+
+# Add CLI directory to path
+cli_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, cli_dir)
+
+# Add parent directory to path for imports
+parent_dir = os.path.dirname(cli_dir)
+sys.path.insert(0, parent_dir)
+
+# Run the CLI
+from cli.__main__ import main
+
+if __name__ == "__main__":
+    main()

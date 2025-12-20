@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Zap, CheckCircle, XCircle, RefreshCw } from 'lucide-react'
+import { Zap, CheckCircle, XCircle, RefreshCw, Cpu, Globe } from 'lucide-react'
+import { Card, StatCard, Badge } from '../tailadmin-ui'
 
 const API_BASE = ''
 
@@ -16,12 +17,11 @@ export default function InstantAvailability({ getAuthHeaders }) {
       })
       if (res.ok) {
         const result = await res.json()
-        // Map API response to expected format
         const gpus = result.items?.map(item => ({
           gpu_name: item.gpu_name,
           available: item.available_now,
           min_price: item.spot_price,
-          max_price: item.spot_price * 1.2, // Estimate max as 20% higher
+          max_price: item.spot_price * 1.2,
           regions: item.regions ? Object.keys(item.regions) : [],
           time_to_provision: item.time_to_provision,
           verified_count: item.verified_count
@@ -43,87 +43,87 @@ export default function InstantAvailability({ getAuthHeaders }) {
 
   useEffect(() => {
     loadData()
-    const interval = setInterval(loadData, 30000) // Refresh every 30s
+    const interval = setInterval(loadData, 30000)
     return () => clearInterval(interval)
   }, [])
 
-  const formatPrice = (price) => `$${price?.toFixed(4) || '0.0000'}/h`
+  const formatPrice = (price) => `$${price?.toFixed(2) || '0.00'}/h`
 
-  const getAvailabilityColor = (available) => {
-    if (available > 20) return '#22c55e'
-    if (available > 5) return '#f59e0b'
-    return '#ef4444'
+  const getIconColor = (available) => {
+    if (available > 20) return 'success'
+    if (available > 5) return 'warning'
+    return 'error'
   }
 
   if (loading && !data) {
-    return <div className="spot-card loading">Verificando disponibilidade...</div>
+    return (
+      <Card>
+        <div className="flex items-center justify-center min-h-[300px]">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-emerald-500 rounded-full animate-spin" />
+        </div>
+      </Card>
+    )
   }
 
   return (
-    <div className="spot-card instant-availability">
-      <div className="spot-card-header">
-        <h3><Zap size={20} /> Disponibilidade Instantânea Spot</h3>
-        <button onClick={loadData} className="refresh-btn" disabled={loading}>
-          <RefreshCw size={16} className={loading ? 'spinning' : ''} />
-        </button>
-      </div>
-
-      <div className="availability-summary">
-        <div className="summary-item">
-          <span className="big-number">{data?.total_available || 0}</span>
-          <span className="label">GPUs Spot Disponíveis</span>
-        </div>
-        <div className="summary-item">
-          <span className="big-number">{data?.gpu_types || 0}</span>
-          <span className="label">Tipos de GPU</span>
-        </div>
-      </div>
-
-      <div className="availability-grid">
-        {data?.gpus?.slice(0, 8).map((gpu, idx) => (
-          <div key={idx} className="availability-item">
-            <div className="gpu-header">
-              <span className="gpu-name">{gpu.gpu_name}</span>
-              {gpu.available > 0 ? (
-                <CheckCircle size={16} className="available" />
-              ) : (
-                <XCircle size={16} className="unavailable" />
-              )}
+    <Card
+      header={
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+              <Zap size={20} className="text-yellow-400" />
             </div>
-            <div className="gpu-stats">
-              <div
-                className="available-count"
-                style={{ color: getAvailabilityColor(gpu.available) }}
-              >
-                {gpu.available} disponíveis
-              </div>
-              <div className="price-range">
-                {formatPrice(gpu.min_price)} - {formatPrice(gpu.max_price)}
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Disponibilidade Instantânea</h3>
+              <p className="text-sm text-gray-400">GPUs Spot disponíveis agora</p>
             </div>
-            <div className="availability-bar">
-              <div
-                className="bar-fill"
-                style={{
-                  width: `${Math.min(gpu.available / 50 * 100, 100)}%`,
-                  backgroundColor: getAvailabilityColor(gpu.available)
-                }}
-              />
-            </div>
-            {gpu.regions && (
-              <div className="regions">
-                {gpu.regions.slice(0, 3).map((region, i) => (
-                  <span key={i} className="region-tag">{region}</span>
-                ))}
-              </div>
-            )}
           </div>
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+      }
+    >
+      {/* Summary Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <StatCard
+          title="GPUs Disponíveis"
+          value={String(data?.total_available || 0)}
+          icon={Cpu}
+          iconColor="success"
+          subtitle="Prontas para uso"
+        />
+        <StatCard
+          title="Tipos de GPU"
+          value={String(data?.gpu_types || 0)}
+          icon={Globe}
+          iconColor="primary"
+          subtitle="Modelos diferentes"
+        />
+      </div>
+
+      {/* GPU List */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {data?.gpus?.slice(0, 6).map((gpu, idx) => (
+          <StatCard
+            key={idx}
+            title={gpu.gpu_name}
+            value={`${gpu.available} disp.`}
+            icon={gpu.available > 0 ? CheckCircle : XCircle}
+            iconColor={getIconColor(gpu.available)}
+            subtitle={`${formatPrice(gpu.min_price)} - ${formatPrice(gpu.max_price)}`}
+          />
         ))}
       </div>
 
-      <div className="last-update">
-        Atualizado: {new Date(data?.timestamp).toLocaleTimeString('pt-BR')}
+      {/* Timestamp */}
+      <div className="text-center text-xs text-gray-500 mt-4 pt-4 border-t border-white/10">
+        Atualizado: {data?.timestamp ? new Date(data.timestamp).toLocaleTimeString('pt-BR') : '-'}
       </div>
-    </div>
+    </Card>
   )
 }

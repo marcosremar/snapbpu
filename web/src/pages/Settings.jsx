@@ -577,8 +577,8 @@ export default function Settings() {
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left mb-1 ${
                       isActive
-                        ? 'bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400'
-                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                        ? 'bg-emerald-500/10 text-emerald-400'
+                        : 'text-gray-400 hover:bg-white/10 hover:text-gray-200'
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${iconColorClasses[item.color]}`}>
@@ -742,7 +742,7 @@ export default function Settings() {
               >
                 <div className="space-y-4">
                   {/* Enable/Disable Toggle */}
-                  <div className="flex items-center justify-between p-4 bg-dark-surface rounded-lg">
+                  <div className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-lg">
                     <div>
                       <h4 className="text-white font-medium">Habilitar Cloud Storage Failover</h4>
                       <p className="text-gray-400 text-sm mt-1">

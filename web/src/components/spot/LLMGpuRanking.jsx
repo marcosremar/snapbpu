@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Cpu, Zap, DollarSign, Award } from 'lucide-react'
+import { Cpu, Zap, Award } from 'lucide-react'
 
 const API_BASE = ''
 
@@ -20,7 +20,6 @@ export default function LLMGpuRanking({ getAuthHeaders }) {
       })
       if (res.ok) {
         const result = await res.json()
-        // Map API response to expected format
         setData({
           best_gpu: result.best_value ? {
             gpu_name: result.best_value.gpu_name,
@@ -46,86 +45,103 @@ export default function LLMGpuRanking({ getAuthHeaders }) {
     loadData()
   }, [selectedModel])
 
-  const formatPrice = (price) => `$${price?.toFixed(6) || '0.000000'}`
+  const formatPrice = (price) => `$${price?.toFixed(2) || '0.00'}`
 
   if (loading) {
-    return <div className="spot-card loading">Analisando GPUs para LLM...</div>
+    return (
+      <div className="ta-card">
+        <div className="ta-card-body flex items-center justify-center min-h-[200px]">
+          <div className="ta-spinner" />
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="spot-card llm-gpu-ranking">
-      <div className="spot-card-header">
-        <h3><Cpu size={20} /> Melhor GPU para LLM ($/Token)</h3>
-      </div>
-
-      {data?.compatible_models && (
-        <div className="model-selector">
-          <label>Modelo LLM:</label>
-          <select
-            value={selectedModel}
-            onChange={(e) => setSelectedModel(e.target.value)}
-          >
-            <option value="">Todos os modelos</option>
-            {data.compatible_models.map(model => (
-              <option key={model} value={model}>{model}</option>
-            ))}
-          </select>
-        </div>
-      )}
-
-      {data?.best_gpu && (
-        <div className="best-gpu-highlight">
-          <Award size={24} className="award-icon" />
-          <div className="best-gpu-info">
-            <span className="best-label">Melhor Custo-Benefício</span>
-            <span className="best-gpu-name">{data.best_gpu.gpu_name}</span>
-            <span className="best-price">{formatPrice(data.best_gpu.cost_per_token)}/token</span>
+    <div className="ta-card hover-glow">
+      <div className="ta-card-header">
+        <h3 className="ta-card-title flex items-center gap-2">
+          <div className="stat-card-icon stat-card-icon-success">
+            <Cpu size={18} />
           </div>
-        </div>
-      )}
-
-      <div className="gpu-rankings">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>GPU</th>
-              <th>VRAM</th>
-              <th>Tokens/s</th>
-              <th>$/1M Tokens</th>
-              <th>Score</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data?.rankings?.slice(0, 8).map((gpu, idx) => (
-              <tr key={idx} className={idx === 0 ? 'top-rank' : ''}>
-                <td className="rank">{idx + 1}</td>
-                <td className="gpu-name">
-                  <Cpu size={14} />
-                  {gpu.gpu_name}
-                </td>
-                <td>{gpu.vram_gb}GB</td>
-                <td className="tokens">{gpu.estimated_tokens_per_sec?.toFixed(0)}</td>
-                <td className="cost">
-                  ${(gpu.cost_per_token * 1000000)?.toFixed(2)}
-                </td>
-                <td>
-                  <div className="score-badge" style={{
-                    backgroundColor: `hsl(${gpu.efficiency_score}, 70%, 45%)`
-                  }}>
-                    {gpu.efficiency_score?.toFixed(0)}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          Melhor GPU para LLM ($/Token)
+        </h3>
       </div>
 
-      <div className="llm-info">
-        <p>
-          <Zap size={14} /> Baseado em preços Spot atuais e benchmarks de inferência LLM
-        </p>
+      <div className="ta-card-body">
+        {data?.compatible_models && (
+          <div className="flex items-center gap-3 mb-4 p-3 bg-white/[0.03] rounded-xl border border-white/5">
+            <label className="text-sm text-gray-400">Modelo LLM:</label>
+            <select
+              value={selectedModel}
+              onChange={(e) => setSelectedModel(e.target.value)}
+              className="ta-select flex-1 max-w-[300px]"
+            >
+              <option value="">Todos os modelos</option>
+              {data.compatible_models.map(model => (
+                <option key={model} value={model}>{model}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {data?.best_gpu && (
+          <div className="spot-highlight mb-5" style={{ background: 'linear-gradient(135deg, rgba(234, 179, 8, 0.15) 0%, rgba(161, 98, 7, 0.1) 100%)', borderColor: 'rgba(234, 179, 8, 0.3)' }}>
+            <div className="flex items-center justify-center gap-3 relative z-10">
+              <Award size={28} className="text-yellow-400" />
+              <div className="text-left">
+                <span className="block text-xs text-yellow-300/70 uppercase font-semibold">Melhor Custo-Benefício</span>
+                <span className="block text-xl font-bold text-white">{data.best_gpu.gpu_name}</span>
+                <span className="block text-sm text-yellow-200/60">
+                  <strong className="text-yellow-300">{formatPrice(data.best_gpu.cost_per_token)}</strong>/token
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="overflow-x-auto">
+          <table className="ta-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>GPU</th>
+                <th>VRAM</th>
+                <th>Tokens/s</th>
+                <th>$/1M Tokens</th>
+                <th>Score</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.rankings?.slice(0, 8).map((gpu, idx) => (
+                <tr key={idx} className={`animate-fade-in ${idx === 0 ? 'bg-yellow-500/10' : ''}`} style={{ animationDelay: `${idx * 50}ms` }}>
+                  <td className="text-emerald-400 font-bold">{idx + 1}</td>
+                  <td>
+                    <span className="gpu-badge">{gpu.gpu_name}</span>
+                  </td>
+                  <td className="text-gray-300">{gpu.vram_gb}GB</td>
+                  <td className="text-emerald-400">{gpu.estimated_tokens_per_sec?.toFixed(0)}</td>
+                  <td className="text-orange-400">
+                    ${(gpu.cost_per_token * 1000000)?.toFixed(2)}
+                  </td>
+                  <td>
+                    <span
+                      className="inline-block px-2 py-0.5 rounded-full text-xs font-semibold text-white"
+                      style={{ backgroundColor: `hsl(${gpu.efficiency_score}, 70%, 45%)` }}
+                    >
+                      {gpu.efficiency_score?.toFixed(0)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-white/10 text-xs text-gray-500 flex items-center gap-1.5">
+          <Zap size={14} />
+          Baseado em preços Spot atuais e benchmarks de inferência LLM
+        </div>
       </div>
     </div>
   )

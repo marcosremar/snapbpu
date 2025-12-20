@@ -1,0 +1,19 @@
+[Unit]
+Description=DumontCloud Cost Optimizer
+After=network.target
+
+[Service]
+Type=simple
+User=marcos
+WorkingDirectory=/home/marcos/dumontcloud
+ExecStart=/home/marcos/dumontcloud/bin/start-cost-optimizer.sh
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

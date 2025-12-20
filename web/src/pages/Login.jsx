@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import { Moon, Sun, ArrowRight, Shield, Zap, Server } from 'lucide-react'
+import { Moon, Sun, ArrowRight, Shield, Zap, Server, User, Lock, Eye, EyeOff } from 'lucide-react'
 import { useTheme } from '../context/ThemeContext'
 import DumontLogo from '../components/DumontLogo'
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const { theme, toggleTheme } = useTheme()
@@ -161,47 +162,64 @@ export default function Login({ onLogin }) {
               </div>
             )}
 
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-medium text-gray-400 ml-1">Username</label>
-                <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
-                  placeholder="name@company.com"
-                  autoFocus
-                  required
-                />
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white ml-1">Email</label>
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <User size={20} className="text-gray-500" />
+                  </div>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full h-14 pl-12 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                    placeholder="seu@email.com"
+                    autoFocus
+                    required
+                  />
+                </div>
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
-                  <label className="text-xs font-medium text-gray-400">Password</label>
-                  <a href="#" className="text-xs text-emerald-500 hover:text-emerald-400 transition-colors">Esqueceu a senha?</a>
+                  <label className="text-sm font-medium text-white">Senha</label>
+                  <a href="#" className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">Esqueceu?</a>
                 </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-emerald-500/50 focus:ring-4 focus:ring-emerald-500/10 transition-all text-sm"
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Lock size={20} className="text-gray-500" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full h-14 pl-12 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-400 transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full h-11 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition-all shadow-lg shadow-emerald-900/20 hover:shadow-emerald-900/40 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="group relative w-full h-14 flex items-center justify-center gap-2.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-gray-900 font-semibold transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin" />
               ) : (
                 <>
                   <span>Entrar</span>
-                  <ArrowRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform" />
                 </>
               )}
             </button>

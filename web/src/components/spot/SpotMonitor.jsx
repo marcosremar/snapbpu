@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, TrendingDown, Minus, RefreshCw } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, RefreshCw, Cpu, Zap, DollarSign } from 'lucide-react'
+import { Card, StatCard, Badge, StatsGrid } from '../tailadmin-ui'
 
 const API_BASE = ''
 
@@ -30,68 +31,88 @@ export default function SpotMonitor({ getAuthHeaders }) {
 
   useEffect(() => {
     loadData()
-    const interval = setInterval(loadData, 60000) // Refresh every minute
+    const interval = setInterval(loadData, 60000)
     return () => clearInterval(interval)
   }, [])
 
-  const getTrendIcon = (trend) => {
-    if (trend === 'up') return <TrendingUp size={16} className="trend-up" />
-    if (trend === 'down') return <TrendingDown size={16} className="trend-down" />
-    return <Minus size={16} className="trend-stable" />
-  }
-
-  const formatPrice = (price) => `$${price?.toFixed(4) || '0.0000'}/h`
-  const formatPercent = (value) => `${value?.toFixed(1) || '0'}%`
+  const formatPrice = (price) => `$${price?.toFixed(2) || '0.00'}/h`
+  const formatPercent = (value) => `${Math.abs(value)?.toFixed(1) || '0'}%`
 
   if (loading && !data) {
-    return <div className="spot-card loading">Carregando monitor spot...</div>
+    return (
+      <Card>
+        <div className="flex items-center justify-center min-h-[300px]">
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-emerald-500 rounded-full animate-spin" />
+        </div>
+      </Card>
+    )
   }
 
   if (error) {
-    return <div className="spot-card error">{error}</div>
+    return (
+      <Card className="border-red-500/50">
+        <div className="text-red-400 text-center py-8">{error}</div>
+      </Card>
+    )
   }
 
   return (
-    <div className="spot-card spot-monitor">
-      <div className="spot-card-header">
-        <h3>Monitor de Preços Spot</h3>
-        <button onClick={loadData} className="refresh-btn" disabled={loading}>
-          <RefreshCw size={16} className={loading ? 'spinning' : ''} />
-        </button>
-      </div>
-
-      <div className="spot-monitor-grid">
-        {data?.items?.slice(0, 8).map((item, idx) => (
-          <div key={idx} className="spot-monitor-item">
-            <div className="spot-gpu-name">{item.gpu_name}</div>
-            <div className="spot-price-row">
-              <span className="spot-price">{formatPrice(item.spot_price)}</span>
-              {getTrendIcon(item.price_trend)}
+    <Card
+      header={
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+              <TrendingUp size={20} className="text-emerald-400" />
             </div>
-            <div className="spot-savings">
-              <span className="savings-badge">-{formatPercent(item.savings_percent)}</span>
-              vs On-Demand
-            </div>
-            <div className="spot-meta">
-              <span>{item.available_gpus} disponíveis</span>
-              <span>Min: {formatPrice(item.min_price)}</span>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Monitor de Preços Spot</h3>
+              <p className="text-sm text-gray-400">Preços em tempo real</p>
             </div>
           </div>
+          <button
+            onClick={loadData}
+            disabled={loading}
+            className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 transition-colors text-gray-400 hover:text-white"
+          >
+            <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </div>
+      }
+    >
+      {/* GPU Stats - Responsive Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {data?.items?.slice(0, 6).map((item, idx) => (
+          <StatCard
+            key={idx}
+            title={item.gpu_name}
+            value={formatPrice(item.spot_price)}
+            icon={Cpu}
+            iconColor="success"
+            subtitle={`${item.available_gpus} disponíveis • Min: ${formatPrice(item.min_price)}`}
+            change={`-${formatPercent(item.savings_percent)} vs On-Demand`}
+            changeType="up"
+          />
         ))}
       </div>
 
+      {/* Market Overview */}
       {data?.market_overview && (
-        <div className="spot-overview">
-          <div className="overview-item">
-            <span className="label">Total GPUs Spot:</span>
-            <span className="value">{data.market_overview.total_spot_gpus}</span>
-          </div>
-          <div className="overview-item">
-            <span className="label">Economia Média:</span>
-            <span className="value savings">{formatPercent(data.market_overview.avg_savings_percent)}</span>
-          </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/10">
+          <StatCard
+            title="Total GPUs Spot"
+            value={String(data.market_overview.total_spot_gpus || '0')}
+            icon={Zap}
+            iconColor="warning"
+          />
+          <StatCard
+            title="Economia Média"
+            value={`${formatPercent(data.market_overview.avg_savings_percent)}`}
+            icon={DollarSign}
+            iconColor="success"
+            subtitle="comparado com On-Demand"
+          />
         </div>
       )}
-    </div>
+    </Card>
   )
 }

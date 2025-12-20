@@ -17,7 +17,6 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
       })
       if (res.ok) {
         const result = await res.json()
-        // Map API response to expected format
         const hourlyPredictions = {}
         result.predictions_24h?.forEach(p => {
           hourlyPredictions[p.hour_utc] = p.predicted_price
@@ -44,7 +43,7 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
     loadData()
   }, [selectedGPU])
 
-  const formatPrice = (price) => `$${price?.toFixed(4) || '0.0000'}/h`
+  const formatPrice = (price) => `$${price?.toFixed(2) || '0.00'}/h`
   const formatPercent = (value) => `${(value * 100)?.toFixed(0) || '0'}%`
 
   const getChartData = () => {
@@ -73,7 +72,7 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
       legend: { display: false },
       tooltip: {
         callbacks: {
-          label: (context) => `$${context.parsed.y?.toFixed(4)}/h`
+          label: (context) => `$${context.parsed.y?.toFixed(2)}/h`
         }
       }
     },
@@ -81,7 +80,7 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
       y: {
         ticks: {
           color: '#9ca3af',
-          callback: (value) => `$${value.toFixed(3)}`
+          callback: (value) => `$${value.toFixed(2)}`
         },
         grid: { color: '#30363d' }
       },
@@ -93,57 +92,76 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
   }
 
   if (loading) {
-    return <div className="spot-card loading">Gerando previsão...</div>
+    return (
+      <div className="ta-card">
+        <div className="ta-card-body flex items-center justify-center min-h-[200px]">
+          <div className="ta-spinner" />
+        </div>
+      </div>
+    )
   }
 
   const chartData = getChartData()
 
   return (
-    <div className="spot-card spot-prediction">
-      <div className="spot-card-header">
-        <h3><Target size={20} /> Previsão de Preços Spot</h3>
-        <span className="gpu-tag">{data?.gpu_name}</span>
+    <div className="ta-card hover-glow">
+      <div className="ta-card-header flex justify-between items-center">
+        <h3 className="ta-card-title flex items-center gap-2">
+          <div className="stat-card-icon stat-card-icon-success pulse-dot">
+            <Target size={18} />
+          </div>
+          Previsão de Preços Spot
+        </h3>
+        <span className="gpu-badge">{data?.gpu_name}</span>
       </div>
 
-      {data?.prediction_summary && (
-        <div className="prediction-summary">
-          <div className="prediction-item">
-            <TrendingDown size={18} className="icon low" />
-            <div>
-              <span className="label">Preço Mínimo Previsto</span>
-              <span className="value">{formatPrice(data.prediction_summary.predicted_min)}</span>
+      <div className="ta-card-body">
+        {data?.prediction_summary && (
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div className="stat-card flex items-center gap-2.5 p-3 animate-fade-in" style={{ animationDelay: '0ms' }}>
+              <div className="stat-card-icon stat-card-icon-success">
+                <TrendingDown size={16} />
+              </div>
+              <div>
+                <span className="block text-[11px] text-gray-400 uppercase tracking-wide">Preço Mínimo</span>
+                <span className="text-lg font-bold text-emerald-400">{formatPrice(data.prediction_summary.predicted_min)}</span>
+              </div>
+            </div>
+            <div className="stat-card flex items-center gap-2.5 p-3 animate-fade-in" style={{ animationDelay: '50ms' }}>
+              <div className="stat-card-icon stat-card-icon-danger">
+                <TrendingUp size={16} />
+              </div>
+              <div>
+                <span className="block text-[11px] text-gray-400 uppercase tracking-wide">Preço Máximo</span>
+                <span className="text-lg font-bold text-red-400">{formatPrice(data.prediction_summary.predicted_max)}</span>
+              </div>
+            </div>
+            <div className="stat-card flex items-center gap-2.5 p-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
+              <div className="stat-card-icon stat-card-icon-primary">
+                <Clock size={16} />
+              </div>
+              <div>
+                <span className="block text-[11px] text-gray-400 uppercase tracking-wide">Melhor Horário</span>
+                <span className="text-lg font-bold text-blue-400">{data.prediction_summary.best_hour}:00 UTC</span>
+              </div>
             </div>
           </div>
-          <div className="prediction-item">
-            <TrendingUp size={18} className="icon high" />
-            <div>
-              <span className="label">Preço Máximo Previsto</span>
-              <span className="value">{formatPrice(data.prediction_summary.predicted_max)}</span>
-            </div>
-          </div>
-          <div className="prediction-item">
-            <Clock size={18} className="icon best" />
-            <div>
-              <span className="label">Melhor Horário (UTC)</span>
-              <span className="value">{data.prediction_summary.best_hour}:00</span>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
 
-      {chartData && (
-        <div className="prediction-chart" style={{ height: '200px' }}>
-          <Line data={chartData} options={chartOptions} />
-        </div>
-      )}
+        {chartData && (
+          <div className="h-[200px] my-4 p-3 bg-white/[0.02] rounded-xl border border-white/5">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+        )}
 
-      <div className="model-info">
-        <span className="confidence">
-          Confiança: {formatPercent(data?.model_confidence)}
-        </span>
-        <span className="model-version">
-          Modelo: {data?.model_version}
-        </span>
+        <div className="flex justify-between pt-3 border-t border-white/10 text-xs">
+          <span className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="text-gray-400">Confiança:</span>
+            <span className="text-emerald-400 font-semibold">{formatPercent(data?.model_confidence)}</span>
+          </span>
+          <span className="text-gray-500">Modelo: {data?.model_version}</span>
+        </div>
       </div>
     </div>
   )

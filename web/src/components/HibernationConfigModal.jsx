@@ -61,7 +61,15 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
       }
 
       const data = await response.json();
-      setConfig(data);
+      // Ensure failover_storage has default values
+      setConfig({
+        ...data,
+        failover_storage: data.failover_storage || {
+          provider: 'user_default',
+          bucket: '',
+          mount_path: '/data',
+        },
+      });
     } catch (err) {
       console.error('Erro ao carregar config:', err);
       setError(err.message);
@@ -259,6 +267,149 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
                     ✓ Snapshot permanece seguro no R2 (custo: ~$0.01/mês)
                   </p>
                 </div>
+              </div>
+
+              {/* Failover Storage Configuration */}
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => setShowFailoverConfig(!showFailoverConfig)}
+                  className="w-full flex items-center justify-between p-3 bg-gray-800/50 rounded-lg border border-gray-700/50 hover:border-purple-500/50 transition-colors"
+                >
+                  <div className="flex items-center gap-2">
+                    <Cloud className="w-4 h-4 text-purple-400" />
+                    <span className="text-base font-medium text-white">Cloud Storage Failover</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-400">
+                      {config.failover_storage?.provider === 'user_default'
+                        ? 'Usar Config. do Usuário'
+                        : FAILOVER_PROVIDERS.find(p => p.id === config.failover_storage?.provider)?.name || 'Não configurado'}
+                    </span>
+                    {showFailoverConfig ? (
+                      <ChevronUp className="w-4 h-4 text-gray-400" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                    )}
+                  </div>
+                </button>
+
+                {showFailoverConfig && (
+                  <div className="space-y-4 p-4 bg-gray-800/30 rounded-lg border border-gray-700/50">
+                    <p className="text-sm text-gray-400">
+                      Configure onde os dados serão armazenados para failover global.
+                      Permite restaurar em qualquer região do mundo.
+                    </p>
+
+                    {/* Provider Selection */}
+                    <div className="space-y-2">
+                      <Label className="text-sm text-gray-300">Provedor de Storage</Label>
+                      <div className="grid grid-cols-1 gap-2">
+                        {FAILOVER_PROVIDERS.map((provider) => (
+                          <label
+                            key={provider.id}
+                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                              config.failover_storage?.provider === provider.id
+                                ? 'border-purple-500 bg-purple-500/10'
+                                : 'border-gray-700 hover:border-gray-600'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name="failover_provider"
+                              value={provider.id}
+                              checked={config.failover_storage?.provider === provider.id}
+                              onChange={(e) =>
+                                setConfig({
+                                  ...config,
+                                  failover_storage: {
+                                    ...config.failover_storage,
+                                    provider: e.target.value,
+                                  },
+                                })
+                              }
+                              className="sr-only"
+                            />
+                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                              config.failover_storage?.provider === provider.id
+                                ? 'border-purple-500'
+                                : 'border-gray-600'
+                            }`}>
+                              {config.failover_storage?.provider === provider.id && (
+                                <div className="w-2 h-2 rounded-full bg-purple-500" />
+                              )}
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm text-white font-medium">{provider.name}</p>
+                              <p className="text-xs text-gray-400">{provider.description}</p>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Custom bucket config (only if not using user default) */}
+                    {config.failover_storage?.provider !== 'user_default' && (
+                      <div className="space-y-3 pt-2 border-t border-gray-700/50">
+                        <div className="space-y-2">
+                          <Label className="text-sm text-gray-300">Bucket Name</Label>
+                          <input
+                            type="text"
+                            value={config.failover_storage?.bucket || ''}
+                            onChange={(e) =>
+                              setConfig({
+                                ...config,
+                                failover_storage: {
+                                  ...config.failover_storage,
+                                  bucket: e.target.value,
+                                },
+                              })
+                            }
+                            placeholder="my-failover-bucket"
+                            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                          />
+                          <p className="text-xs text-gray-500">
+                            Bucket específico para esta máquina. Deixe vazio para usar o bucket padrão das configurações.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label className="text-sm text-gray-300">Mount Path</Label>
+                          <input
+                            type="text"
+                            value={config.failover_storage?.mount_path || '/data'}
+                            onChange={(e) =>
+                              setConfig({
+                                ...config,
+                                failover_storage: {
+                                  ...config.failover_storage,
+                                  mount_path: e.target.value,
+                                },
+                              })
+                            }
+                            placeholder="/data"
+                            className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-md text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Info about failover times */}
+                    <div className="bg-purple-500/10 border border-purple-500/30 rounded-md p-3">
+                      <div className="flex items-start gap-2">
+                        <HardDrive className="w-4 h-4 text-purple-400 mt-0.5" />
+                        <div className="text-xs text-gray-300">
+                          <p className="mb-1">
+                            <strong className="text-purple-400">Cloud Storage Failover</strong> permite restaurar em qualquer região (~45-60s)
+                          </p>
+                          <p className="text-gray-400">
+                            Comparativo: Warm Pool (~6s) → Regional Volume (~23s) → Cloud Storage (~47s)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Economia Estimada */}

@@ -42,8 +42,10 @@ test.describe('Fine-Tuning Feature - Vibe Test Journey', () => {
     console.log('STEP 1: Navigate to Fine-Tuning page');
     const step1Start = Date.now();
 
-    await page.goto('/app/finetune');
-    await page.waitForLoadState('networkidle');
+    if (!page.url().includes('/app/finetune')) {
+      await page.goto('/app/finetune');
+    }
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
 
     const step1Duration = Date.now() - step1Start;
@@ -56,15 +58,17 @@ test.describe('Fine-Tuning Feature - Vibe Test Journey', () => {
     if (!currentUrl.includes('/finetune')) {
       console.log('Status: Fine-Tuning page may not be available');
       // Try clicking sidebar link
-      const finetuneLink = page.locator('a[href*="finetune"]').first();
-      if (await finetuneLink.isVisible().catch(() => false)) {
-        await finetuneLink.click();
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+      const finetuneLink = page.getByRole('link', { name: /fine.?tuning|treinamento/i }).first();
+      if (await finetuneLink.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await finetuneLink.click({ force: true });
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1000);
       } else {
-        console.log('Skipping test - Fine-Tuning page not accessible');
-        test.skip();
-        return;
+        console.log('Warning: Fine-Tuning page not accessible - checking if page is /finetune anyway');
+        // Tentar navegar diretamente
+        await page.goto('/app/finetune');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1000);
       }
     }
 
@@ -103,9 +107,8 @@ test.describe('Fine-Tuning Feature - Vibe Test Journey', () => {
       console.log(`Page content length: ${pageContent.length} characters`);
 
       if (pageContent.length < 50) {
-        console.log('Skipping - page appears empty');
-        test.skip();
-        return;
+        console.log('Warning: page appears empty but continuing test');
+        // Não fazer skip - continuar para verificar se há elementos interativos
       }
     }
 
@@ -231,24 +234,34 @@ test.describe('Fine-Tuning Feature - Vibe Test Journey', () => {
     console.log('========================================\n');
 
     // Check for Fine-Tuning link in sidebar
-    const finetuneLink = page.locator('a[href*="finetune"]');
-    const hasLink = await finetuneLink.isVisible().catch(() => false);
+    const finetuneLink = page.getByRole('link', { name: /fine.?tuning|treinamento/i }).first();
+    const hasLink = await finetuneLink.isVisible({ timeout: 5000 }).catch(() => false);
 
     if (hasLink) {
       console.log('Validated: Fine-Tuning link visible in sidebar');
 
       // Click and verify navigation
-      await finetuneLink.click();
-      await page.waitForLoadState('networkidle');
-      await page.waitForTimeout(500);
+      await finetuneLink.click({ force: true });
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1000);
 
       const currentUrl = page.url();
       expect(currentUrl).toContain('/finetune');
       console.log(`Validated: Navigated to ${currentUrl}`);
     } else {
       console.log('Status: Fine-Tuning link not in sidebar');
-      console.log('Note: Feature may not be enabled');
-      test.skip();
+      console.log('Note: Feature may not be enabled - checking page directly');
+
+      // Tentar navegar diretamente
+      await page.goto('/app/finetune');
+      await page.waitForLoadState('domcontentloaded');
+
+      const currentUrl = page.url();
+      console.log(`Navigated to: ${currentUrl}`);
+
+      // Verificar se página tem algum conteúdo
+      const hasContent = await page.locator('main, [role="main"]').isVisible().catch(() => false);
+      expect(hasContent).toBeTruthy();
     }
 
     console.log('\n========================================');
@@ -261,8 +274,10 @@ test.describe('Fine-Tuning Feature - Vibe Test Journey', () => {
     console.log('VIBE TEST: Fine-Tuning Jobs List');
     console.log('========================================\n');
 
-    await page.goto('/app/finetune');
-    await page.waitForLoadState('networkidle');
+    if (!page.url().includes('/app/finetune')) {
+      await page.goto('/app/finetune');
+    }
+    await page.waitForLoadState('domcontentloaded');
     await page.waitForTimeout(1000);
 
     // Check for jobs list or empty state

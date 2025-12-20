@@ -186,13 +186,13 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
 
   return (
     <div
-      className={`group relative flex flex-col p-5 rounded-2xl border transition-all duration-300 bg-white dark:bg-[#131713] 
+      className={`group relative flex flex-col p-5 rounded-2xl border transition-all duration-300 bg-[#131713]
         shadow-lg hover:shadow-[0_0_25px_rgba(16,185,129,0.15)] hover:-translate-y-1
         ${isInFailover
           ? getFailoverBorderColor()
           : isRunning
             ? 'border-emerald-500/20 shadow-emerald-900/5'
-            : 'border-white/5 hover:border-emerald-500/20'
+            : 'border-white/10 hover:border-emerald-500/20'
         }
       `}
     >
@@ -202,7 +202,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
       )}
       {/* Failover Progress Panel - Shows during failover */}
       {isInFailover && (
-        <div className="mb-3 p-3 rounded-lg bg-dark-surface-secondary border border-dark-surface-border" data-testid="failover-progress-panel">
+        <div className="mb-3 p-3 rounded-lg bg-white/5 border border-white/10" data-testid="failover-progress-panel">
           <div className="flex items-center gap-2 mb-3">
             <Zap className={`w-4 h-4 ${failoverProgress.phase === 'gpu_lost' ? 'text-red-400 animate-pulse' :
               failoverProgress.phase === 'complete' ? 'text-green-400' :
@@ -331,7 +331,7 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
       {/* Header Row */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-gray-900 dark:text-white font-semibold text-base">{gpuName}</span>
+          <span className="text-white font-semibold text-base">{gpuName}</span>
           <span className={`ta-badge ${isRunning ? 'ta-badge-success' : 'ta-badge-gray'}`}>
             {isRunning ? 'Online' : 'Offline'}
           </span>
@@ -352,15 +352,15 @@ function MachineCard({ machine, onDestroy, onStart, onPause, onRestoreToNew, onS
 
             {/* Backup Info Popover */}
             {showBackupInfo && (
-              <div className="absolute top-full left-0 mt-2 z-50 w-72 p-4 bg-white dark:bg-[#131713] border border-gray-200 dark:border-gray-800 rounded-xl shadow-xl">
+              <div className="absolute top-full left-0 mt-2 z-50 w-72 p-4 bg-[#131713] border border-white/10 rounded-xl shadow-xl">
                 <div className="flex items-center justify-between mb-3">
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                    <Layers className="w-4 h-4 text-brand-500" />
+                  <span className="text-sm font-semibold text-white flex items-center gap-2">
+                    <Layers className="w-4 h-4 text-emerald-400" />
                     CPU Backup (Espelho)
                   </span>
                   <button
                     onClick={() => setShowBackupInfo(false)}
-                    className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-dark-surface-hover text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    className="p-1 rounded-lg hover:bg-white/10 text-gray-500 hover:text-gray-300"
                   >
                     <X className="w-4 h-4" />
                   </button>

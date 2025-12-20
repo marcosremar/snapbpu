@@ -56,15 +56,16 @@ test.describe('Fine-Tuning Job Status - Verification Vibe Test', () => {
 
     if (!currentUrl.includes('/finetune')) {
       console.log('Status: Fine-Tuning page may not be available');
-      const finetuneLink = page.locator('a[href*="finetune"]').first();
-      if (await finetuneLink.isVisible().catch(() => false)) {
-        await finetuneLink.click();
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(500);
+      const finetuneLink = page.getByRole('link', { name: /fine.?tuning|treinamento/i }).first();
+      if (await finetuneLink.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await finetuneLink.click({ force: true });
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1000);
       } else {
-        console.log('Skipping test - Fine-Tuning page not accessible');
-        test.skip();
-        return;
+        console.log('Warning: Fine-Tuning link not found - trying direct navigation');
+        await page.goto('/app/finetune');
+        await page.waitForLoadState('domcontentloaded');
+        await page.waitForTimeout(1000);
       }
     }
 
@@ -81,9 +82,8 @@ test.describe('Fine-Tuning Job Status - Verification Vibe Test', () => {
     console.log(`Page content length: ${pageContent.length} characters`);
 
     if (pageContent.length < 50) {
-      console.log('Status: Page appears empty');
-      test.skip();
-      return;
+      console.log('Warning: Page appears empty but continuing test');
+      // Não fazer skip - continuar para verificar elementos
     }
 
     // Look for Fine-Tuning header
@@ -199,9 +199,10 @@ test.describe('Fine-Tuning Job Status - Verification Vibe Test', () => {
     console.log(`URL: ${currentUrl}`);
 
     if (!currentUrl.includes('/finetune')) {
-      console.log('Not on Fine-Tuning page');
-      test.skip();
-      return;
+      console.log('Warning: Not on Fine-Tuning page - trying to navigate');
+      await page.goto('/app/finetune');
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(1000);
     }
 
     // Check for main layout elements

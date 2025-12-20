@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronRight, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -93,20 +93,20 @@ export function StatCard({
   );
 }
 
-// Card Component
+// Card Component - Dark theme by default
 export function Card({ children, className = '', header, footer, noPadding = false }) {
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-theme-sm ${className}`}>
+    <div className={`bg-[#111411] rounded-xl border border-white/10 shadow-xl ${className}`}>
       {header && (
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="px-6 py-4 border-b border-white/10">
           {typeof header === 'string' ? (
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{header}</h3>
+            <h3 className="text-lg font-semibold text-white">{header}</h3>
           ) : header}
         </div>
       )}
       <div className={noPadding ? '' : 'p-6'}>{children}</div>
       {footer && (
-        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl">
+        <div className="px-6 py-4 border-t border-white/10 bg-white/5 rounded-b-xl">
           {footer}
         </div>
       )}
@@ -117,7 +117,7 @@ export function Card({ children, className = '', header, footer, noPadding = fal
 // Card Sub-components (for compatibility with old UI structure)
 export function CardHeader({ children, className = '' }) {
   return (
-    <div className={`px-6 py-4 border-b border-gray-200 dark:border-gray-800 ${className}`}>
+    <div className={`px-6 py-4 border-b border-white/10 ${className}`}>
       {children}
     </div>
   );
@@ -125,7 +125,7 @@ export function CardHeader({ children, className = '' }) {
 
 export function CardTitle({ children, className = '' }) {
   return (
-    <h3 className={`text-lg font-semibold text-gray-900 dark:text-white ${className}`}>
+    <h3 className={`text-lg font-semibold text-white ${className}`}>
       {children}
     </h3>
   );
@@ -133,7 +133,7 @@ export function CardTitle({ children, className = '' }) {
 
 export function CardDescription({ children, className = '' }) {
   return (
-    <p className={`text-sm text-gray-500 dark:text-gray-400 mt-1 ${className}`}>
+    <p className={`text-sm text-gray-400 mt-1 ${className}`}>
       {children}
     </p>
   );
@@ -145,7 +145,7 @@ export function CardContent({ children, className = '' }) {
 
 export function CardFooter({ children, className = '' }) {
   return (
-    <div className={`px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl ${className}`}>
+    <div className={`px-6 py-4 border-t border-white/10 bg-white/5 rounded-b-xl ${className}`}>
       {children}
     </div>
   );
@@ -164,24 +164,24 @@ export function Button({
   ...props
 }) {
   const variants = {
-    primary: 'bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-500',
-    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700',
+    primary: 'bg-emerald-300 text-gray-900 hover:bg-emerald-400 focus:ring-emerald-300 font-semibold shadow-lg shadow-emerald-500/20',
+    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20',
     success: 'bg-success-500 text-white hover:bg-success-600 focus:ring-success-500',
     error: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500',
     warning: 'bg-warning-500 text-white hover:bg-warning-600 focus:ring-warning-500',
-    outline: 'border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800',
-    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800',
+    outline: 'border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10',
+    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/10',
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2.5 text-sm',
-    lg: 'px-6 py-3 text-base',
+    sm: 'px-4 py-2 text-xs',
+    md: 'px-5 py-3 text-sm',
+    lg: 'px-8 py-4 text-base',
   };
 
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center gap-2.5 font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled || loading}
       {...props}
     >
@@ -273,18 +273,25 @@ export function Table({ columns, data, onRowClick, emptyMessage = 'Nenhum dado e
 }
 
 // Input Component
-export function Input({ label, error, helper, className = '', ...props }) {
+export function Input({ label, error, helper, icon: Icon, className = '', ...props }) {
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {label}
         </label>
       )}
-      <input
-        className={`w-full px-4 py-2.5 text-sm text-gray-900 bg-white border rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:focus:border-brand-400 transition-colors ${error ? 'border-error-500' : 'border-gray-300'}`}
-        {...props}
-      />
+      <div className="relative">
+        {Icon && (
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+            <Icon size={20} className="text-gray-400 dark:text-gray-500" />
+          </div>
+        )}
+        <input
+          className={`w-full ${Icon ? 'pl-12' : 'px-4'} pr-4 py-3.5 text-sm text-gray-900 bg-white border rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-emerald-400 transition-all ${error ? 'border-error-500' : 'border-gray-200 dark:border-white/10'}`}
+          {...props}
+        />
+      </div>
       {(error || helper) && (
         <p className={`mt-1.5 text-xs ${error ? 'text-error-500' : 'text-gray-500 dark:text-gray-400'}`}>
           {error || helper}
@@ -294,8 +301,8 @@ export function Input({ label, error, helper, className = '', ...props }) {
   );
 }
 
-// Select Component
-export function Select({ label, error, helper, options = [], className = '', ...props }) {
+// Simple Select Component (native HTML select)
+export function SelectSimple({ label, error, helper, options = [], className = '', ...props }) {
   return (
     <div className={className}>
       {label && (
@@ -473,14 +480,23 @@ export function Label({ children, htmlFor, required = false, className = '' }) {
 }
 
 // Switch Component
-export function Switch({ checked, onChange, disabled = false, label, className = '' }) {
+export function Switch({ checked, onChange, onCheckedChange, disabled = false, label, className = '' }) {
+  const handleChange = (e) => {
+    if (onChange) {
+      onChange(e);
+    }
+    if (onCheckedChange) {
+      onCheckedChange(e.target.checked);
+    }
+  };
+
   return (
     <label className={`flex items-center gap-3 cursor-pointer ${disabled ? 'opacity-50 cursor-not-allowed' : ''} ${className}`}>
       <div className="relative">
         <input
           type="checkbox"
           checked={checked}
-          onChange={onChange}
+          onChange={handleChange}
           disabled={disabled}
           className="sr-only peer"
         />
@@ -711,37 +727,141 @@ export function AvatarFallback({ children, className = '' }) {
   );
 }
 
-// Select Components (for compatibility with old UI)
+// Compound Select Components with state management
+const SelectContext = React.createContext({});
+
+export function SelectCompound({ value, onValueChange, children, className = '' }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLabel, setSelectedLabel] = useState('');
+  const selectRef = useRef(null);
+  const optionsMapRef = useRef({});
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (selectRef.current && !selectRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Register options for label lookup - using ref to avoid re-renders
+  const registerOption = useCallback((optValue, optLabel) => {
+    if (optionsMapRef.current[optValue] !== optLabel) {
+      optionsMapRef.current[optValue] = optLabel;
+    }
+  }, []);
+
+  // Get display label for current value
+  const getDisplayLabel = useCallback(() => {
+    if (selectedLabel) return selectedLabel;
+    if (optionsMapRef.current[value]) return optionsMapRef.current[value];
+    return value || '';
+  }, [selectedLabel, value]);
+
+  const handleValueChange = useCallback((val, label) => {
+    onValueChange?.(val);
+    setSelectedLabel(typeof label === 'string' ? label : String(label));
+    setIsOpen(false);
+  }, [onValueChange]);
+
+  const contextValue = {
+    value,
+    isOpen,
+    setIsOpen,
+    onValueChange: handleValueChange,
+    selectedLabel,
+    setSelectedLabel,
+    registerOption,
+    getDisplayLabel
+  };
+
+  return (
+    <SelectContext.Provider value={contextValue}>
+      <div ref={selectRef} className={`relative ${className}`}>
+        {children}
+      </div>
+    </SelectContext.Provider>
+  );
+}
+
 export function SelectTrigger({ children, className = '', ...props }) {
+  const { isOpen, setIsOpen } = React.useContext(SelectContext);
   return (
     <button
-      className={`w-full px-4 py-2.5 text-sm text-left text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white flex items-center justify-between ${className}`}
+      type="button"
+      onClick={() => setIsOpen(!isOpen)}
+      className={`w-full px-4 py-3.5 text-sm text-left text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 dark:bg-white/5 dark:border-white/10 dark:text-white flex items-center justify-between transition-all ${className}`}
       {...props}
     >
       {children}
+      <svg className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
     </button>
   );
 }
 
-export function SelectValue({ placeholder, children }) {
-  return <span className="truncate">{children || placeholder}</span>;
+export function SelectValue({ placeholder }) {
+  const { getDisplayLabel } = React.useContext(SelectContext);
+  const displayLabel = getDisplayLabel ? getDisplayLabel() : '';
+  return <span className="truncate">{displayLabel || placeholder}</span>;
 }
 
 export function SelectContent({ children, className = '' }) {
+  const { isOpen } = React.useContext(SelectContext);
+
+  // Always render children for option registration, but hide when closed
   return (
-    <div className={`absolute mt-1 w-full rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg z-50 max-h-60 overflow-auto ${className}`}>
+    <div
+      className={`absolute mt-2 w-full rounded-xl bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 shadow-2xl z-50 max-h-60 overflow-auto py-2 ${className}`}
+      style={{
+        visibility: isOpen ? 'visible' : 'hidden',
+        opacity: isOpen ? 1 : 0,
+        pointerEvents: isOpen ? 'auto' : 'none'
+      }}
+    >
       {children}
     </div>
   );
 }
 
-export function SelectItem({ children, value, onSelect, className = '' }) {
+export function SelectItem({ children, value, className = '' }) {
+  const { value: selectedValue, onValueChange, registerOption } = React.useContext(SelectContext);
+  const isSelected = selectedValue === value;
+  const registeredRef = useRef(false);
+
+  // Register this option's value and label on mount only
+  useEffect(() => {
+    if (registerOption && !registeredRef.current) {
+      const label = typeof children === 'string' ? children : String(children);
+      registerOption(value, label);
+      registeredRef.current = true;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   return (
     <button
-      onClick={() => onSelect?.(value)}
-      className={`w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors ${className}`}
+      type="button"
+      onClick={() => onValueChange(value, children)}
+      className={`w-full px-4 py-3 text-left text-sm transition-all flex items-center justify-between mx-2 rounded-lg ${
+        isSelected
+          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium'
+          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
+      } ${className}`}
+      style={{ width: 'calc(100% - 16px)' }}
     >
-      {children}
+      <span>{children}</span>
+      {isSelected && (
+        <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      )}
     </button>
   );
 }
+
+// Main Select export (use the compound version)
+export { SelectCompound as Select };

@@ -167,6 +167,32 @@ const WorldMap = ({ selectedCodes = [], onCountryClick }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  // Theme-aware colors
+  const mapColors = {
+    dark: {
+      background: '#0a0d0a',           // Match page background
+      landFill: '#1a2e1a',             // Dark green-tinted land
+      landStroke: '#2d4a2d',           // Subtle green borders
+      hoverFill: '#10b981',            // Emerald on hover
+      hoverStroke: '#34d399',          // Light emerald stroke
+      selectedFill: '#10b981',         // Emerald for selected
+      markerFill: '#10b981',
+      markerStroke: '#34d399',
+    },
+    light: {
+      background: '#f0fdf4',           // Light green-tinted background
+      landFill: '#d1fae5',             // Light emerald land
+      landStroke: '#a7f3d0',           // Emerald borders
+      hoverFill: '#34d399',            // Emerald on hover
+      hoverStroke: '#10b981',          // Darker emerald stroke
+      selectedFill: '#059669',         // Darker emerald for selected
+      markerFill: '#059669',
+      markerStroke: '#10b981',
+    }
+  };
+
+  const colors = isDark ? mapColors.dark : mapColors.light;
+
   // Datacenter markers
   const datacenterMarkers = [
     { latLng: [37.77, -122.42], name: 'San Francisco', code: 'US' },
@@ -185,19 +211,20 @@ const WorldMap = ({ selectedCodes = [], onCountryClick }) => {
     : datacenterMarkers.filter(m => selectedCodes.includes(m.code));
 
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-full" style={{ backgroundColor: colors.background }}>
       <VectorMap
+        key={`map-${theme}`}
         map={worldMill}
-        backgroundColor={isDark ? '#0a0d0a' : '#f8fafc'}
+        backgroundColor="transparent"
         containerStyle={{
           width: '100%',
           height: '100%',
         }}
         markerStyle={{
           initial: {
-            fill: '#10b981',
+            fill: colors.markerFill,
             r: 6,
-            stroke: isDark ? '#34d399' : '#059669',
+            stroke: colors.markerStroke,
             strokeWidth: 2,
             fillOpacity: 0.9,
           },
@@ -212,7 +239,7 @@ const WorldMap = ({ selectedCodes = [], onCountryClick }) => {
         markers={visibleMarkers.map(m => ({
           latLng: m.latLng,
           name: m.name,
-          style: { fill: '#10b981', stroke: '#34d399', strokeWidth: 2, fillOpacity: 0.9 },
+          style: { fill: colors.markerFill, stroke: colors.markerStroke, strokeWidth: 2, fillOpacity: 0.9 },
         }))}
         zoomOnScroll={false}
         zoomMax={12}
@@ -224,17 +251,17 @@ const WorldMap = ({ selectedCodes = [], onCountryClick }) => {
         }}
         regionStyle={{
           initial: {
-            fill: isDark ? '#1e293b' : '#cbd5e1',
+            fill: colors.landFill,
             fillOpacity: 1,
-            stroke: isDark ? '#334155' : '#94a3b8',
+            stroke: colors.landStroke,
             strokeWidth: 0.5,
             strokeOpacity: 1,
           },
           hover: {
             fillOpacity: 0.9,
             cursor: 'pointer',
-            fill: isDark ? '#10b981' : '#34d399',
-            stroke: isDark ? '#34d399' : '#10b981',
+            fill: colors.hoverFill,
+            stroke: colors.hoverStroke,
             strokeWidth: 1,
           },
         }}
@@ -245,7 +272,7 @@ const WorldMap = ({ selectedCodes = [], onCountryClick }) => {
               return acc;
             }, {}),
             scale: {
-              '1': isDark ? '#10b981' : '#059669'
+              '1': colors.selectedFill
             },
             attribute: 'fill'
           }]
@@ -270,20 +297,29 @@ const TierCard = ({ tier, isSelected, onClick }) => (
   <Popover>
     <PopoverTrigger asChild>
       <button onClick={onClick}
-        className={`flex flex-col p-3 md:p-4 rounded-lg border text-left transition-all shadow-theme-sm ${isSelected ? 'border-brand-500 bg-brand-50 dark:bg-brand-500/10' : 'border-gray-200 dark:border-gray-800 bg-white dark:bg-[#131713] hover:border-brand-300 dark:hover:border-brand-500/50'}`}
+        className={`relative flex flex-col p-3 md:p-4 rounded-xl text-left transition-all overflow-hidden ${
+          isSelected
+            ? 'border-2 border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10'
+            : 'border border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
+        }`}
         style={{ minHeight: '160px' }}
       >
+        {/* Green accent bar on left when selected */}
+        {isSelected && (
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-400 via-emerald-500 to-teal-500" />
+        )}
+
         <div className="flex items-center justify-between mb-2">
-          <span className="text-gray-900 dark:text-white font-semibold text-xs md:text-sm tracking-tight">{tier.name}</span>
+          <span className={`font-bold text-sm md:text-base tracking-tight ${isSelected ? 'text-white' : 'text-gray-100'}`}>{tier.name}</span>
           <SpeedBars level={tier.level} color={tier.color} />
         </div>
-        <div className="text-green-400 text-[10px] md:text-xs font-mono font-medium tracking-tight">{tier.speed}</div>
-        <div className="text-gray-500 dark:text-gray-400 text-[9px] md:text-[10px] mb-1.5">{tier.time}</div>
-        <div className="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] leading-relaxed">{tier.gpu}</div>
-        <div className="text-gray-600 dark:text-gray-500 text-[9px] md:text-[10px] leading-relaxed">{tier.vram}</div>
-        <div className="text-yellow-400/80 text-[9px] md:text-[10px] font-mono font-medium mt-1.5">{tier.priceRange}</div>
-        <div className="mt-auto pt-2 border-t border-gray-200 dark:border-gray-700/30">
-          <p className="text-gray-500 dark:text-gray-400 text-[8px] md:text-[9px] leading-relaxed">{tier.description}</p>
+        <div className={`text-xs md:text-sm font-mono font-semibold tracking-tight ${isSelected ? 'text-emerald-400' : 'text-emerald-400'}`}>{tier.speed}</div>
+        <div className="text-gray-400 text-[10px] md:text-xs mb-2">{tier.time}</div>
+        <div className="text-gray-400 text-[10px] md:text-xs leading-relaxed">{tier.gpu}</div>
+        <div className="text-gray-400 text-[10px] md:text-xs leading-relaxed">{tier.vram}</div>
+        <div className={`text-xs md:text-sm font-mono font-semibold mt-2 ${isSelected ? 'text-yellow-400' : 'text-yellow-400/80'}`}>{tier.priceRange}</div>
+        <div className="mt-auto pt-3 border-t border-white/10">
+          <p className="text-gray-400 text-[9px] md:text-[10px] leading-relaxed">{tier.description}</p>
         </div>
       </button>
     </PopoverTrigger>
@@ -406,20 +442,24 @@ const GPUSelector = ({ selectedGPU, onSelectGPU, selectedCategory, onSelectCateg
                     setIsExpanded(true);
                   }
                 }}
-                className={`p-3 rounded-lg border transition-all text-left ${isActive
-                  ? 'bg-emerald-600 dark:bg-emerald-500 border-emerald-700 dark:border-emerald-600'
-                  : 'border-gray-300 hover:border-gray-400 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700'
+                className={`relative p-3 rounded-xl border transition-all text-left overflow-hidden ${isActive
+                  ? 'border-emerald-500/50 bg-emerald-500/10'
+                  : 'border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10'
                   }`}
               >
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={`w-6 h-6 rounded-md ${isActive ? 'bg-white/20' : 'bg-gray-200 dark:bg-gray-700'} flex items-center justify-center`}>
+                {/* Left accent when active */}
+                {isActive && (
+                  <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-emerald-500" />
+                )}
+                <div className="flex items-center gap-2.5 mb-1.5">
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${isActive ? 'bg-emerald-500/20' : 'bg-white/10'}`}>
                     {getCategoryIcon(cat.icon, isActive)}
                   </div>
-                  <span className={`text-xs font-bold ${isActive ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
+                  <span className={`text-sm font-bold ${isActive ? 'text-white' : 'text-gray-100'}`}>
                     {cat.name}
                   </span>
                 </div>
-                <p className={`text-[9px] ${isActive ? 'text-white/90' : 'text-gray-600 dark:text-gray-400'}`}>
+                <p className={`text-[10px] pl-9 ${isActive ? 'text-emerald-300' : 'text-gray-400'}`}>
                   {cat.description}
                 </p>
               </button>
@@ -798,7 +838,7 @@ const AIWizardChat = ({ onRecommendation, onSearchWithFilters, compact = false }
                 <button
                   key={ex}
                   onClick={() => setInputValue(ex)}
-                  className="px-3 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700/70 hover:border-gray-300 dark:hover:border-gray-600 transition-all"
+                  className="px-4 py-2 text-xs font-semibold text-gray-700 dark:text-emerald-300 bg-gray-100 dark:bg-emerald-500/10 border border-gray-300 dark:border-emerald-500/30 rounded-full hover:bg-emerald-50 dark:hover:bg-emerald-500/20 hover:border-emerald-400 dark:hover:border-emerald-500/50 hover:text-emerald-600 dark:hover:text-emerald-200 transition-all"
                 >
                   {ex}
                 </button>
@@ -1319,40 +1359,95 @@ const GPUCarousel = ({ options, onSearch }) => {
   );
 };
 
-const OfferCard = ({ offer, onSelect }) => (
-  <Card className="hover:border-green-300 dark:hover:border-green-500/30 transition-all">
-    <CardContent className="p-4">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Cpu className="w-5 h-5 text-green-600 dark:text-green-400" />
-          <span className="text-gray-900 dark:text-white font-semibold text-sm">{offer.gpu_name}</span>
-          {offer.num_gpus > 1 && <span className="text-xs text-gray-500 dark:text-gray-400">x{offer.num_gpus}</span>}
+const OfferCard = ({ offer, onSelect }) => {
+  const reliability = offer.reliability || 0;
+  const reliabilityColor = reliability >= 0.9 ? 'text-green-500' : reliability >= 0.7 ? 'text-yellow-500' : 'text-red-500';
+  const reliabilityBg = reliability >= 0.9 ? 'bg-green-500/10' : reliability >= 0.7 ? 'bg-yellow-500/10' : 'bg-red-500/10';
+
+  return (
+    <Card className="group relative overflow-hidden hover:shadow-lg dark:hover:shadow-green-500/5 hover:border-green-400 dark:hover:border-green-500/50 transition-all duration-300">
+      {/* Gradient accent bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500" />
+
+      <CardContent className="p-5 pt-6">
+        {/* Header with GPU info and price */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/20 to-emerald-500/10 dark:from-green-500/30 dark:to-emerald-500/20">
+                <Cpu className="w-5 h-5 text-green-600 dark:text-green-400" />
+              </div>
+              <div>
+                <h3 className="text-gray-900 dark:text-white font-bold text-base leading-tight">{offer.gpu_name}</h3>
+                {offer.num_gpus > 1 && (
+                  <span className="text-xs font-medium text-green-600 dark:text-green-400">x{offer.num_gpus} GPUs</span>
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+              ${offer.dph_total?.toFixed(2)}
+            </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400">por hora</div>
+          </div>
         </div>
-        <div className="text-green-600 dark:text-green-400 font-mono font-semibold text-sm">
-          ${offer.dph_total?.toFixed(3)}/hr
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="text-center p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
+            <div className="text-lg font-bold text-gray-900 dark:text-white">{offer.gpu_ram?.toFixed(0) || '-'}</div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-medium">VRAM GB</div>
+          </div>
+          <div className="text-center p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
+            <div className="text-lg font-bold text-gray-900 dark:text-white">{offer.cpu_cores_effective || '-'}</div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-medium">CPU Cores</div>
+          </div>
+          <div className="text-center p-2.5 rounded-lg bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
+            <div className="text-lg font-bold text-gray-900 dark:text-white">{offer.disk_space?.toFixed(0) || '-'}</div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-medium">Disco GB</div>
+          </div>
         </div>
-      </div>
-      <div className="grid grid-cols-2 gap-2 mb-3 text-[11px]">
-        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">VRAM:</span> {offer.gpu_ram?.toFixed(0) || '-'} GB</div>
-        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">CPU:</span> {offer.cpu_cores_effective || '-'} cores</div>
-        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">Disco:</span> {offer.disk_space?.toFixed(0) || '-'} GB</div>
-        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">Rede:</span> {offer.inet_down?.toFixed(0) || '-'} Mbps</div>
-        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">DLPerf:</span> {offer.dlperf?.toFixed(1) || '-'}</div>
-        <div className="text-gray-600 dark:text-gray-400"><span className="text-gray-500">PCIe:</span> {offer.pcie_bw?.toFixed(1) || '-'} GB/s</div>
-      </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${(offer.reliability || 0) >= 0.9 ? 'bg-green-500' : (offer.reliability || 0) >= 0.7 ? 'bg-yellow-500' : 'bg-red-500'}`} />
-          <span className="text-[10px] text-gray-500 dark:text-gray-400">{((offer.reliability || 0) * 100).toFixed(0)}%</span>
-          {offer.verified && <span className="text-[9px] text-green-600 dark:text-green-400 px-1.5 py-0.5 bg-green-100 dark:bg-green-500/10 rounded">Verificado</span>}
+
+        {/* Secondary Stats */}
+        <div className="flex flex-wrap gap-2 mb-4 text-xs">
+          <span className="px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium">
+            <Wifi className="w-3 h-3 inline mr-1" />{offer.inet_down?.toFixed(0) || '-'} Mbps
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 font-medium">
+            <Zap className="w-3 h-3 inline mr-1" />DL {offer.dlperf?.toFixed(1) || '-'}
+          </span>
+          <span className="px-2.5 py-1 rounded-full bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 font-medium">
+            PCIe {offer.pcie_bw?.toFixed(1) || '-'} GB/s
+          </span>
         </div>
-        <Button onClick={() => onSelect(offer)} size="sm">
-          Selecionar
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
-);
+
+        {/* Footer with reliability and action */}
+        <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700/50">
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full ${reliabilityBg}`}>
+              <div className={`w-2 h-2 rounded-full ${reliability >= 0.9 ? 'bg-green-500' : reliability >= 0.7 ? 'bg-yellow-500' : 'bg-red-500'}`} />
+              <span className={`text-xs font-semibold ${reliabilityColor}`}>{(reliability * 100).toFixed(0)}%</span>
+            </div>
+            {offer.verified && (
+              <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400 px-2 py-1 bg-green-100 dark:bg-green-500/10 rounded-full font-medium">
+                <Check className="w-3 h-3" />
+                Verificado
+              </span>
+            )}
+          </div>
+          <Button
+            onClick={() => onSelect(offer)}
+            size="sm"
+            className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-md hover:shadow-lg transition-all"
+          >
+            Selecionar
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 
 // Collapsible Filter Section
 const FilterSection = ({ title, icon: Icon, children, defaultOpen = true }) => {
@@ -1382,11 +1477,170 @@ const FilterSection = ({ title, icon: Icon, children, defaultOpen = true }) => {
 
 // Stats Card Component with tooltip and animation support
 
+// Provisioning Race Screen Component
+const ProvisioningRaceScreen = ({ candidates, winner, onCancel, onComplete }) => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+      <div className="w-full max-w-4xl mx-4">
+        <Card className="border-2 border-emerald-500/30 bg-gradient-to-br from-gray-900 to-gray-950 shadow-2xl shadow-emerald-500/10">
+          <CardContent className="p-8">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-2 border-emerald-500/30 mb-4">
+                {winner ? (
+                  <Check className="w-8 h-8 text-emerald-400" />
+                ) : (
+                  <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+                )}
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {winner ? 'Máquina Conectada!' : 'Provisionando Máquinas...'}
+              </h2>
+              <p className="text-gray-400">
+                {winner
+                  ? 'Sua máquina está pronta para uso'
+                  : 'Testando conexão com 5 máquinas simultaneamente. A primeira que responder será selecionada.'}
+              </p>
+            </div>
+
+            {/* Race Track */}
+            <div className="space-y-3 mb-8">
+              {candidates.map((candidate, index) => {
+                const isWinner = winner?.id === candidate.id;
+                const isCancelled = winner && !isWinner;
+                const status = candidate.status; // 'connecting', 'connected', 'failed', 'cancelled'
+
+                return (
+                  <div
+                    key={candidate.id}
+                    className={`relative overflow-hidden rounded-xl border-2 transition-all duration-500 ${
+                      isWinner
+                        ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02] shadow-lg shadow-emerald-500/20'
+                        : isCancelled
+                        ? 'border-gray-700 bg-gray-800/30 opacity-50 scale-[0.98]'
+                        : status === 'failed'
+                        ? 'border-red-500/50 bg-red-500/5'
+                        : 'border-gray-700 bg-gray-800/50'
+                    }`}
+                  >
+                    {/* Progress bar animation for connecting */}
+                    {status === 'connecting' && !winner && (
+                      <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 animate-pulse"
+                        style={{ width: `${candidate.progress || 0}%`, transition: 'width 0.3s ease-out' }}
+                      />
+                    )}
+
+                    <div className="p-4 flex items-center gap-4">
+                      {/* Position/Status Icon */}
+                      <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg ${
+                        isWinner
+                          ? 'bg-emerald-500 text-white'
+                          : isCancelled
+                          ? 'bg-gray-700 text-gray-500'
+                          : status === 'failed'
+                          ? 'bg-red-500/20 text-red-400'
+                          : 'bg-gray-700 text-gray-300'
+                      }`}>
+                        {isWinner ? (
+                          <Check className="w-5 h-5" />
+                        ) : isCancelled ? (
+                          <X className="w-5 h-5" />
+                        ) : status === 'failed' ? (
+                          <X className="w-5 h-5" />
+                        ) : (
+                          <span>{index + 1}</span>
+                        )}
+                      </div>
+
+                      {/* Machine Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Cpu className={`w-4 h-4 ${isWinner ? 'text-emerald-400' : 'text-gray-400'}`} />
+                          <span className={`font-semibold truncate ${isWinner ? 'text-white' : 'text-gray-300'}`}>
+                            {candidate.gpu_name}
+                          </span>
+                          {candidate.num_gpus > 1 && (
+                            <span className="text-xs text-gray-500">x{candidate.num_gpus}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                          <span>{candidate.gpu_ram?.toFixed(0)} GB VRAM</span>
+                          <span>•</span>
+                          <span>{candidate.geolocation || 'Unknown'}</span>
+                          <span>•</span>
+                          <span className="text-emerald-400 font-medium">${candidate.dph_total?.toFixed(2)}/hr</span>
+                        </div>
+                      </div>
+
+                      {/* Status */}
+                      <div className="flex-shrink-0">
+                        {isWinner ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-sm font-semibold">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                            Conectado
+                          </span>
+                        ) : isCancelled ? (
+                          <span className="text-sm text-gray-600">Cancelado</span>
+                        ) : status === 'failed' ? (
+                          <span className="text-sm text-red-400">Falhou</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-2 text-sm text-gray-400">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Conectando...
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center justify-center gap-4">
+              {winner ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={onCancel}
+                    className="border-gray-700 text-gray-400 hover:bg-gray-800"
+                  >
+                    Buscar Outras
+                  </Button>
+                  <Button
+                    onClick={() => onComplete(winner)}
+                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8"
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Usar Esta Máquina
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={onCancel}
+                  className="border-gray-700 text-gray-400 hover:bg-gray-800"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Cancelar
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [mode, setMode] = useState('wizard');
+  const [provisioningMode, setProvisioningMode] = useState(false);
+  const [raceCandidates, setRaceCandidates] = useState([]);
+  const [raceWinner, setRaceWinner] = useState(null);
   const [dashboardStats, setDashboardStats] = useState({
     activeMachines: 0,
     totalMachines: 0,
@@ -1748,6 +2002,133 @@ export default function Dashboard() {
     navigate('/app/machines', { state: { selectedOffer: offer } });
   };
 
+  // Start provisioning race with top 5 offers
+  const startProvisioningRace = (selectedOffers) => {
+    // Take top 5 offers (or less if not available)
+    const top5 = selectedOffers.slice(0, 5).map((offer, index) => ({
+      ...offer,
+      status: 'connecting',
+      progress: 0,
+      connectionTime: Math.random() * 5000 + 2000 // Random time between 2-7 seconds
+    }));
+
+    setRaceCandidates(top5);
+    setRaceWinner(null);
+    setProvisioningMode(true);
+
+    // Simulate the race
+    simulateRace(top5);
+  };
+
+  // Simulate connection race
+  const simulateRace = (candidates) => {
+    // Find which one will "win" (fastest connection time)
+    const sortedBySpeed = [...candidates].sort((a, b) => a.connectionTime - b.connectionTime);
+    const winnerIndex = candidates.findIndex(c => c.id === sortedBySpeed[0].id);
+
+    // Update progress for each candidate
+    const intervals = candidates.map((candidate, index) => {
+      const progressIncrement = 100 / (candidate.connectionTime / 100);
+
+      return setInterval(() => {
+        setRaceCandidates(prev => {
+          const updated = [...prev];
+          if (updated[index] && updated[index].status === 'connecting') {
+            updated[index] = {
+              ...updated[index],
+              progress: Math.min((updated[index].progress || 0) + progressIncrement, 100)
+            };
+          }
+          return updated;
+        });
+      }, 100);
+    });
+
+    // Determine winner after their connection time
+    setTimeout(() => {
+      // Clear all intervals
+      intervals.forEach(clearInterval);
+
+      // Set the winner
+      setRaceCandidates(prev => {
+        return prev.map((c, i) => ({
+          ...c,
+          status: i === winnerIndex ? 'connected' : 'cancelled',
+          progress: i === winnerIndex ? 100 : c.progress
+        }));
+      });
+
+      setRaceWinner(candidates[winnerIndex]);
+    }, sortedBySpeed[0].connectionTime);
+
+    // Simulate some failures for realism (optional - 20% chance per non-winner)
+    candidates.forEach((candidate, index) => {
+      if (index !== winnerIndex && Math.random() < 0.2) {
+        const failTime = Math.random() * sortedBySpeed[0].connectionTime;
+        setTimeout(() => {
+          setRaceCandidates(prev => {
+            const updated = [...prev];
+            if (updated[index] && updated[index].status === 'connecting') {
+              updated[index] = { ...updated[index], status: 'failed' };
+            }
+            return updated;
+          });
+        }, failTime);
+      }
+    });
+  };
+
+  const cancelProvisioningRace = () => {
+    setProvisioningMode(false);
+    setRaceCandidates([]);
+    setRaceWinner(null);
+  };
+
+  const completeProvisioningRace = (winner) => {
+    setProvisioningMode(false);
+    navigate('/app/machines', { state: { selectedOffer: winner } });
+  };
+
+  // Modified wizard search to start the race
+  const handleWizardSearchWithRace = () => {
+    const tier = tiers.find(t => t.name === selectedTier);
+    if (tier) {
+      // First fetch offers, then start race
+      setLoading(true);
+      const params = new URLSearchParams();
+      const filters = {
+        ...tier.filter,
+        region: regionToApiRegion[activeTab] || '',
+        gpu_name: selectedGPU === 'any' ? '' : selectedGPU
+      };
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== 'any' && value !== '' && value !== null && value !== undefined && value !== false && value !== 0) {
+          params.append(key, value);
+        }
+      });
+
+      fetch(`${API_BASE}/api/v1/instances/offers?${params}`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+      })
+        .then(res => res.json())
+        .then(data => {
+          const realOffers = data.offers || [];
+          const offersToUse = realOffers.length > 0 ? realOffers : DEMO_OFFERS;
+          setOffers(offersToUse);
+          setLoading(false);
+          // Start the race with top offers
+          if (offersToUse.length > 0) {
+            startProvisioningRace(offersToUse);
+          }
+        })
+        .catch(() => {
+          setOffers(DEMO_OFFERS);
+          setLoading(false);
+          startProvisioningRace(DEMO_OFFERS);
+        });
+    }
+  };
+
   const resetAdvancedFilters = () => {
     setAdvancedFilters({
       gpu_name: 'any', num_gpus: 1, min_gpu_ram: 0, gpu_frac: 1, gpu_mem_bw: 0, gpu_max_power: 0, bw_nvlink: 0,
@@ -1761,7 +2142,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-6 lg:p-8 bg-gray-50 dark:bg-[#0a0d0a]" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen p-4 md:p-6 lg:p-8 bg-[#0a0d0a]" style={{ fontFamily: "'Inter', sans-serif" }}>
       {showOnboarding && (
         <OnboardingWizard
           user={user}
@@ -1770,39 +2151,54 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Page Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Dashboard</h1>
-        <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Visão geral e gerenciamento das suas máquinas GPU</p>
-      </div>
+      {/* Provisioning Race Screen */}
+      {provisioningMode && (
+        <ProvisioningRaceScreen
+          candidates={raceCandidates}
+          winner={raceWinner}
+          onCancel={cancelProvisioningRace}
+          onComplete={completeProvisioningRace}
+        />
+      )}
 
-      {/* Dashboard Stats Cards */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <MetricsGrid columns={3}>
-          <MetricCard
-            icon={Server}
-            iconColor="primary"
-            title="Máquinas Ativas"
-            value={`${dashboardStats.activeMachines}/${dashboardStats.totalMachines}`}
-            subtitle="Instâncias em execução"
-          />
-          <MetricCard
-            icon={DollarSign}
-            iconColor="warning"
-            title="Custo Diário"
-            value={`$${dashboardStats.dailyCost}`}
-            subtitle="Estimativa baseada no uso"
-          />
-          <MetricCard
-            icon={Shield}
-            iconColor="success"
-            title="Economia Mensal"
-            value={`$${dashboardStats.savings}`}
-            subtitle="vs. preços on-demand"
-            change="+89%"
-            changeType="up"
-          />
-        </MetricsGrid>
+      {/* Page Header + Stats - Compact Layout */}
+      <div className="max-w-7xl mx-auto mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <h1 className="text-2xl font-bold text-white tracking-tight">Dashboard</h1>
+
+          {/* Compact Stats - Inline */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <Server className="w-4 h-4 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Máquinas</p>
+                <p className="text-sm font-bold text-white">{dashboardStats.activeMachines}/{dashboardStats.totalMachines}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+              <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center">
+                <DollarSign className="w-4 h-4 text-yellow-500" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Custo/Dia</p>
+                <p className="text-sm font-bold text-white">${dashboardStats.dailyCost}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5 border border-white/10">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                <Shield className="w-4 h-4 text-emerald-500" />
+              </div>
+              <div>
+                <p className="text-xs text-gray-400">Economia</p>
+                <p className="text-sm font-bold text-emerald-500">${dashboardStats.savings} <span className="text-[10px] text-emerald-400">+89%</span></p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Deploy Wizard */}
@@ -1821,12 +2217,12 @@ export default function Dashboard() {
               </div>
 
               {/* Level 1: Method Selection */}
-              <div className="flex bg-gray-100 dark:bg-gray-900/50 p-1.5 rounded-xl border border-gray-300 dark:border-gray-700">
+              <div className="flex bg-white/5 p-1.5 rounded-xl border border-white/10">
                 <button
                   onClick={() => setDeployMethod('manual')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${deployMethod === 'manual'
-                    ? 'bg-emerald-700 dark:bg-emerald-600 text-white shadow-md'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10'
                     }`}
                 >
                   <Server className="w-4 h-4" />
@@ -1835,8 +2231,8 @@ export default function Dashboard() {
                 <button
                   onClick={() => setDeployMethod('ai')}
                   className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${deployMethod === 'ai'
-                    ? 'bg-emerald-700 dark:bg-emerald-600 text-white shadow-md'
-                    : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'text-gray-300 hover:text-white hover:bg-white/10'
                     }`}
                 >
                   <Bot className="w-4 h-4" />
@@ -1849,12 +2245,12 @@ export default function Dashboard() {
             {deployMethod === 'manual' && (
               <div className="flex w-full pt-3">
                 <Tabs value={mode} onValueChange={(v) => { setMode(v); setShowResults(false); }} className="w-full md:w-auto">
-                  <TabsList className="bg-gray-200 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 h-11 p-1 gap-1 rounded-xl">
-                    <TabsTrigger value="wizard" className="gap-2 rounded-lg data-[state=active]:bg-emerald-700 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-700 dark:text-gray-300 font-semibold">
+                  <TabsList className="bg-white/5 border border-white/10 h-11 p-1 gap-1 rounded-xl">
+                    <TabsTrigger value="wizard" className="gap-2 rounded-lg data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-300 font-semibold">
                       <Wand2 className="w-4 h-4" />
                       <span>Wizard</span>
                     </TabsTrigger>
-                    <TabsTrigger value="advanced" className="gap-2 rounded-lg data-[state=active]:bg-emerald-700 dark:data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-700 dark:text-gray-300 font-semibold">
+                    <TabsTrigger value="advanced" className="gap-2 rounded-lg data-[state=active]:bg-emerald-600 data-[state=active]:text-white data-[state=active]:shadow-md text-gray-300 font-semibold">
                       <Sliders className="w-4 h-4" />
                       <span>Avançado</span>
                     </TabsTrigger>
@@ -1885,18 +2281,18 @@ export default function Dashboard() {
             <CardContent className="p-6 space-y-8">
 
               {/* Step 1: Localização */}
-              <div className="relative p-6 rounded-2xl border-2 border-gray-300 dark:border-white/10 bg-gradient-to-br from-gray-100 dark:from-white/[0.03] to-white dark:to-transparent backdrop-blur-sm shadow-sm">
+              <div className="relative p-6 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm">
                 {/* Connector Line */}
-                <div className="absolute left-10 top-[72px] bottom-6 w-0.5 bg-gradient-to-b from-emerald-600/40 via-emerald-500/20 dark:from-emerald-500/30 dark:via-emerald-500/10 to-transparent z-0" />
+                <div className="absolute left-10 top-[72px] bottom-6 w-0.5 bg-gradient-to-b from-emerald-500/30 via-emerald-500/10 to-transparent z-0" />
 
                 <div className="space-y-6 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-500/10 border-2 border-emerald-600 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-base shadow-lg shadow-emerald-500/20">1</div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base shadow-lg shadow-emerald-500/20">1</div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Escolha a Região</h3>
+                      <h3 className="text-xl font-bold text-white mb-1">Escolha a Região</h3>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-400">Onde você quer que sua máquina esteja localizada?</p>
-                        <span className="text-[10px] bg-emerald-100 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full border-2 border-emerald-600 dark:border-emerald-500/20 font-bold whitespace-nowrap">Closer = Faster</span>
+                        <p className="text-sm font-medium text-gray-400">Onde você quer que sua máquina esteja localizada?</p>
+                        <span className="text-[10px] bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full border border-emerald-500/30 font-bold whitespace-nowrap">Closer = Faster</span>
                       </div>
                     </div>
                   </div>
@@ -1907,15 +2303,15 @@ export default function Dashboard() {
                       <div className="flex flex-col gap-4">
                         {/* Search Input + Selected Location Chip */}
                         <div className="flex flex-col gap-3">
-                          {/* Search Input - TailAdmin Style */}
+                          {/* Search Input - Dark Theme Style */}
                           <div className="relative">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10">
-                              <Search className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                              <Search className="w-5 h-5 text-gray-400" />
                             </div>
                             <input
                               type="text"
                               placeholder="Buscar país ou região (ex: Brasil, Europa, Japão...)"
-                              className="w-full pl-12 pr-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 dark:focus:border-emerald-400 hover:border-gray-400 dark:hover:border-gray-600 transition-all"
+                              className="w-full pl-12 pr-4 py-3.5 text-sm text-white bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 placeholder:text-gray-500 transition-all"
                               value={searchCountry}
                               onChange={(e) => handleSearchChange(e.target.value)}
                             />
@@ -1944,12 +2340,12 @@ export default function Dashboard() {
                           {/* Quick Select Buttons (only show when no location is selected) */}
                           {!selectedLocation && (
                             <div className="flex flex-wrap gap-2">
-                              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium mr-1 self-center">Regiões:</span>
+                              <span className="text-xs text-gray-400 font-medium mr-1 self-center">Regiões:</span>
                               {['eua', 'europa', 'asia', 'america do sul'].map((regionKey) => (
                                 <button
                                   key={regionKey}
                                   onClick={() => handleRegionSelect(regionKey)}
-                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:border-emerald-500 dark:hover:border-emerald-500 hover:text-emerald-700 dark:hover:text-emerald-400 transition-all"
+                                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/5 text-gray-300 border border-white/10 hover:bg-emerald-500/10 hover:border-emerald-500/50 hover:text-emerald-400 transition-all"
                                 >
                                   <Globe className="w-3 h-3" />
                                   {countryData[regionKey].name}
@@ -1959,7 +2355,7 @@ export default function Dashboard() {
                           )}
                         </div>
                       </div>
-                      <div className="h-64 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-white/10 bg-gray-50 dark:bg-[#0a0d0a] relative group shadow-lg">
+                      <div className="h-64 rounded-xl overflow-hidden border border-white/10 bg-[#0a0d0a] relative group shadow-lg">
                         <WorldMap
                           selectedCodes={selectedLocation?.codes || []}
                           onCountryClick={(code) => {
@@ -1986,16 +2382,16 @@ export default function Dashboard() {
               </div>
 
               {/* Step 2: Hardware & Performance */}
-              <div className="relative p-6 rounded-2xl border-2 border-gray-300 dark:border-white/10 bg-gradient-to-br from-gray-100 dark:from-white/[0.03] to-white dark:to-transparent backdrop-blur-sm shadow-sm">
+              <div className="relative p-6 rounded-2xl border border-white/10 bg-white/[0.02] backdrop-blur-sm">
                 {/* Connector Line */}
-                <div className="absolute left-10 top-[72px] bottom-6 w-0.5 bg-gradient-to-b from-emerald-600/40 via-emerald-500/20 dark:from-emerald-500/30 dark:via-emerald-500/10 to-transparent z-0" />
+                <div className="absolute left-10 top-[72px] bottom-6 w-0.5 bg-gradient-to-b from-emerald-500/30 via-emerald-500/10 to-transparent z-0" />
 
                 <div className="space-y-6 relative z-10">
                   <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 dark:from-emerald-500/20 dark:to-emerald-500/10 border-2 border-emerald-600 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-400 font-bold text-base shadow-lg shadow-emerald-500/20">2</div>
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-base shadow-lg shadow-emerald-500/20">2</div>
                     <div>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">Defina o Hardware</h3>
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-400">Qual potência de GPU e velocidade você precisa?</p>
+                      <h3 className="text-xl font-bold text-white mb-1">Defina o Hardware</h3>
+                      <p className="text-sm font-medium text-gray-400">Qual potência de GPU e velocidade você precisa?</p>
                     </div>
                   </div>
 
@@ -2003,8 +2399,8 @@ export default function Dashboard() {
                   {/* GPU Selector */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2 pb-1">
-                      <Cpu className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
-                      <Label className="text-gray-800 dark:text-gray-200 text-sm font-bold tracking-wide">Modelo da GPU</Label>
+                      <Cpu className="w-4 h-4 text-emerald-400" />
+                      <Label className="text-gray-200 text-sm font-bold tracking-wide">Modelo da GPU</Label>
                     </div>
                     <GPUSelector
                       selectedGPU={selectedGPU}
@@ -2040,31 +2436,31 @@ export default function Dashboard() {
                             key={useCase.id}
                             onClick={() => setSelectedTier(useCase.tier)}
                             className={`
-                              p-3 rounded-lg border-2 cursor-pointer transition-all duration-200
+                              p-3 rounded-lg border cursor-pointer transition-all duration-200
                               ${isSelected
-                                ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 shadow-sm"
-                                : "bg-white dark:bg-gray-800/30 border-gray-200 dark:border-gray-700 hover:border-emerald-300 dark:hover:border-emerald-700"}
+                                ? "bg-emerald-500/10 border-emerald-500/50 shadow-sm"
+                                : "bg-white/5 border-white/10 hover:border-emerald-500/30 hover:bg-white/10"}
                             `}
                           >
                             <div className="flex items-start gap-2">
                               <div className={`
                                 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0
                                 ${isSelected
-                                  ? "bg-emerald-600 dark:bg-emerald-500 text-white"
-                                  : "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400"}
+                                  ? "bg-emerald-500 text-white"
+                                  : "bg-white/10 text-gray-400"}
                               `}>
                                 <UseCaseIcon className="w-4 h-4" />
                               </div>
                               <div className="flex-1 min-w-0">
-                                <div className={`text-sm font-semibold ${isSelected ? "text-emerald-700 dark:text-emerald-400" : "text-gray-900 dark:text-gray-100"}`}>
+                                <div className={`text-sm font-semibold ${isSelected ? "text-emerald-400" : "text-gray-100"}`}>
                                   {useCase.label}
                                 </div>
-                                <div className={`text-[10px] ${isSelected ? "text-emerald-600 dark:text-emerald-500" : "text-gray-500 dark:text-gray-400"}`}>
+                                <div className={`text-[10px] ${isSelected ? "text-emerald-500" : "text-gray-400"}`}>
                                   {useCase.desc}
                                 </div>
                               </div>
                               {isSelected && (
-                                <div className="w-4 h-4 rounded-full bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                                <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
                                   <div className="w-1.5 h-1.5 rounded-full bg-white" />
                                 </div>
                               )}
@@ -2076,9 +2472,9 @@ export default function Dashboard() {
 
                     {/* Recommended Tier Info */}
                     {selectedTier && (
-                      <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/40 dark:to-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50">
+                      <div className="mt-4 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
                         <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-lg bg-emerald-500 flex items-center justify-center flex-shrink-0">
                             {selectedTier === 'Lento' && <Gauge className="w-5 h-5 text-white" />}
                             {selectedTier === 'Medio' && <Activity className="w-5 h-5 text-white" />}
                             {selectedTier === 'Rapido' && <Zap className="w-5 h-5 text-white" />}
@@ -2086,25 +2482,25 @@ export default function Dashboard() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center justify-between mb-2">
-                              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                              <h4 className="text-sm font-bold text-gray-100">
                                 Recomendação: {tiers.find(t => t.name === selectedTier)?.name}
                               </h4>
-                              <span className="text-xs font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                              <span className="text-xs font-mono font-bold text-emerald-400">
                                 {tiers.find(t => t.name === selectedTier)?.priceRange}
                               </span>
                             </div>
                             <div className="space-y-1.5">
-                              <div className="flex items-center gap-2 text-xs text-gray-700 dark:text-gray-300">
+                              <div className="flex items-center gap-2 text-xs text-gray-300">
                                 <Cpu className="w-3.5 h-3.5" />
                                 <span className="font-semibold">{tiers.find(t => t.name === selectedTier)?.gpu}</span>
-                                <span className="text-gray-500 dark:text-gray-400">•</span>
+                                <span className="text-gray-400">•</span>
                                 <span>{tiers.find(t => t.name === selectedTier)?.vram}</span>
                               </div>
-                              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center gap-2 text-xs text-gray-400">
                                 <Clock className="w-3.5 h-3.5" />
                                 <span>Tempo médio de deploy: {tiers.find(t => t.name === selectedTier)?.time}</span>
                               </div>
-                              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                              <p className="text-xs text-gray-400 mt-2">
                                 {tiers.find(t => t.name === selectedTier)?.description}
                               </p>
                             </div>
@@ -2120,11 +2516,21 @@ export default function Dashboard() {
               {/* Action */}
               <div className="pt-2">
                 <Button
-                  onClick={handleWizardSearch}
-                  className="w-full h-12 text-base font-bold bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-md hover:shadow-lg rounded-xl transition-all"
+                  onClick={handleWizardSearchWithRace}
+                  disabled={loading}
+                  className="w-full h-12 text-base font-bold bg-emerald-700 hover:bg-emerald-800 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white shadow-md hover:shadow-lg rounded-xl transition-all disabled:opacity-50"
                 >
-                  <Search className="w-4 h-4 mr-2" />
-                  Buscar Máquinas Disponíveis
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Buscando...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Iniciar Provisionamento
+                    </>
+                  )}
                 </Button>
               </div>
 
@@ -2618,8 +3024,8 @@ export default function Dashboard() {
                 </FilterSection>
               </div>
 
-              {/* Opções & Ordenação */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+              {/* Opções Adicionais */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 <FilterSection title="Opções Adicionais" icon={Shield} defaultOpen={false}>
                   <div className="space-y-3 mt-3">
                     <div className="flex items-center justify-between">
@@ -2635,25 +3041,6 @@ export default function Dashboard() {
                         checked={advancedFilters.static_ip}
                         onCheckedChange={(checked) => handleAdvancedFilterChange('static_ip', checked)}
                       />
-                    </div>
-                  </div>
-                </FilterSection>
-
-                <FilterSection title="Ordenação" icon={Activity} defaultOpen={false}>
-                  <div className="space-y-3 mt-3">
-                    <div>
-                      <Label className="text-xs text-gray-500 dark:text-gray-400 mb-2 block">Ordenar Por</Label>
-                      <Select value={advancedFilters.order_by} onValueChange={(v) => handleAdvancedFilterChange('order_by', v)}>
-                        <SelectTrigger><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          {ORDER_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label className="text-xs text-gray-500 dark:text-gray-400 mb-2 block">Limite de Resultados</Label>
-                      <Input type="number" min="10" max="500" value={advancedFilters.limit}
-                        onChange={(e) => handleAdvancedFilterChange('limit', parseInt(e.target.value) || 100)} />
                     </div>
                   </div>
                 </FilterSection>
@@ -2684,19 +3071,52 @@ export default function Dashboard() {
           {/* RESULTS VIEW */}
           {showResults && (
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-gray-900 dark:text-white text-lg font-semibold">Máquinas Disponíveis</h2>
-                  <p className="text-gray-500 text-xs">{offers.length} resultados encontrados</p>
+              <div className="flex flex-col gap-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-gray-900 dark:text-white text-lg font-semibold">Máquinas Disponíveis</h2>
+                    <p className="text-gray-500 text-xs">{offers.length} resultados encontrados</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowResults(false)}
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    Voltar
+                  </Button>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowResults(false)}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Voltar
-                </Button>
+
+                {/* Sorting Controls */}
+                {offers.length > 0 && (
+                  <div className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-2">
+                      <Activity className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Ordenar por:</span>
+                    </div>
+                    <Select value={advancedFilters.order_by} onValueChange={(v) => handleAdvancedFilterChange('order_by', v)}>
+                      <SelectTrigger className="w-[200px] h-9 bg-white dark:bg-gray-900">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ORDER_OPTIONS.map(opt => (
+                          <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <div className="flex items-center gap-2 ml-4">
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Limite:</span>
+                      <Input
+                        type="number"
+                        min="10"
+                        max="500"
+                        value={advancedFilters.limit}
+                        onChange={(e) => handleAdvancedFilterChange('limit', parseInt(e.target.value) || 100)}
+                        className="w-20 h-9 bg-white dark:bg-gray-900"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {loading && (

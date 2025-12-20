@@ -8,7 +8,7 @@
 
 /* Page Container */
 .page-container {
-  @apply min-h-screen;
+  @apply min-h-screen bg-[#0a0d0a];
 }
 
 /* Page Header */
@@ -17,45 +17,46 @@
 }
 
 .page-title {
-  @apply text-2xl font-semibold text-gray-900 dark:text-white;
+  @apply text-2xl font-semibold text-white;
 }
 
 .page-subtitle {
-  @apply text-sm text-gray-500 dark:text-gray-400 mt-1;
+  @apply text-sm text-gray-400 mt-1;
 }
 
 /* Breadcrumb */
 .breadcrumb {
-  @apply flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-4;
+  @apply flex items-center gap-2 text-sm text-gray-400 mb-4;
 }
 
 .breadcrumb-link {
-  @apply hover:text-brand-500 transition-colors;
+  @apply hover:text-emerald-400 transition-colors;
 }
 
 .breadcrumb-separator {
-  @apply text-gray-300 dark:text-gray-600;
+  @apply text-gray-600;
 }
 
 .breadcrumb-current {
-  @apply text-gray-900 dark:text-white font-medium;
+  @apply text-white font-medium;
 }
 
-/* Cards - TailAdmin Style */
+/* Cards - TailAdmin Style - Dark Theme */
 .ta-card {
-  @apply bg-white dark:bg-[#121512] rounded-2xl border border-gray-200 dark:border-white/5 shadow-theme-sm;
+  @apply bg-gradient-to-br from-[#131613] to-[#0d100d] rounded-2xl border border-white/10 shadow-xl transition-all duration-300;
+  @apply hover:border-white/20;
 }
 
 .ta-card-header {
-  @apply px-6 py-4 border-b border-gray-200 dark:border-white/5;
+  @apply px-6 py-5 border-b border-white/10 bg-white/[0.02];
 }
 
 .ta-card-title {
-  @apply text-lg font-semibold text-gray-900 dark:text-white;
+  @apply text-lg font-semibold text-white tracking-tight;
 }
 
 .ta-card-subtitle {
-  @apply text-sm text-gray-500 dark:text-gray-400 mt-0.5;
+  @apply text-sm text-gray-400 mt-1;
 }
 
 .ta-card-body {
@@ -63,12 +64,14 @@
 }
 
 .ta-card-footer {
-  @apply px-6 py-4 border-t border-gray-200 dark:border-white/5 bg-gray-50 dark:bg-[#0e110e];
+  @apply px-6 py-4 border-t border-white/10 bg-white/[0.02];
 }
 
-/* Stat Cards */
+/* Stat Cards - Dark Theme */
 .stat-card {
-  @apply bg-white dark:bg-[#121512] rounded-2xl border border-gray-200 dark:border-white/5 p-5 shadow-theme-sm hover:translate-y-[-2px] transition-all;
+  @apply bg-gradient-to-br from-[#141814] to-[#0f120f] rounded-2xl border border-white/10 p-5 shadow-xl transition-all duration-300;
+  @apply hover:border-emerald-500/30 hover:shadow-emerald-500/5 hover:translate-y-[-2px];
+  @apply flex flex-col;
 }
 
 .stat-card-icon {
@@ -76,27 +79,31 @@
 }
 
 .stat-card-icon-primary {
-  @apply bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400;
+  @apply bg-emerald-500/10 text-emerald-400;
 }
 
 .stat-card-icon-success {
-  @apply bg-success-50 text-success-500 dark:bg-success-500/10 dark:text-success-400;
+  @apply bg-emerald-500/10 text-emerald-400;
 }
 
 .stat-card-icon-warning {
-  @apply bg-warning-50 text-warning-500 dark:bg-warning-500/10 dark:text-warning-400;
+  @apply bg-yellow-500/10 text-yellow-400;
 }
 
 .stat-card-icon-error {
-  @apply bg-error-50 text-error-500 dark:bg-error-500/10 dark:text-error-400;
+  @apply bg-red-500/10 text-red-400;
+}
+
+.stat-card-icon-danger {
+  @apply bg-red-500/10 text-red-400;
 }
 
 .stat-card-value {
-  @apply text-2xl font-bold text-gray-900 dark:text-white;
+  @apply text-2xl font-bold text-white;
 }
 
 .stat-card-label {
-  @apply text-sm text-gray-500 dark:text-gray-400;
+  @apply text-sm text-gray-400;
 }
 
 .stat-card-change {
@@ -111,37 +118,37 @@
   @apply text-error-500;
 }
 
-/* Buttons - TailAdmin Style */
+/* Buttons - TailAdmin Style - Dark Theme */
 .ta-btn {
-  @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0a0d0a];
 }
 
 .ta-btn-primary {
-  @apply bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-500;
+  @apply bg-emerald-300 text-gray-900 hover:bg-emerald-400 focus:ring-emerald-500 font-semibold;
 }
 
 .ta-btn-secondary {
-  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 focus:ring-gray-500;
+  @apply bg-white/10 text-gray-300 hover:bg-white/20 focus:ring-gray-500;
 }
 
 .ta-btn-success {
-  @apply bg-success-500 text-white hover:bg-success-600 focus:ring-success-500;
+  @apply bg-emerald-500 text-white hover:bg-emerald-600 focus:ring-emerald-500;
 }
 
 .ta-btn-error {
-  @apply bg-error-500 text-white hover:bg-error-600 focus:ring-error-500;
+  @apply bg-red-500 text-white hover:bg-red-600 focus:ring-red-500;
 }
 
 .ta-btn-warning {
-  @apply bg-warning-500 text-white hover:bg-warning-600 focus:ring-warning-500;
+  @apply bg-yellow-500 text-gray-900 hover:bg-yellow-600 focus:ring-yellow-500;
 }
 
 .ta-btn-outline {
-  @apply border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 focus:ring-gray-500;
+  @apply border border-white/20 bg-transparent text-gray-300 hover:bg-white/10 focus:ring-gray-500;
 }
 
 .ta-btn-ghost {
-  @apply bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800;
+  @apply bg-transparent text-gray-400 hover:bg-white/10;
 }
 
 .ta-btn-sm {
@@ -152,115 +159,115 @@
   @apply px-6 py-3 text-base;
 }
 
-/* Tables - TailAdmin Style */
+/* Tables - TailAdmin Style - Dark Theme */
 .ta-table {
   @apply w-full;
 }
 
 .ta-table thead {
-  @apply bg-gray-50 dark:bg-gray-800;
+  @apply bg-white/5;
 }
 
 .ta-table th {
-  @apply px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider;
+  @apply px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider;
 }
 
 .ta-table td {
-  @apply px-4 py-4 text-sm text-gray-900 dark:text-gray-100;
+  @apply px-4 py-4 text-sm text-gray-100;
 }
 
 .ta-table tbody tr {
-  @apply border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors;
+  @apply border-b border-white/10 hover:bg-white/5 transition-colors;
 }
 
-/* Badges */
+/* Badges - Dark Theme */
 .ta-badge {
   @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
 }
 
 .ta-badge-primary {
-  @apply bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400;
+  @apply bg-emerald-500/10 text-emerald-400;
 }
 
 .ta-badge-success {
-  @apply bg-success-50 text-success-700 dark:bg-success-500/10 dark:text-success-400;
+  @apply bg-emerald-500/10 text-emerald-400;
 }
 
 .ta-badge-warning {
-  @apply bg-warning-50 text-warning-700 dark:bg-warning-500/10 dark:text-warning-400;
+  @apply bg-yellow-500/10 text-yellow-400;
 }
 
 .ta-badge-error {
-  @apply bg-error-50 text-error-700 dark:bg-error-500/10 dark:text-error-400;
+  @apply bg-red-500/10 text-red-400;
 }
 
 .ta-badge-gray {
-  @apply bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300;
+  @apply bg-white/10 text-gray-300;
 }
 
-/* Form Inputs */
+/* Form Inputs - Dark Theme */
 .ta-input {
-  @apply w-full px-4 py-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white dark:focus:border-brand-400 transition-colors;
+  @apply w-full px-4 py-3.5 text-sm text-white bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 placeholder:text-gray-500 transition-all;
 }
 
 .ta-input-label {
-  @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5;
+  @apply block text-sm font-medium text-gray-300 mb-2;
 }
 
 .ta-input-error {
-  @apply border-error-500 focus:ring-error-500/20 focus:border-error-500;
+  @apply border-red-500 focus:ring-red-500/20 focus:border-red-500;
 }
 
 .ta-input-helper {
-  @apply mt-1.5 text-xs text-gray-500 dark:text-gray-400;
+  @apply mt-1.5 text-xs text-gray-400;
 }
 
-/* Select */
+/* Select - Dark Theme */
 .ta-select {
-  @apply w-full px-4 py-2.5 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white cursor-pointer;
+  @apply w-full px-4 py-3.5 text-sm text-white bg-white/5 border border-white/10 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 cursor-pointer;
 }
 
-/* Tabs */
+/* Tabs - Dark Theme */
 .ta-tabs {
-  @apply flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg;
+  @apply flex items-center gap-1 p-1.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-sm;
 }
 
 .ta-tab {
-  @apply px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 rounded-md transition-colors;
+  @apply flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-400 rounded-lg transition-all duration-200;
 }
 
 .ta-tab-active {
-  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm;
+  @apply bg-gradient-to-r from-emerald-600 to-emerald-500 text-white shadow-lg shadow-emerald-500/25;
 }
 
 .ta-tab:not(.ta-tab-active):hover {
-  @apply text-gray-900 dark:text-white;
+  @apply text-white bg-white/10 transform scale-[1.02];
 }
 
-/* Alerts */
+/* Alerts - Dark Theme */
 .ta-alert {
-  @apply p-4 rounded-lg flex items-start gap-3;
+  @apply p-4 rounded-xl flex items-start gap-3;
 }
 
 .ta-alert-info {
-  @apply bg-brand-50 text-brand-800 dark:bg-brand-500/10 dark:text-brand-300;
+  @apply bg-blue-500/10 text-blue-300 border border-blue-500/20;
 }
 
 .ta-alert-success {
-  @apply bg-success-50 text-success-800 dark:bg-success-500/10 dark:text-success-300;
+  @apply bg-emerald-500/10 text-emerald-300 border border-emerald-500/20;
 }
 
 .ta-alert-warning {
-  @apply bg-warning-50 text-warning-800 dark:bg-warning-500/10 dark:text-warning-300;
+  @apply bg-yellow-500/10 text-yellow-300 border border-yellow-500/20;
 }
 
 .ta-alert-error {
-  @apply bg-error-50 text-error-800 dark:bg-error-500/10 dark:text-error-300;
+  @apply bg-red-500/10 text-red-300 border border-red-500/20;
 }
 
-/* Progress Bar */
+/* Progress Bar - Dark Theme */
 .ta-progress {
-  @apply w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden;
+  @apply w-full h-2 bg-white/10 rounded-full overflow-hidden;
 }
 
 .ta-progress-bar {
@@ -268,19 +275,19 @@
 }
 
 .ta-progress-primary {
-  @apply bg-brand-500;
+  @apply bg-emerald-500;
 }
 
 .ta-progress-success {
-  @apply bg-success-500;
+  @apply bg-emerald-500;
 }
 
 .ta-progress-warning {
-  @apply bg-warning-500;
+  @apply bg-yellow-500;
 }
 
 .ta-progress-error {
-  @apply bg-error-500;
+  @apply bg-red-500;
 }
 
 /* Avatar */
@@ -304,38 +311,38 @@
   @apply w-16 h-16 text-lg;
 }
 
-/* Dropdown Menu */
+/* Dropdown Menu - Dark Theme */
 .ta-dropdown {
-  @apply absolute right-0 mt-2 w-56 bg-white dark:bg-gray-900 rounded-xl shadow-theme-lg border border-gray-200 dark:border-gray-800 py-2 z-50;
+  @apply absolute right-0 mt-2 w-56 bg-[#1a1a1a] rounded-xl shadow-2xl border border-white/10 py-2 z-50;
 }
 
 .ta-dropdown-item {
-  @apply flex items-center gap-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors;
+  @apply flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-white/10 cursor-pointer transition-colors;
 }
 
 .ta-dropdown-item-danger {
-  @apply text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-500/10;
+  @apply text-red-400 hover:bg-red-500/10;
 }
 
 .ta-dropdown-separator {
-  @apply my-2 border-t border-gray-200 dark:border-gray-800;
+  @apply my-2 border-t border-white/10;
 }
 
-/* Modal */
+/* Modal - Dark Theme */
 .ta-modal-overlay {
-  @apply fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+  @apply fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4;
 }
 
 .ta-modal {
-  @apply bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-auto;
+  @apply bg-[#111411] rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-auto border border-white/10;
 }
 
 .ta-modal-header {
-  @apply px-6 py-4 border-b border-gray-200 dark:border-gray-800;
+  @apply px-6 py-4 border-b border-white/10;
 }
 
 .ta-modal-title {
-  @apply text-lg font-semibold text-gray-900 dark:text-white;
+  @apply text-lg font-semibold text-white;
 }
 
 .ta-modal-body {
@@ -343,7 +350,7 @@
 }
 
 .ta-modal-footer {
-  @apply px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-end gap-3;
+  @apply px-6 py-4 border-t border-white/10 bg-white/5 flex items-center justify-end gap-3;
 }
 
 /* Grid Layouts */
@@ -355,44 +362,256 @@
   @apply grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6;
 }
 
-/* Empty State */
+/* Empty State - Dark Theme */
 .ta-empty-state {
   @apply flex flex-col items-center justify-center py-12 px-4 text-center;
 }
 
 .ta-empty-state-icon {
-  @apply w-16 h-16 text-gray-300 dark:text-gray-600 mb-4;
+  @apply w-16 h-16 text-gray-600 mb-4;
 }
 
 .ta-empty-state-title {
-  @apply text-lg font-medium text-gray-900 dark:text-white mb-2;
+  @apply text-lg font-medium text-white mb-2;
 }
 
 .ta-empty-state-description {
-  @apply text-sm text-gray-500 dark:text-gray-400 max-w-sm;
+  @apply text-sm text-gray-400 max-w-sm;
 }
 
-/* Loading Spinner */
+/* Loading Spinner - Dark Theme */
 .ta-spinner {
-  @apply w-8 h-8 border-4 border-gray-200 border-t-brand-500 rounded-full animate-spin;
+  @apply w-8 h-8 border-4 border-white/10 border-t-emerald-500 rounded-full animate-spin;
 }
 
-/* Scrollbar Customization */
+/* Scrollbar Customization - Dark Theme */
 .ta-scrollbar::-webkit-scrollbar {
   @apply w-1.5 h-1.5;
 }
 
 .ta-scrollbar::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800 rounded-full;
+  @apply bg-white/5 rounded-full;
 }
 
 .ta-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full hover:bg-gray-400 dark:hover:bg-gray-500;
+  @apply bg-white/20 rounded-full hover:bg-white/30;
 }
 
-/* Dark Mode Body */
-.dark body {
-  @apply bg-[#0a0d0a];
+/* Tier/Selection Cards with Green Accent - Dark Theme */
+.ta-selection-card {
+  @apply relative flex flex-col p-4 rounded-xl border transition-all overflow-hidden cursor-pointer;
+  @apply border-white/10 bg-white/5 hover:border-white/20 hover:bg-white/10;
+}
+
+.ta-selection-card.selected {
+  @apply border-2 border-emerald-500/50 bg-emerald-500/10 shadow-lg shadow-emerald-500/10;
+}
+
+.ta-selection-card.selected::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-1;
+  background: linear-gradient(to bottom, #34d399, #10b981, #14b8a6);
+}
+
+/* Quick Action Buttons (Green pill style) - Dark Theme */
+.ta-quick-action {
+  @apply px-4 py-2 text-xs font-semibold rounded-full transition-all;
+  @apply text-emerald-300 bg-emerald-500/10 border border-emerald-500/30;
+  @apply hover:bg-emerald-500/20 hover:border-emerald-500/50 hover:text-emerald-200;
+}
+
+/* Category Cards (GPU selector style) - Dark Theme */
+.ta-category-card {
+  @apply relative p-3 rounded-xl border transition-all text-left overflow-hidden;
+  @apply border-white/10 bg-[#0d120d] hover:border-white/20 hover:bg-[#131a13];
+}
+
+.ta-category-card.active {
+  @apply border-emerald-500/50 bg-emerald-500/15;
+}
+
+.ta-category-card.active::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-0.5 bg-emerald-500;
+}
+
+/* Input Fields - Dark Theme Enhancement */
+.ta-input,
+.ta-select {
+  background: #0a0d0a;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.ta-input:focus,
+.ta-select:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Slider Track - Green Theme */
+.ta-slider-track {
+  @apply w-full h-2 bg-white/10 rounded-full;
+}
+
+.ta-slider-fill {
+  @apply h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full;
+}
+
+.ta-slider-thumb {
+  @apply w-5 h-5 bg-white border-2 border-emerald-500 rounded-full shadow-lg cursor-pointer;
+  @apply hover:scale-110 transition-transform;
+}
+
+/* Primary Button - Green Gradient */
+.ta-btn-gradient {
+  @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white rounded-xl transition-all;
+  background: linear-gradient(to right, #059669, #10b981);
+  box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.3);
+}
+
+.ta-btn-gradient:hover {
+  background: linear-gradient(to right, #047857, #059669);
+  box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Stat Values - Green Accent */
+.ta-stat-value-green {
+  @apply text-emerald-400 font-mono font-semibold;
+}
+
+/* Price Range - Yellow/Gold Accent */
+.ta-price-range {
+  @apply text-yellow-400 font-mono font-semibold;
+}
+
+/* Speed/Performance Text - Green */
+.ta-speed-text {
+  @apply text-emerald-400 font-mono font-medium;
+}
+
+/* Spot Report Specific Styles */
+.spot-highlight {
+  @apply relative overflow-hidden rounded-xl p-5 text-center;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 78, 59, 0.1) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.spot-highlight::before {
+  content: '';
+  @apply absolute inset-0 opacity-30;
+  background: radial-gradient(circle at 30% 30%, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+}
+
+.spot-highlight-value {
+  @apply block text-3xl font-extrabold text-white relative z-10;
+}
+
+.spot-highlight-label {
+  @apply block text-sm text-emerald-200/80 mt-1 relative z-10;
+}
+
+/* Metric Item Row */
+.metric-row {
+  @apply flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5;
+  @apply hover:bg-white/[0.05] hover:border-white/10 transition-all;
+}
+
+.metric-row-label {
+  @apply text-sm text-gray-400;
+}
+
+.metric-row-value {
+  @apply text-sm font-semibold text-white font-mono;
+}
+
+/* GPU Badge */
+.gpu-badge {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap;
+  @apply bg-gradient-to-r from-emerald-500/20 to-emerald-600/10 text-emerald-300 border border-emerald-500/30;
+}
+
+/* Risk Indicators */
+.risk-low {
+  @apply text-emerald-400;
+}
+
+.risk-medium {
+  @apply text-yellow-400;
+}
+
+.risk-high {
+  @apply text-red-400;
+}
+
+.risk-badge-low {
+  @apply bg-emerald-500/20 text-emerald-400 border border-emerald-500/30;
+}
+
+.risk-badge-medium {
+  @apply bg-yellow-500/20 text-yellow-400 border border-yellow-500/30;
+}
+
+.risk-badge-high {
+  @apply bg-red-500/20 text-red-400 border border-red-500/30;
+}
+
+/* Animated Gradient Border */
+.gradient-border {
+  @apply relative rounded-2xl;
+  background: linear-gradient(135deg, #131613, #0d100d);
+}
+
+.gradient-border::before {
+  content: '';
+  @apply absolute -inset-[1px] rounded-2xl -z-10;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.5), rgba(6, 78, 59, 0.2), rgba(16, 185, 129, 0.5));
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Pulse Animation for Live Data */
+.pulse-dot {
+  @apply relative;
+}
+
+.pulse-dot::after {
+  content: '';
+  @apply absolute w-2 h-2 bg-emerald-500 rounded-full top-0 right-0;
+  animation: pulse-ring 2s infinite;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+/* Hover Card Effect */
+.hover-glow:hover {
+  box-shadow: 0 0 30px -5px rgba(16, 185, 129, 0.15);
+}
+
+/* Data Grid */
+.data-grid {
+  @apply grid gap-3;
+}
+
+.data-grid-2 {
+  @apply grid-cols-2;
+}
+
+.data-grid-3 {
+  @apply grid-cols-3;
+}
+
+.data-grid-4 {
+  @apply grid-cols-4;
 }
 
 /* Custom Utilities */
@@ -403,4 +622,23 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Animations */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Glassmorphism Effect */
+.glass {
+  @apply bg-white/5 backdrop-blur-xl border border-white/10;
+}
+
+.glass-dark {
+  @apply bg-black/20 backdrop-blur-xl border border-white/5;
 }
