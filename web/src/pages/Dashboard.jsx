@@ -2012,52 +2012,94 @@ export default function Dashboard() {
 
                   {/* Tiers - Redesigned as List */}
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2 pb-1">
+                    <div className="flex items-center gap-2 pb-3">
                       <Zap className="w-4 h-4 text-emerald-700 dark:text-emerald-400" />
                       <Label className="text-gray-800 dark:text-gray-200 text-sm font-bold tracking-wide">Nível de Performance</Label>
                     </div>
-                    <div className="p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 h-[280px] overflow-y-auto custom-scrollbar">
-                      <div className="flex flex-col gap-2">
-                        {tiers.map((tier) => (
-                          <div
-                            key={tier.name}
-                            onClick={() => setSelectedTier(tier.name)}
-                            className={`
-                            relative flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all group
+                    <div className="grid grid-cols-2 gap-3">
+                      {tiers.map((tier) => (
+                        <div
+                          key={tier.name}
+                          onClick={() => setSelectedTier(tier.name)}
+                          className={`
+                            relative p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 group
                             ${selectedTier === tier.name
-                                ? "bg-emerald-600 dark:bg-emerald-500 border-emerald-700 dark:border-emerald-600"
-                                : "bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-800"
+                                ? "bg-gradient-to-br from-emerald-600 to-emerald-700 dark:from-emerald-500 dark:to-emerald-600 border-emerald-500 shadow-lg shadow-emerald-500/30 scale-[1.02]"
+                                : "bg-white dark:bg-gray-800/50 border-gray-300 dark:border-gray-700 hover:border-emerald-400 dark:hover:border-emerald-600 hover:shadow-md"
                               }
                           `}
-                          >
-                            <div className="flex items-center gap-3">
+                        >
+                          {/* Header with icon and name */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
                               <div className={`
-                                w-8 h-8 rounded-lg flex items-center justify-center
-                                ${selectedTier === tier.name ? "bg-white/20 text-white" : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300"}
+                                w-10 h-10 rounded-lg flex items-center justify-center transition-all
+                                ${selectedTier === tier.name
+                                  ? "bg-white/20 text-white"
+                                  : "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-800/40"}
                              `}>
-                                {tier.name === 'Lento' && <Gauge className="w-4 h-4" />}
-                                {tier.name === 'Medio' && <Activity className="w-4 h-4" />}
-                                {tier.name === 'Rapido' && <Zap className="w-4 h-4" />}
-                                {tier.name === 'Ultra' && <Sparkles className="w-4 h-4" />}
+                                {tier.name === 'Lento' && <Gauge className="w-5 h-5" />}
+                                {tier.name === 'Medio' && <Activity className="w-5 h-5" />}
+                                {tier.name === 'Rapido' && <Zap className="w-5 h-5" />}
+                                {tier.name === 'Ultra' && <Sparkles className="w-5 h-5" />}
                               </div>
                               <div>
-                                <h4 className={`text-sm font-bold ${selectedTier === tier.name ? "text-white" : "text-gray-900 dark:text-gray-100"}`}>{tier.name}</h4>
-                                <p className={`text-[10px] ${selectedTier === tier.name ? "text-white/80" : "text-gray-600 dark:text-gray-400"}`}>{tier.speed}</p>
+                                <h4 className={`text-base font-bold leading-tight ${selectedTier === tier.name ? "text-white" : "text-gray-900 dark:text-gray-100"}`}>
+                                  {tier.name}
+                                </h4>
+                                <p className={`text-[10px] font-medium ${selectedTier === tier.name ? "text-white/80" : "text-gray-500 dark:text-gray-400"}`}>
+                                  {tier.time}
+                                </p>
                               </div>
                             </div>
 
-                            <div className="text-right">
-                              <div className={`text-xs font-mono mb-0.5 font-semibold ${selectedTier === tier.name ? "text-white" : "text-gray-700 dark:text-gray-300"}`}>{tier.priceRange}</div>
-                              <SpeedBars level={tier.level} color={tier.color} />
-                            </div>
-
-                            {/* Glow effect for selected */}
+                            {/* Selected checkmark */}
                             {selectedTier === tier.name && (
-                              <div className="absolute inset-0 rounded-xl bg-white/10 pointer-events-none" />
+                              <div className="w-5 h-5 rounded-full bg-white/30 flex items-center justify-center">
+                                <div className="w-2 h-2 rounded-full bg-white" />
+                              </div>
                             )}
                           </div>
-                        ))}
-                      </div>
+
+                          {/* GPU specs */}
+                          <div className="space-y-1.5 mb-3">
+                            <div className={`text-xs font-semibold ${selectedTier === tier.name ? "text-white/90" : "text-gray-700 dark:text-gray-300"}`}>
+                              {tier.gpu}
+                            </div>
+                            <div className={`text-[11px] ${selectedTier === tier.name ? "text-white/70" : "text-gray-600 dark:text-gray-400"}`}>
+                              {tier.vram}
+                            </div>
+                          </div>
+
+                          {/* Speed indicator */}
+                          <div className="mb-3">
+                            <SpeedBars level={tier.level} color={selectedTier === tier.name ? 'white' : tier.color} />
+                          </div>
+
+                          {/* Price */}
+                          <div className={`
+                            text-center py-2 px-3 rounded-lg font-mono text-sm font-bold
+                            ${selectedTier === tier.name
+                              ? "bg-white/20 text-white"
+                              : "bg-gray-100 dark:bg-gray-900/50 text-emerald-700 dark:text-emerald-400"}
+                          `}>
+                            {tier.priceRange}
+                          </div>
+
+                          {/* Description */}
+                          <p className={`
+                            text-[10px] mt-2 leading-relaxed
+                            ${selectedTier === tier.name ? "text-white/70" : "text-gray-500 dark:text-gray-400"}
+                          `}>
+                            {tier.description}
+                          </p>
+
+                          {/* Glow effect for selected */}
+                          {selectedTier === tier.name && (
+                            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
