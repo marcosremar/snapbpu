@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { useState, useEffect, createContext, useContext } from 'react'
+import { useState, useEffect, createContext, useContext, useMemo, useCallback } from 'react'
 import AppLayout from './components/layout/AppLayout'
 import { SidebarProvider } from './context/SidebarContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -10,12 +10,16 @@ import LandingPage from './pages/LandingPage'
 import Machines from './pages/Machines'
 import GPUMetrics from './pages/GPUMetrics'
 import MetricsHub from './pages/MetricsHub'
-import SavingsPage from './pages/Savings'
-import AdvisorPage from './pages/AdvisorPage'
 import FailoverReportPage from './pages/FailoverReportPage'
+import MachinesReportPage from './pages/MachinesReportPage'
 import FineTuning from './pages/FineTuning'
+import Serverless from './pages/Serverless'
+import GpuOffers from './pages/GpuOffers'
 import Documentation from './pages/Documentation'
+import ButtonShowcase from './pages/ButtonShowcase'
+import ForgotPassword from './pages/ForgotPassword'
 import { ToastProvider } from './components/Toast'
+import ErrorBoundary from './components/ErrorBoundary'
 import './styles/landing.css'
 
 const API_BASE = ''
@@ -58,6 +62,15 @@ const getInitialDemoState = () => {
 export default function App() {
   const [user, setUser] = useState(getInitialDemoState)
   const [loading, setLoading] = useState(!getInitialDemoState())
+  const [dashboardStats, setDashboardStats] = useState(null)
+
+  // Memoize demo user object to prevent creating new object on every render
+  const demoUser = useMemo(() => ({ username: 'demo@dumont.cloud', isDemo: true }), [])
+
+  // Memoize demo logout handler to prevent creating new function on every render
+  const handleDemoLogout = useCallback(() => {
+    window.location.href = '/'
+  }, [])
 
   useEffect(() => {
     // If already in demo mode, skip auth check
@@ -66,11 +79,12 @@ export default function App() {
     }
 
     checkAuth()
-    // Registrar Service Worker para notificações
+
+    // Desregistrar Service Workers antigos que podem estar causando cache
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker registrado'))
-        .catch(err => console.error('Erro ao registrar SW:', err))
+      navigator.serviceWorker.getRegistrations().then(registrations => {
+        registrations.forEach(reg => reg.unregister())
+      })
     }
   }, [])
 
@@ -82,30 +96,24 @@ export default function App() {
       if (!token) {
         token = sessionStorage.getItem('auth_token')
         if (token) {
-          console.log('[App.jsx] Token encontrado em sessionStorage, movendo para localStorage')
           localStorage.setItem('auth_token', token)
         }
       }
 
       if (!token) {
-        console.log('[App.jsx] No token found')
         setLoading(false)
         return
       }
 
-      console.log('[App.jsx] Validando token via /api/v1/auth/me')
       const res = await fetch(`${API_BASE}/api/v1/auth/me`, {
         credentials: 'include',
         headers: { 'Authorization': `Bearer ${token}` }
       })
       const data = await res.json()
-      console.log('[App.jsx] Auth check response:', data)
 
       if (data.authenticated) {
-        console.log('[App.jsx] Usuário autenticado:', data.user)
         setUser(data.user)
       } else {
-        console.log('[App.jsx] Auth failed, removendo token')
         localStorage.removeItem('auth_token')
         sessionStorage.removeItem('auth_token')
       }
@@ -117,8 +125,6 @@ export default function App() {
 
   const handleLogin = async (username, password) => {
     try {
-      console.log('[App.jsx] handleLogin called with:', username)
-
       // Timeout para detectar servidor offline
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 segundos
@@ -134,7 +140,6 @@ export default function App() {
       clearTimeout(timeoutId)
 
       const data = await res.json()
-      console.log('[App.jsx] API response:', data)
 
       // Tratamento de erro HTTP
       if (!res.ok) {
@@ -179,30 +184,24 @@ export default function App() {
       // Login bem-sucedido
       if (data.success) {
         if (data.token) {
-          console.log('[App.jsx] Saving token to localStorage')
           localStorage.setItem('auth_token', data.token)
           const saved = localStorage.getItem('auth_token')
-          console.log('[App.jsx] Token saved. Verification:', saved?.substring(0, 20))
 
           // Garantir que o token foi salvo
           if (!saved) {
-            console.error('[App.jsx] WARNING: Token não foi salvo em localStorage!')
             // Tentar com sessionStorage como fallback
             sessionStorage.setItem('auth_token', data.token)
-            console.log('[App.jsx] Token salvo em sessionStorage como fallback')
           }
         }
 
         // Check if demo user and set demo_mode flag
         const isDemoUser = username === 'test@test.com' || username === 'demo@dumont.cloud'
         if (isDemoUser) {
-          console.log('[App.jsx] Demo user detected, setting demo_mode flag')
           localStorage.setItem('demo_mode', 'true')
         } else {
           localStorage.removeItem('demo_mode')
         }
 
-        console.log('[App.jsx] Setting user:', data.user)
         setUser(data.user)
         return { success: true }
       }
@@ -240,28 +239,24 @@ export default function App() {
   }
 
   const handleLogout = async () => {
-    console.log('[App.jsx] handleLogout called')
     const token = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token')
 
     if (token) {
       try {
-        console.log('[App.jsx] Chamando /api/v1/auth/logout')
         await fetch(`${API_BASE}/api/v1/auth/logout`, {
           method: 'POST',
           credentials: 'include',
           headers: { 'Authorization': `Bearer ${token}` },
         })
       } catch (e) {
-        console.error('[App.jsx] Logout API call failed:', e)
+        // Logout API call failed - continue with local cleanup
       }
     }
 
-    console.log('[App.jsx] Removendo tokens do storage')
     localStorage.removeItem('auth_token')
     sessionStorage.removeItem('auth_token')
     localStorage.removeItem('demo_mode')  // Clear demo mode flag
     setUser(null)
-    console.log('[App.jsx] Logout completo')
   }
 
   if (loading) {
@@ -273,23 +268,26 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider>
-      <SidebarProvider>
-        <ToastProvider>
-          <Routes>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <SidebarProvider>
+          <ToastProvider>
+            <Routes>
             {/* Rotas Públicas */}
             <Route path="/" element={
               user ? <Navigate to="/app" replace /> : <LandingPage onLogin={handleLogin} />
             } />
+            <Route path="/botoes" element={<ButtonShowcase />} />
             <Route path="/login" element={
               user ? <Navigate to="/app" replace /> : <Login onLogin={handleLogin} />
             } />
+            <Route path="/esqueci-senha" element={<ForgotPassword />} />
 
             {/* Rotas Protegidas (requer login) */}
             <Route path="/app" element={
               <ProtectedRoute user={user}>
-                <AppLayout user={user} onLogout={handleLogout}>
-                  <Dashboard />
+                <AppLayout user={user} onLogout={handleLogout} dashboardStats={dashboardStats}>
+                  <Dashboard onStatsUpdate={setDashboardStats} />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -300,10 +298,10 @@ export default function App() {
                 </AppLayout>
               </ProtectedRoute>
             } />
-            <Route path="/app/advisor" element={
+            <Route path="/app/serverless" element={
               <ProtectedRoute user={user}>
                 <AppLayout user={user} onLogout={handleLogout}>
-                  <AdvisorPage user={user} onLogout={handleLogout} />
+                  <Serverless />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -321,13 +319,6 @@ export default function App() {
                 </AppLayout>
               </ProtectedRoute>
             } />
-            <Route path="/app/savings" element={
-              <ProtectedRoute user={user}>
-                <AppLayout user={user} onLogout={handleLogout}>
-                  <SavingsPage user={user} onLogout={handleLogout} />
-                </AppLayout>
-              </ProtectedRoute>
-            } />
             <Route path="/app/settings" element={
               <ProtectedRoute user={user}>
                 <AppLayout user={user} onLogout={handleLogout}>
@@ -342,10 +333,24 @@ export default function App() {
                 </AppLayout>
               </ProtectedRoute>
             } />
+            <Route path="/app/machines-report" element={
+              <ProtectedRoute user={user}>
+                <AppLayout user={user} onLogout={handleLogout}>
+                  <MachinesReportPage />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
             <Route path="/app/finetune" element={
               <ProtectedRoute user={user}>
                 <AppLayout user={user} onLogout={handleLogout}>
                   <FineTuning />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/gpu-offers" element={
+              <ProtectedRoute user={user}>
+                <AppLayout user={user} onLogout={handleLogout}>
+                  <GpuOffers />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -365,64 +370,71 @@ export default function App() {
             {/* Rotas Demo - não requer login, dados fictícios */}
             <Route path="/demo-app" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
-                  <Dashboard />
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true} dashboardStats={dashboardStats}>
+                  <Dashboard onStatsUpdate={setDashboardStats} />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-app/machines" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <Machines />
                 </AppLayout>
               </DemoRoute>
             } />
-            <Route path="/demo-app/advisor" element={
+            <Route path="/demo-app/serverless" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
-                  <AdvisorPage user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} />
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
+                  <Serverless />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-app/metrics-hub" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <MetricsHub />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-app/metrics" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <GPUMetrics />
-                </AppLayout>
-              </DemoRoute>
-            } />
-            <Route path="/demo-app/savings" element={
-              <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
-                  <SavingsPage user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-app/settings" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <Settings />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-app/failover-report" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <FailoverReportPage />
+                </AppLayout>
+              </DemoRoute>
+            } />
+            <Route path="/demo-app/machines-report" element={
+              <DemoRoute>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
+                  <MachinesReportPage />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-app/finetune" element={
               <DemoRoute>
-                <AppLayout user={user || { username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <FineTuning />
+                </AppLayout>
+              </DemoRoute>
+            } />
+            <Route path="/demo-app/gpu-offers" element={
+              <DemoRoute>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
+                  <GpuOffers />
                 </AppLayout>
               </DemoRoute>
             } />
@@ -430,14 +442,14 @@ export default function App() {
             {/* Demo Documentation Routes */}
             <Route path="/demo-docs" element={
               <DemoRoute>
-                <AppLayout user={{ username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <Documentation />
                 </AppLayout>
               </DemoRoute>
             } />
             <Route path="/demo-docs/:docId" element={
               <DemoRoute>
-                <AppLayout user={{ username: 'demo@dumont.cloud', isDemo: true }} onLogout={() => window.location.href = '/'} isDemo={true}>
+                <AppLayout user={demoUser} onLogout={handleDemoLogout} isDemo={true}>
                   <Documentation />
                 </AppLayout>
               </DemoRoute>
@@ -445,9 +457,10 @@ export default function App() {
 
             {/* Fallback - redireciona para landing page */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </ToastProvider>
-      </SidebarProvider>
-    </ThemeProvider>
+            </Routes>
+          </ToastProvider>
+        </SidebarProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }

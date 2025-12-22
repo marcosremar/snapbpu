@@ -3,9 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Server,
+  Zap,
   BarChart3,
-  PiggyBank,
-  Bot,
   Settings,
   ChevronDown,
   MoreHorizontal,
@@ -15,7 +14,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
-import DumontLogo from "../DumontLogo";
+import Logo, { LogoIcon } from "../Logo";
 
 // Helper to get base path based on demo mode
 function useBasePath() {
@@ -44,6 +43,11 @@ const AppSidebar = ({ isDemo = false }) => {
       path: `${basePath}/machines`,
     },
     {
+      icon: Zap,
+      name: "Serverless",
+      path: `${basePath}/serverless`,
+    },
+    {
       icon: Brain,
       name: "Fine-Tuning",
       path: `${basePath}/finetune`,
@@ -51,11 +55,7 @@ const AppSidebar = ({ isDemo = false }) => {
     {
       name: "Analytics",
       icon: BarChart3,
-      subItems: [
-        { name: "Métricas", path: `${basePath}/metrics-hub`, icon: BarChart3 },
-        { name: "Economia", path: `${basePath}/savings`, icon: PiggyBank },
-        { name: "AI Advisor", path: `${basePath}/advisor`, icon: Bot },
-      ],
+      path: `${basePath}/metrics-hub`,
     },
     {
       icon: Settings,
@@ -131,7 +131,7 @@ const AppSidebar = ({ isDemo = false }) => {
               <button
                 onClick={() => handleSubmenuToggle(index)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer ${isItemActive
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                  ? "bg-brand-800/10 text-brand-800 dark:text-brand-500"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-100"
                   } ${!isExpanded && !isHovered
                     ? "lg:justify-center"
@@ -140,7 +140,7 @@ const AppSidebar = ({ isDemo = false }) => {
               >
                 <Icon
                   size={20}
-                  className={isItemActive ? "text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-300"}
+                  className={isItemActive ? "text-brand-800 dark:text-brand-500" : "text-gray-600 dark:text-gray-300"}
                 />
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <span>{nav.name}</span>
@@ -159,7 +159,7 @@ const AppSidebar = ({ isDemo = false }) => {
               <Link
                 to={nav.path}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors ${isActive(nav.path)
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                  ? "bg-brand-800/10 text-brand-800 dark:text-brand-500"
                   : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-gray-100"
                   } ${!isExpanded && !isHovered
                     ? "lg:justify-center"
@@ -168,7 +168,7 @@ const AppSidebar = ({ isDemo = false }) => {
               >
                 <Icon
                   size={20}
-                  className={isActive(nav.path) ? "text-emerald-600 dark:text-emerald-400" : "text-gray-600 dark:text-gray-300"}
+                  className={isActive(nav.path) ? "text-brand-800 dark:text-brand-500" : "text-gray-600 dark:text-gray-300"}
                 />
                 {(isExpanded || isHovered || isMobileOpen) && (
                   <span>{nav.name}</span>
@@ -235,16 +235,17 @@ const AppSidebar = ({ isDemo = false }) => {
           }`}
       >
         <Link to={basePath} className="flex items-center gap-2">
-          <DumontLogo size={32} />
-          {(isExpanded || isHovered || isMobileOpen) && (
+          {(isExpanded || isHovered || isMobileOpen) ? (
             <div className="flex items-center gap-1">
-              <span className="text-lg font-bold text-gray-900 dark:text-white">Dumont Cloud</span>
+              <Logo />
               {isDemo && (
-                <span className="ml-2 px-1.5 py-0.5 text-xs font-medium bg-warning-100 text-warning-700 rounded">
+                <span className="ml-2 px-2 py-0.5 text-xs font-bold bg-amber-500 text-black rounded border-b-2 border-amber-600">
                   DEMO
                 </span>
               )}
             </div>
+          ) : (
+            <LogoIcon />
           )}
         </Link>
       </div>
@@ -271,31 +272,26 @@ const AppSidebar = ({ isDemo = false }) => {
           </div>
         </nav>
 
-        {/* Promo Widget */}
+        {/* Promo Widget - Subtle */}
         {(isExpanded || isHovered || isMobileOpen) && (
-          <div className="mt-auto mb-6 px-2">
-            <div className="relative p-4 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-500/10 dark:to-emerald-600/5 border-2 border-emerald-200 dark:border-emerald-500/30 overflow-hidden group shadow-md">
-              {/* Glow Effect */}
-              <div className="absolute -top-10 -right-10 w-24 h-24 bg-emerald-200/50 dark:bg-emerald-500/20 rounded-full blur-3xl transition-all group-hover:bg-emerald-300/60 dark:group-hover:bg-emerald-500/30" />
-
-              <div className="relative z-10">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center shadow-lg shadow-emerald-500/40">
-                    <Cloud className="w-5 h-5 text-white" />
-                  </div>
-                  <span className="text-gray-900 dark:text-white font-bold text-sm tracking-tight">GPU Cloud</span>
+          <div className="mt-auto mb-10 px-2">
+            <div className="relative p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 overflow-hidden">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-6 h-6 rounded-md bg-brand-800/10 dark:bg-brand-500/10 flex items-center justify-center">
+                  <Cloud className="w-3.5 h-3.5 text-brand-800 dark:text-brand-500" />
                 </div>
-                <p className="text-gray-700 dark:text-gray-300 text-[11px] leading-relaxed mb-3 font-medium">
-                  GPUs de alto desempenho com até 80% de economia.
-                </p>
-                <Link
-                  to={isDemo ? "/demo-app" : "/app"}
-                  className="w-full flex items-center justify-center gap-2 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700/50 dark:hover:bg-emerald-600/60 border border-emerald-700 dark:border-emerald-500/40 text-white text-xs font-bold transition-all hover:scale-[1.02] shadow-sm"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  Explorar Ofertas
-                </Link>
+                <span className="text-gray-700 dark:text-gray-300 font-medium text-xs">GPU Cloud</span>
               </div>
+              <p className="text-gray-500 dark:text-gray-500 text-[10px] leading-relaxed mb-2">
+                GPUs de alto desempenho com até 80% de economia.
+              </p>
+              <Link
+                to={isDemo ? "/demo-app/gpu-offers" : "/app/gpu-offers"}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-transparent hover:bg-brand-800/10 dark:hover:bg-brand-500/10 border border-gray-200 dark:border-white/10 text-gray-600 dark:text-gray-400 hover:text-brand-800 dark:hover:text-brand-500 text-[10px] font-medium transition-all"
+              >
+                <Sparkles className="w-3 h-3" />
+                Explorar Ofertas
+              </Link>
             </div>
           </div>
         )}

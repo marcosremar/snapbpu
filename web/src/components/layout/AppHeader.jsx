@@ -12,7 +12,10 @@ import {
   ChevronDown,
   User,
   LogOut,
-  Cloud
+  Cloud,
+  Server,
+  DollarSign,
+  Shield
 } from "lucide-react";
 import DumontLogo from "../DumontLogo";
 
@@ -22,7 +25,7 @@ function useBasePath() {
   return location.pathname.startsWith('/demo-app') ? '/demo-app' : '/app';
 }
 
-const AppHeader = ({ user, onLogout, isDemo = false }) => {
+const AppHeader = ({ user, onLogout, isDemo = false, dashboardStats = null }) => {
   const [isNotificationOpen, setNotificationOpen] = useState(false);
   const [isUserMenuOpen, setUserMenuOpen] = useState(false);
 
@@ -74,23 +77,41 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
             <DumontLogo size={32} />
             <span className="text-lg font-bold text-gray-900 dark:text-white">Dumont Cloud</span>
           </Link>
-
-          {/* Search Bar - Desktop */}
-          <div className="hidden lg:block">
-            <div className="relative">
-              <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar máquinas, modelos..."
-                className="w-[300px] h-10 pl-10 pr-4 text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-xl focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 focus:outline-none dark:bg-white/5 dark:border-white/10 dark:text-gray-200 dark:placeholder:text-gray-500 transition-all focus:bg-white dark:focus:bg-[#050505]"
-              />
-            </div>
-          </div>
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
-          {/* Dark Mode Toggle */}
+        <div className="flex items-center gap-3">
+          {/* Dashboard Stats - Only show on dashboard page */}
+          {dashboardStats && (
+            <>
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                <Server className="w-4 h-4 text-brand-400" />
+                <div>
+                  <p className="text-[10px] text-gray-400 leading-none">Máquinas</p>
+                  <p className="text-xs font-bold text-white leading-none mt-0.5">{dashboardStats.activeMachines}/{dashboardStats.totalMachines}</p>
+                </div>
+              </div>
+
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                <DollarSign className="w-4 h-4 text-yellow-400" />
+                <div>
+                  <p className="text-[10px] text-gray-400 leading-none">Custo/Dia</p>
+                  <p className="text-xs font-bold text-white leading-none mt-0.5">${dashboardStats.dailyCost}</p>
+                </div>
+              </div>
+
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10">
+                <Shield className="w-4 h-4 text-brand-400" />
+                <div>
+                  <p className="text-[10px] text-gray-400 leading-none">Economia</p>
+                  <p className="text-xs font-bold text-brand-500 leading-none mt-0.5">${dashboardStats.savings} <span className="text-[9px] text-brand-400">+89%</span></p>
+                </div>
+              </div>
+
+              <div className="h-8 w-px bg-white/10 hidden lg:block" />
+            </>
+          )}
+          {/* TODO: Dark Mode Toggle - será implementado no futuro
           <button
             onClick={toggleTheme}
             className="flex items-center justify-center w-10 h-10 text-gray-500 rounded-lg hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-[#1a1f1a]"
@@ -98,6 +119,7 @@ const AppHeader = ({ user, onLogout, isDemo = false }) => {
           >
             {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
           </button>
+          */}
 
           {/* Notifications */}
           <div className="relative" ref={notificationRef}>
