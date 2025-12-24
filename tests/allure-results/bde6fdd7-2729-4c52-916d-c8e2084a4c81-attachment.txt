@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers ordenados por: reliability_score
+INFO     tests.backend.conftest:conftest.py:255 PASS: Ordenação por 'reliability_score' verificada OK
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers ordenados por: availability_score
+INFO     tests.backend.conftest:conftest.py:255 PASS: Ordenação por 'availability_score' verificada OK
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers ordenados por: price_stability_score
+INFO     tests.backend.conftest:conftest.py:255 PASS: Ordenação por 'price_stability_score' verificada OK

@@ -1,0 +1,2 @@
+2025-12-21 06:31:39,478 - tests.backend.conftest - ERROR - FAIL: Descrição com caracteres especiais falhou: 500
+2025-12-21 06:31:39,478 - tests.backend.conftest - ERROR - FAIL: Response: {'error': 'Internal server error', 'details': 'AI Wizard requires OpenRouter API key to function. Please configure OPENROUTER_API_KEY environment variable.'}

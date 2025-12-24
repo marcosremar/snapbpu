@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: DevOps: Health check
+INFO     tests.backend.conftest:conftest.py:255 PASS: Health OK
+INFO     tests.backend.conftest:conftest.py:265 INFO: DevOps: Standby status
+INFO     tests.backend.conftest:conftest.py:255 PASS: Standby status OK
+INFO     tests.backend.conftest:conftest.py:265 INFO: DevOps: Listar instâncias
+INFO     tests.backend.conftest:conftest.py:255 PASS: Instâncias listadas

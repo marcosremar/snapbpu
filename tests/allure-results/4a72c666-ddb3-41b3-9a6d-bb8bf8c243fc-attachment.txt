@@ -1,0 +1,5 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestPricePredictions
+INFO     tests.backend.conftest:conftest.py:265 INFO: Previsão não disponível para 'RTX 4090'
+INFO     tests.backend.conftest:conftest.py:265 INFO: Previsão não disponível para 'RTX 3090'
+INFO     tests.backend.conftest:conftest.py:265 INFO: Previsão não disponível para 'A100'
+INFO     tests.backend.conftest:conftest.py:265 INFO: Nenhuma previsão disponível (serviço ML não executado)

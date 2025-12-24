@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Busca com filtros de especificação
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtros aplicados: 64 ofertas

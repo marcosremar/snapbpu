@@ -1,0 +1,1 @@
+[94mℹ[0m Validação de target_offer_id: status 500

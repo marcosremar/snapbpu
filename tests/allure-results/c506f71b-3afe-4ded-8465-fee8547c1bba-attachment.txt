@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,036 - tests.backend.conftest - INFO - PASS: Snapshot não criado (Restic não configurado ou instância inválida - OK)

@@ -11,7 +11,10 @@ import {
   Cloud,
   Brain,
   BookOpen,
-  Sparkles
+  Sparkles,
+  Play,
+  Columns,
+  Rocket
 } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
 import Logo, { LogoIcon } from "../Logo";
@@ -48,9 +51,24 @@ const AppSidebar = ({ isDemo = false }) => {
       path: `${basePath}/serverless`,
     },
     {
+      icon: Play,
+      name: "Jobs",
+      path: `${basePath}/jobs`,
+    },
+    {
+      icon: Rocket,
+      name: "Models",
+      path: `${basePath}/models`,
+    },
+    {
       icon: Brain,
       name: "Fine-Tuning",
       path: `${basePath}/finetune`,
+    },
+    {
+      icon: Columns,
+      name: "Chat Arena",
+      path: `${basePath}/chat-arena`,
     },
     {
       name: "Analytics",

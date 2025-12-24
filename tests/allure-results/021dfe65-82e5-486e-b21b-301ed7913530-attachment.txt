@@ -1,0 +1,1 @@
+[92m✓[0m Requisições concorrentes: 4/4 OK, tempo médio: 0.01s

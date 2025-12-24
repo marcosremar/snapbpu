@@ -1,0 +1,7 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestUserJourneyScenarios
+INFO     tests.backend.conftest:conftest.py:265 INFO: ML Researcher: Buscando ofertas de GPU
+INFO     tests.backend.conftest:conftest.py:255 PASS: Ofertas carregadas
+INFO     tests.backend.conftest:conftest.py:265 INFO: ML Researcher: Analisando mercado
+INFO     tests.backend.conftest:conftest.py:255 PASS: Métricas de mercado carregadas
+INFO     tests.backend.conftest:conftest.py:265 INFO: ML Researcher: Verificando instâncias
+INFO     tests.backend.conftest:conftest.py:255 PASS: Instâncias verificadas

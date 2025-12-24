@@ -6,7 +6,8 @@ import {
   Server, Smartphone, Code, TrendingUp, PiggyBank,
   Lock, Rocket, BarChart3, Users, Star, Calculator
 } from 'lucide-react'
-import DumontLogo from '../components/DumontLogo'
+import Logo, { LogoIcon } from '../components/Logo'
+import LoginModal from '../components/auth/LoginModal'
 
 // Componente de comparação de preços em tempo real
 const PriceComparison = () => {
@@ -89,8 +90,8 @@ const PriceComparison = () => {
 
         <div className="comparison-row dumont highlight">
           <div className="provider">
-            <DumontLogo size={18} />
-            <span>Dumont Cloud</span>
+            <LogoIcon size={18} />
+            <span className="brand-name"><span className="brand-dumont">Dumont</span> <span className="brand-cloud">Cloud</span></span>
             <span className="badge">VOCÊ</span>
           </div>
           <div className="price">${gpu.dumont.toFixed(2)}</div>
@@ -244,8 +245,8 @@ export default function LandingPage({ onLogin }) {
       <nav className={`landing-nav ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
           <div className="nav-brand">
-            <DumontLogo size={32} className="brand-icon" />
-            <span>Dumont Cloud</span>
+            <LogoIcon size={42} className="brand-icon" />
+            <span className="brand-name"><span className="brand-dumont">Dumont</span> <span className="brand-cloud">Cloud</span></span>
           </div>
           <div className="nav-links">
             <a href="#features">Features</a>
@@ -253,11 +254,11 @@ export default function LandingPage({ onLogin }) {
             <a href="#calculator">Calculadora</a>
           </div>
           <div className="nav-actions">
-            <button className="nav-login" onClick={() => setShowLogin(true)}>
+            <button className="nav-login" onClick={() => navigate('/login')}>
               Login
             </button>
-            <button className="nav-cta" onClick={() => document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' })}>
-              Começar Grátis
+            <button className="nav-cta" onClick={() => navigate('/login')}>
+              Começar Agora
               <ArrowRight size={16} />
             </button>
           </div>
@@ -267,8 +268,15 @@ export default function LandingPage({ onLogin }) {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-bg">
+          <div className="hero-decoration">
+            <div className="decoration-circle c1"></div>
+            <div className="decoration-circle c2"></div>
+            <div className="decoration-circle c3"></div>
+            <div className="decoration-circle c4"></div>
+            <div className="decoration-circle c5"></div>
+          </div>
           <div className="hero-gradient" />
-          <div className="hero-grid" />
+          
         </div>
 
         <div className="hero-content">
@@ -301,7 +309,7 @@ export default function LandingPage({ onLogin }) {
           </div>
 
           <div className="hero-ctas">
-            <button className="cta-primary" onClick={() => setShowLogin(true)}>
+            <button className="cta-primary" onClick={() => navigate('/login')}>
               <DollarSign size={18} />
               Ver Quanto Eu Economizo
             </button>
@@ -536,7 +544,7 @@ export default function LandingPage({ onLogin }) {
               </ul>
             </div>
 
-            <button className="plan-cta" onClick={() => setShowLogin(true)}>
+            <button className="plan-cta" onClick={() => navigate('/login')}>
               Começar 7 Dias Grátis
             </button>
           </div>
@@ -570,7 +578,7 @@ export default function LandingPage({ onLogin }) {
               </ul>
             </div>
 
-            <button className="plan-cta primary" onClick={() => setShowLogin(true)}>
+            <button className="plan-cta primary" onClick={() => navigate('/login')}>
               <Rocket size={16} />
               Começar 7 Dias Grátis
             </button>
@@ -791,7 +799,7 @@ export default function LandingPage({ onLogin }) {
               <Calculator size={20} />
               Calcular Minha Economia
             </button>
-            <button className="cta-secondary large" onClick={() => setShowLogin(true)}>
+            <button className="cta-secondary large" onClick={() => navigate('/login')}>
               Começar Agora (Trial Grátis)
             </button>
           </div>
@@ -807,8 +815,8 @@ export default function LandingPage({ onLogin }) {
       <footer className="landing-footer">
         <div className="footer-container">
           <div className="footer-brand">
-            <DumontLogo size={24} />
-            <span>Dumont Cloud</span>
+            <LogoIcon size={24} />
+            <span className="brand-name"><span className="brand-dumont">Dumont</span> <span className="brand-cloud">Cloud</span></span>
             <p>GPU Cloud para desenvolvedores que valorizam seu tempo e dinheiro.</p>
           </div>
           <div className="footer-links">
@@ -838,196 +846,12 @@ export default function LandingPage({ onLogin }) {
       </footer>
 
       {/* Login Modal */}
-      {showLogin && (
-        <div className="login-modal-overlay" onClick={() => setShowLogin(false)}>
-          <div className="login-modal-container" onClick={e => e.stopPropagation()}>
-            {/* Left Panel - Branding */}
-            <div className="login-modal-branding">
-              <div className="branding-content">
-                <div className="branding-logo">
-                  <DumontLogo size={32} />
-                  <span>Dumont Cloud</span>
-                </div>
-                <h2>Desenvolvimento com GPU na nuvem</h2>
-                <p>Economize até 89% comparado com AWS, GCP e Azure</p>
-                <div className="branding-features">
-                  <div className="branding-feature">
-                    <Zap size={16} />
-                    <span>Deploy em segundos</span>
-                  </div>
-                  <div className="branding-feature">
-                    <DollarSign size={16} />
-                    <span>Pague só o que usar</span>
-                  </div>
-                  <div className="branding-feature">
-                    <Sparkles size={16} />
-                    <span>IA para escolher GPU</span>
-                  </div>
-                </div>
-              </div>
-              <div className="branding-decoration">
-                <div className="decoration-circle c1"></div>
-                <div className="decoration-circle c2"></div>
-                <div className="decoration-circle c3"></div>
-              </div>
-            </div>
-
-            {/* Right Panel - Login Form */}
-            <div className="login-modal-form-panel">
-              <button className="modal-close-btn" onClick={() => setShowLogin(false)}>
-                ×
-              </button>
-
-              <div className="form-panel-content">
-                <div className="form-header">
-                  <h3>Entrar na sua conta</h3>
-                  <p>Acesse seu ambiente de desenvolvimento</p>
-                </div>
-
-                <LoginForm onLogin={onLogin} onClose={() => setShowLogin(false)} />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <LoginModal
+        isOpen={showLogin}
+        onClose={() => setShowLogin(false)}
+        onLogin={onLogin}
+      />
     </div>
-  )
-}
-
-// Login Form Component
-function LoginForm({ onLogin, onClose }) {
-  const navigate = useNavigate()
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    console.log('[LoginForm] handleSubmit - calling onLogin with:', username)
-
-    const result = await onLogin(username, password)
-    console.log('[LoginForm] onLogin result:', result)
-
-    if (result.error) {
-      setError(result)
-      setLoading(false)
-    } else {
-      console.log('[LoginForm] Login successful, closing modal and redirecting')
-      onClose()
-
-      // Aguardar mais tempo para garantir que o token foi salvo em localStorage
-      // e que o estado React foi atualizado
-      setTimeout(() => {
-        console.log('[LoginForm] Verificando token antes de navegar')
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
-        console.log('[LoginForm] Token presente:', !!token)
-
-        console.log('[LoginForm] Navegando para /app')
-        navigate('/app')
-      }, 1000)  // Aumentado de 500ms para 1000ms
-    }
-  }
-
-  // Determinar ícone e cor com base no tipo de erro
-  const getErrorIcon = (errorType) => {
-    switch (errorType) {
-      case 'connection':
-      case 'timeout':
-        return '🔌'
-      case 'credentials':
-        return '🔒'
-      case 'validation':
-        return '⚠️'
-      case 'server':
-        return '⚙️'
-      default:
-        return '❌'
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="login-form-v2">
-      {error && typeof error === 'object' && error.error && (
-        <div className="login-error">
-          <span className="error-icon">{getErrorIcon(error.errorType)}</span>
-          <div className="error-content">
-            <span className="error-message">{error.error}</span>
-            {error.hint && (
-              <details className="error-hint">
-                <summary>💡 Dica para desenvolvedores</summary>
-                <pre>{error.hint}</pre>
-              </details>
-            )}
-          </div>
-        </div>
-      )}
-
-      <div className="form-field">
-        <label htmlFor="email">Email</label>
-        <div className="field-input-wrap">
-          <Users size={18} className="field-icon" />
-          <input
-            id="email"
-            type="email"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="seu@email.com"
-            autoComplete="email"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="form-field">
-        <div className="field-label-row">
-          <label htmlFor="password">Senha</label>
-          <a href="#" className="forgot-link">Esqueceu?</a>
-        </div>
-        <div className="field-input-wrap">
-          <Lock size={18} className="field-icon" />
-          <input
-            id="password"
-            type={showPassword ? 'text' : 'password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-          />
-          <button
-            type="button"
-            className="password-toggle"
-            onClick={() => setShowPassword(!showPassword)}
-            tabIndex={-1}
-          >
-            {showPassword ? '🙈' : '👁️'}
-          </button>
-        </div>
-      </div>
-
-      <button type="submit" className="login-submit" disabled={loading}>
-        {loading ? (
-          <>
-            <span className="btn-spinner" />
-            Entrando...
-          </>
-        ) : (
-          <>
-            Entrar
-            <ArrowRight size={18} />
-          </>
-        )}
-      </button>
-
-      <div className="login-footer">
-        <p>Não tem conta? <a href="#">Criar conta grátis</a></p>
-      </div>
-
-    </form>
   )
 }
 

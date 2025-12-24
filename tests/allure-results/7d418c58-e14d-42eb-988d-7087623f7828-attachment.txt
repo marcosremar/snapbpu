@@ -1,0 +1,1 @@
+[92m✓[0m Todos os 5 tokens malformados rejeitados

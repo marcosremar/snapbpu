@@ -1,0 +1,2 @@
+[92m✓[0m Status com associations
+[92m✓[0m Associations: 2 encontradas

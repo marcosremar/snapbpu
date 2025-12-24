@@ -1,0 +1,2 @@
+[92m✓[0m Validação: dados requeridos
+[92m✓[0m Validação: offer_id inválido rejeitado

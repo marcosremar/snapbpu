@@ -1,0 +1,1 @@
+[92m✓[0m XSS em tags aceito (deve ser sanitizado)

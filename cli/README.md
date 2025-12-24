@@ -97,6 +97,102 @@ dumont snapshot create name=backup instance_id=12345
 dumont snapshot restore snapshot_id=snap_abc instance_id=12345
 ```
 
+## 📋 All Available Commands (100+)
+
+### Failover Orchestrator
+```bash
+dumont failover strategies              # Ver estrategias
+dumont failover settings-global         # Config global
+dumont failover settings-machines       # Config por maquina
+dumont failover readiness <id>          # Verificar prontidao
+dumont failover status <id>             # Status do failover
+dumont failover execute                 # Executar failover
+dumont failover test <id>               # Testar failover
+dumont failover regional-volume-list    # Listar volumes
+dumont failover regional-volume-create  # Criar volume
+```
+
+### CPU Standby
+```bash
+dumont standby status                   # Status geral
+dumont standby configure                # Configurar standby
+dumont standby associations             # Listar associacoes
+dumont standby pricing                  # Ver precos
+dumont standby failover-simulate <id>   # Simular failover
+dumont standby failover-report          # Relatorio
+dumont standby failover-fast <id>       # Failover rapido
+```
+
+### GPU Warm Pool
+```bash
+dumont warmpool hosts                   # Listar hosts
+dumont warmpool status <id>             # Status da maquina
+dumont warmpool provision               # Provisionar
+dumont warmpool enable <id>             # Habilitar
+dumont warmpool disable <id>            # Desabilitar
+```
+
+### Metrics & Spot Market
+```bash
+dumont metric market                    # Metricas de mercado
+dumont metric providers                 # Comparar provedores
+dumont metric gpus                      # Lista de GPUs
+dumont metric spot-monitor              # Monitorar spot
+dumont metric spot-llm-gpus             # GPUs para LLM
+dumont metric spot-availability         # Disponibilidade
+```
+
+### Savings & Economy
+```bash
+dumont saving summary                   # Resumo de economia
+dumont saving history                   # Historico
+dumont saving breakdown                 # Detalhamento
+dumont hibernation stats                # Stats hibernacao
+```
+
+### Fine-tuning
+```bash
+dumont finetune models                  # Modelos disponiveis
+dumont finetune jobs                    # Listar jobs
+dumont finetune create                  # Criar job
+dumont finetune logs <job_id>           # Ver logs
+```
+
+### Settings
+```bash
+dumont setting list                     # Ver configuracoes
+dumont setting cloud-storage            # Config cloud storage
+dumont balance list                     # Ver saldo
+```
+
+### AI Wizard & Advisor
+```bash
+dumont ai-wizard analyze                # Analisar requisitos
+dumont advisor recommend                # Recomendacoes
+```
+
+## 🧪 Testing
+
+### Run all CLI tests
+```bash
+cd /home/marcos/dumontcloud/cli
+pytest tests/ -v -s
+```
+
+### Run by group
+```bash
+pytest tests/test_cli_real.py -v -s -k "Auth"
+pytest tests/test_cli_real.py -v -s -k "Instance"
+pytest tests/test_cli_real.py -v -s -k "Failover"
+pytest tests/test_cli_real.py -v -s -k "Metrics"
+```
+
+### Real integration tests (USES CREDITS!)
+```bash
+pytest tests/test_real_integration.py -v -s
+pytest tests/test_all_endpoints_real.py -v -s
+```
+
 ## 🏗️ Architecture
 
 ```

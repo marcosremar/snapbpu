@@ -1,0 +1,9 @@
+{
+  "mode": "fast",
+  "provider": "gcp",
+  "instance": "code-server-build",
+  "machine_type": "c2d-highcpu-16",
+  "start_seconds": 9.77528190612793,
+  "stop_seconds": 135.21077609062195,
+  "timestamp": "2025-12-22T04:49:11.823797"
+}

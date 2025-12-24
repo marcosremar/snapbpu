@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Encoding
+INFO     tests.backend.conftest:conftest.py:255 PASS: Resposta em UTF-8 válido

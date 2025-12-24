@@ -1,0 +1,3 @@
+[92m✓[0m Preço para e2-micro obtido
+[92m✓[0m Preço para e2-small obtido
+[92m✓[0m Preço para e2-medium obtido

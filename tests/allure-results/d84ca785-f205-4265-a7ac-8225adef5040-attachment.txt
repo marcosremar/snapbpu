@@ -1,0 +1,1 @@
+[94mℹ[0m GCP credentials não configuradas (esperado em ambiente de teste)

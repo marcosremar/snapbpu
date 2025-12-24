@@ -1,0 +1,3 @@
+[92m✓[0m Listar associações
+[92m✓[0m Testando sync para GPU: 12345
+[94mℹ[0m Sync retornou status: 500

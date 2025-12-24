@@ -1,0 +1,10 @@
+[94mℹ[0m Passo 1: Verificar autenticação
+[92m✓[0m Usuário autenticado
+[94mℹ[0m Passo 2: Listar instâncias
+[92m✓[0m Instâncias listadas: 1
+[94mℹ[0m Passo 3: Ver savings
+[92m✓[0m Savings carregado
+[94mℹ[0m Passo 4: Ver standby status
+[92m✓[0m Standby status carregado
+[94mℹ[0m Passo 5: Ver hibernation stats
+[92m✓[0m Hibernation stats carregado

@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,144 - tests.backend.conftest - INFO - Usando cache para TestSyncEndpoints
+2025-12-21 06:32:13,147 - tests.backend.conftest - INFO - INFO: Sync status para instância inexistente retornou 500 (esperado)

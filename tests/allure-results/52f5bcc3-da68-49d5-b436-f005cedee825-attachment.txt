@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: source_path padrão aceito (falhou por outro motivo)

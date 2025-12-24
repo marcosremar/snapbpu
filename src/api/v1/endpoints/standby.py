@@ -401,6 +401,74 @@ async def get_pricing(
 
 
 # ============================================================
+# MANUAL PROVISIONING ENDPOINT
+# ============================================================
+
+@router.post("/provision/{gpu_instance_id}")
+async def provision_cpu_standby(
+    gpu_instance_id: int,
+    label: Optional[str] = Query(None, description="Label for the CPU standby VM"),
+    user_email: str = Depends(get_current_user_email),
+):
+    """
+    Manually provision CPU Standby for an existing GPU instance.
+
+    This endpoint triggers the creation of a CPU Standby VM in GCP
+    for a GPU instance that was created before auto-standby was enabled.
+
+    Requires:
+    - GCP credentials configured in user settings
+    - Auto-standby to be configured via /standby/configure
+
+    Returns the association info if successful.
+    """
+    manager = get_standby_manager()
+
+    # Check if already has association
+    if gpu_instance_id in manager._associations:
+        association = manager.get_association(gpu_instance_id)
+        return {
+            "success": True,
+            "message": "CPU Standby already exists for this GPU",
+            "association": association,
+        }
+
+    # Check if manager is configured
+    if not manager.is_configured():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Standby manager not configured. Call POST /standby/configure first."
+        )
+
+    # Trigger provisioning
+    try:
+        result = manager.on_gpu_created(
+            gpu_instance_id=gpu_instance_id,
+            label=label or f"gpu-{gpu_instance_id}",
+            machine_id=gpu_instance_id,
+        )
+
+        if result:
+            return {
+                "success": True,
+                "message": "CPU Standby provisioned successfully",
+                "association": result,
+            }
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to provision CPU Standby. Check GCP credentials and quota."
+            )
+
+    except Exception as e:
+        logger.error(f"Failed to provision CPU standby for GPU {gpu_instance_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Provisioning failed: {str(e)}"
+        )
+
+
+# ============================================================
 # FAILOVER SIMULATION & TESTING ENDPOINTS
 # ============================================================
 

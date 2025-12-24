@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,859 - tests.backend.conftest - INFO - PASS: Comparação tipo 'on-demand': 2 GPUs
+2025-12-21 06:32:11,861 - tests.backend.conftest - INFO - PASS: Comparação tipo 'interruptible': 2 GPUs

@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestErrorRecovery
+INFO     tests.backend.conftest:conftest.py:255 PASS: Sistema se recuperou de endpoint inválido

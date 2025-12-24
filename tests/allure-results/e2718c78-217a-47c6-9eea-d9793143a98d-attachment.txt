@@ -1,0 +1,2 @@
+[94mℹ[0m Endpoint /api/v1/telemetry/stats não implementado (status 200)
+[94mℹ[0m Endpoint /api/v1/telemetry/events não implementado (status 200)

@@ -1,0 +1,12 @@
+2025-12-21 06:32:11,833 - tests.backend.conftest - INFO - PASS: Efficiency com filtro: {'gpu_name': 'RTX 3090'}
+2025-12-21 06:32:11,833 - tests.backend.conftest - INFO - PASS: Filtro {'gpu_name': 'RTX 3090'}: 50 resultados
+2025-12-21 06:32:11,835 - tests.backend.conftest - INFO - PASS: Efficiency com filtro: {'machine_type': 'on-demand'}
+2025-12-21 06:32:11,835 - tests.backend.conftest - INFO - PASS: Filtro {'machine_type': 'on-demand'}: 50 resultados
+2025-12-21 06:32:11,836 - tests.backend.conftest - INFO - PASS: Efficiency com filtro: {'verified_only': True}
+2025-12-21 06:32:11,837 - tests.backend.conftest - INFO - PASS: Filtro {'verified_only': True}: 0 resultados
+2025-12-21 06:32:11,839 - tests.backend.conftest - INFO - PASS: Efficiency com filtro: {'max_price': 5.0}
+2025-12-21 06:32:11,839 - tests.backend.conftest - INFO - PASS: Filtro {'max_price': 5.0}: 50 resultados
+2025-12-21 06:32:11,841 - tests.backend.conftest - INFO - PASS: Efficiency com filtro: {'min_reliability': 0.5}
+2025-12-21 06:32:11,841 - tests.backend.conftest - INFO - PASS: Filtro {'min_reliability': 0.5}: 50 resultados
+2025-12-21 06:32:11,842 - tests.backend.conftest - INFO - PASS: Efficiency com filtro: {'limit': 20}
+2025-12-21 06:32:11,842 - tests.backend.conftest - INFO - PASS: Filtro {'limit': 20}: 20 resultados

@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Previsão não disponível para 'RTX 4090' tipo 'on-demand'
+INFO     tests.backend.conftest:conftest.py:265 INFO: Previsão não disponível para 'RTX 4090' tipo 'interruptible'

@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,052 - tests.backend.conftest - INFO - Usando cache para TestSnapshotInputValidation
+2025-12-21 06:32:13,054 - tests.backend.conftest - INFO - PASS: SQL Injection em instance_id rejeitado

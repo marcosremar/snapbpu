@@ -1,0 +1,6 @@
+[92m✓[0m Estimativa de custos
+[92m✓[0m Custo em disk_gb: $100
+[92m✓[0m Custo em spot: $True
+[92m✓[0m Custo em estimated_hourly_usd: $0.01
+[92m✓[0m Custo em estimated_monthly_usd: $11.2
+[92m✓[0m Custo em breakdown.vm_monthly: $7.2

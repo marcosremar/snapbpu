@@ -11,6 +11,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 from ....services.standby.hibernation import get_auto_hibernation_manager
+from ....services.standby.serverless import get_serverless_manager
 
 logger = logging.getLogger(__name__)
 
@@ -99,7 +100,7 @@ async def receive_agent_status(request: AgentStatusRequest):
                 gpu_utilization=gpu_utilization,
                 gpu_threshold=5.0  # < 5% é considerado ocioso
             )
-            
+
             # Verificar se deve hibernar
             if result and result.get("should_hibernate"):
                 return AgentStatusResponse(
@@ -107,6 +108,17 @@ async def receive_agent_status(request: AgentStatusRequest):
                     action="prepare_hibernate",
                     message=f"Instance will hibernate in {result.get('seconds_until_hibernate', 0)}s"
                 )
+
+        # Atualizar o ServerlessManager com GPU utilization
+        try:
+            serverless_manager = get_serverless_manager()
+            serverless_manager.update_gpu_utilization(
+                instance_id=int(instance_id),
+                gpu_util=gpu_utilization
+            )
+        except (ValueError, Exception) as e:
+            # Instance ID pode não ser numérico, ou serverless não configurado
+            logger.debug(f"Could not update serverless manager: {e}")
         
         return AgentStatusResponse(
             instance_id=instance_id,

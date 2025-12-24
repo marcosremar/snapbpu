@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Validação de estrutura
+INFO     tests.backend.conftest:conftest.py:255 PASS: Campos opcionais presentes: 14/14

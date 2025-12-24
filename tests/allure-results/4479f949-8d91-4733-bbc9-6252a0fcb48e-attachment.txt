@@ -1,0 +1,2 @@
+[92m✓[0m Tamanho da resposta
+[92m✓[0m Tamanho da resposta: 78 bytes, JSON: 85 chars

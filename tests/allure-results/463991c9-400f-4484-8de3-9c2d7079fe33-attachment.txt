@@ -1,0 +1,1 @@
+[92m✓[0m Múltiplas requisições processadas (sem rate limit ou não atingido)

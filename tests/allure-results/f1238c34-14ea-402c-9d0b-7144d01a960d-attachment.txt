@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Buscar preços
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preços obtidos
+INFO     tests.backend.conftest:conftest.py:265 INFO: GCP credentials não configuradas - pulando configuração

@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshot não criado (Restic não configurado ou instância inválida - OK)

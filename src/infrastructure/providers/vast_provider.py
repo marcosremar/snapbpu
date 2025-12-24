@@ -8,7 +8,15 @@ import requests
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
-from ...core.exceptions import VastAPIException, ServiceUnavailableException
+from ...core.exceptions import (
+    VastAPIException,
+    ServiceUnavailableException,
+    NotFoundException,
+    InsufficientBalanceException,
+    OfferUnavailableException,
+    RateLimitException,
+    InvalidOfferException,
+)
 from ...core.constants import VAST_API_URL, VAST_DEFAULT_TIMEOUT
 from ...domain.repositories import IGpuProvider
 from ...domain.models import GpuOffer, Instance
@@ -41,6 +49,106 @@ class VastProvider(IGpuProvider):
         self.api_url = api_url
         self.timeout = timeout
         self.headers = {"Authorization": f"Bearer {api_key}"}
+
+    def _handle_vast_error(self, response: requests.Response, context: str = "", offer_id: int = None) -> None:
+        """
+        Analisa resposta de erro da VAST.ai e lança exceção apropriada.
+
+        Args:
+            response: Response object from requests
+            context: Contexto da operação (ex: "criar instância")
+            offer_id: ID da oferta se aplicável
+        """
+        status = response.status_code
+        try:
+            data = response.json()
+            error_msg = data.get("error", data.get("msg", str(data)))
+        except:
+            error_msg = response.text or f"HTTP {status}"
+
+        error_lower = error_msg.lower()
+
+        # 400 Bad Request - múltiplas causas possíveis
+        if status == 400:
+            if "balance" in error_lower or "credit" in error_lower or "funds" in error_lower:
+                raise InsufficientBalanceException()
+
+            if "not available" in error_lower or "no longer" in error_lower:
+                reason = "rented" if "rented" in error_lower else ""
+                raise OfferUnavailableException(offer_id or 0, reason)
+
+            if "invalid" in error_lower:
+                raise InvalidOfferException(error_msg)
+
+            # Oferta não disponível é o caso mais comum de 400
+            if offer_id:
+                raise OfferUnavailableException(offer_id, error_msg)
+
+            raise VastAPIException(f"Requisição inválida: {error_msg}")
+
+        # 401 Unauthorized
+        if status == 401:
+            raise VastAPIException("API key inválida ou expirada. Verifique sua chave em console.vast.ai")
+
+        # 402 Payment Required
+        if status == 402:
+            raise InsufficientBalanceException()
+
+        # 403 Forbidden
+        if status == 403:
+            raise VastAPIException("Acesso negado. Sua conta pode estar suspensa ou a operação não é permitida")
+
+        # 404 Not Found
+        if status == 404:
+            if offer_id:
+                raise OfferUnavailableException(offer_id, "offline")
+            raise NotFoundException(f"Recurso não encontrado: {context}")
+
+        # 429 Rate Limit
+        if status == 429:
+            retry_after = int(response.headers.get("Retry-After", 60))
+            raise RateLimitException(retry_after)
+
+        # 500+ Server Errors
+        if status >= 500:
+            raise ServiceUnavailableException(
+                f"VAST.ai está com problemas temporários (HTTP {status}). Tente novamente em alguns minutos"
+            )
+
+        # Erro genérico
+        raise VastAPIException(f"Erro VAST.ai ({status}): {error_msg}")
+
+    def _diagnose_create_failure(self, offer_id: int, error: Exception) -> str:
+        """
+        Diagnostica falha na criação de instância e retorna mensagem amigável.
+        """
+        error_str = str(error).lower()
+
+        # Tentar obter saldo atual
+        try:
+            balance_info = self.get_balance()
+            balance = balance_info.get("credit", 0)
+        except:
+            balance = None
+
+        diagnostics = []
+
+        if "400" in error_str:
+            diagnostics.append("• A oferta pode ter sido alugada por outro usuário")
+            diagnostics.append("• O host pode ter saído do ar")
+            diagnostics.append("• O preço pode ter mudado")
+
+        if balance is not None:
+            if balance < 1:
+                diagnostics.insert(0, f"• ⚠️ Saldo baixo: ${balance:.2f}")
+            else:
+                diagnostics.append(f"• Saldo disponível: ${balance:.2f}")
+
+        if not diagnostics:
+            diagnostics.append("• Erro temporário na API VAST.ai")
+            diagnostics.append("• Tente novamente em alguns segundos")
+
+        return "\n".join(diagnostics)
 
     def search_offers(
         self,
@@ -323,28 +431,220 @@ class VastProvider(IGpuProvider):
                 headers=self.headers,
                 timeout=self.timeout,
             )
-            resp.raise_for_status()
+
+            # Usar error handler para respostas de erro
+            if not resp.ok:
+                self._handle_vast_error(resp, "criar instância", offer_id)
+
             data = resp.json()
             instance_id = data.get("new_contract")
 
             if not instance_id:
-                raise VastAPIException("No instance ID returned from vast.ai")
+                raise VastAPIException("VAST.ai não retornou ID da instância. A oferta pode ter expirado.")
 
             logger.info(f"Created instance {instance_id}")
 
             # Get full instance details
             return self.get_instance(instance_id)
 
+        except (VastAPIException, OfferUnavailableException, InsufficientBalanceException):
+            raise  # Re-raise our custom exceptions
+        except requests.exceptions.Timeout:
+            raise ServiceUnavailableException(
+                "Timeout ao conectar com VAST.ai. A API pode estar lenta ou indisponível."
+            )
+        except requests.exceptions.ConnectionError:
+            raise ServiceUnavailableException(
+                "Não foi possível conectar à API VAST.ai. Verifique sua conexão com a internet."
+            )
         except requests.RequestException as e:
             logger.error(f"Failed to create instance: {e}")
-            raise ServiceUnavailableException(f"Vast.ai API unreachable: {e}")
+            diagnosis = self._diagnose_create_failure(offer_id, e)
+            raise ServiceUnavailableException(
+                f"Falha ao criar instância na VAST.ai.\n\nPossíveis causas:\n{diagnosis}"
+            )
         except Exception as e:
             logger.error(f"Unexpected error creating instance: {e}")
-            raise VastAPIException(f"Failed to create instance: {e}")
+            raise VastAPIException(f"Erro inesperado ao criar instância: {e}")
+
+    def create_instance_bid(
+        self,
+        offer_id: int,
+        image: str,
+        disk_size: float,
+        bid_price: float,
+        label: Optional[str] = None,
+        env_vars: Optional[Dict[str, str]] = None,
+        onstart_cmd: Optional[str] = None,
+    ) -> Instance:
+        """
+        Cria instância via bidding (spot/interruptível).
+
+        Diferente de create_instance que usa preço fixo (asking price),
+        este método permite especificar um preço de bid. A instância
+        pode ser interrompida se outro usuário fizer um bid maior.
+
+        Args:
+            offer_id: ID da oferta no VAST.ai
+            image: Imagem Docker a usar
+            disk_size: Tamanho do disco em GB
+            bid_price: Preço do bid em $/hr (deve ser >= min_bid da oferta)
+            label: Label opcional para identificar a instância
+            env_vars: Variáveis de ambiente
+            onstart_cmd: Comando a executar no início
+
+        Returns:
+            Instance: Instância criada
+
+        Raises:
+            VastAPIException: Se o bid for rejeitado
+            InsufficientBalanceException: Se não houver saldo
+        """
+        logger.info(f"Creating SPOT instance from offer {offer_id} with bid ${bid_price:.4f}/hr")
+
+        if not onstart_cmd:
+            onstart_cmd = "touch ~/.no_auto_tmux"
+
+        extra_env = []
+        if env_vars:
+            for key, value in env_vars.items():
+                if key.startswith("PORT_"):
+                    port = key.replace("PORT_", "")
+                    extra_env.append([f"-p {port}:{port}", "1"])
+                else:
+                    extra_env.append([key, value])
+
+        payload = {
+            "client_id": "me",
+            "image": image,
+            "disk": int(disk_size),
+            "price": bid_price,  # Preço do bid
+            "onstart": onstart_cmd,
+            "extra_env": extra_env,
+        }
+
+        if label:
+            payload["label"] = label
+
+        try:
+            # Usa endpoint /bids/ ao invés de /asks/
+            resp = requests.put(
+                f"{self.api_url}/bids/{offer_id}/",
+                json=payload,
+                headers=self.headers,
+                timeout=self.timeout,
+            )
+
+            if not resp.ok:
+                self._handle_vast_error(resp, "criar instância spot", offer_id)
+
+            data = resp.json()
+            instance_id = data.get("new_contract")
+
+            if not instance_id:
+                raise VastAPIException("VAST.ai não retornou ID da instância spot. O bid pode ter sido rejeitado.")
+
+            logger.info(f"Created SPOT instance {instance_id} with bid ${bid_price:.4f}/hr")
+
+            return self.get_instance(instance_id)
+
+        except (VastAPIException, OfferUnavailableException, InsufficientBalanceException):
+            raise
+        except requests.exceptions.Timeout:
+            raise ServiceUnavailableException(
+                "Timeout ao conectar com VAST.ai para criar instância spot."
+            )
+        except requests.exceptions.ConnectionError:
+            raise ServiceUnavailableException(
+                "Não foi possível conectar à API VAST.ai."
+            )
+        except Exception as e:
+            logger.error(f"Failed to create spot instance: {e}")
+            raise VastAPIException(f"Erro ao criar instância spot: {e}")
+
+    def get_interruptible_offers(
+        self,
+        region: Optional[str] = None,
+        gpu_name: Optional[str] = None,
+        max_price: float = 1.0,
+        min_inet_down: float = 100,
+        min_disk: float = 20,
+    ) -> List[GpuOffer]:
+        """
+        Busca ofertas interruptíveis (spot) disponíveis.
+
+        Ofertas interruptíveis são mais baratas mas podem ser
+        interrompidas se outro usuário fizer um bid maior.
+
+        Args:
+            region: Região desejada (US, EU, ASIA, etc)
+            gpu_name: Nome da GPU (RTX 4090, etc)
+            max_price: Preço máximo por hora
+            min_inet_down: Velocidade mínima de download em Mbps
+            min_disk: Espaço mínimo de disco em GB
+
+        Returns:
+            Lista de ofertas ordenadas por preço (mais barato primeiro)
+        """
+        logger.info(f"Searching interruptible offers: region={region}, gpu={gpu_name}, max_price=${max_price}")
+
+        query = {
+            "rentable": {"eq": True},
+            "rented": {"eq": False},
+            "min_bid": {"lte": max_price},
+            "inet_down": {"gte": min_inet_down},
+            "disk_space": {"gte": min_disk},
+        }
+
+        # Filtro de região
+        if region and region != "global":
+            region_codes = self._get_region_codes(region)
+            if region_codes:
+                query["geolocation"] = {"in": region_codes}
+
+        # Filtro de GPU
+        if gpu_name:
+            query["gpu_name"] = {"eq": gpu_name}
+
+        try:
+            resp = requests.get(
+                f"{self.api_url}/bundles/",
+                params={
+                    "q": json.dumps(query),
+                    "order": "min_bid",  # Ordenar por preço (mais barato primeiro)
+                    "type": "bid",  # Apenas ofertas que aceitam bid
+                },
+                headers=self.headers,
+                timeout=self.timeout,
+            )
+
+            if not resp.ok:
+                logger.warning(f"Failed to fetch interruptible offers: HTTP {resp.status_code}")
+                return []
+
+            data = resp.json()
+            raw_offers = data.get("offers", [])
+
+            offers = []
+            for offer_data in raw_offers:
+                try:
+                    offer = self._parse_offer(offer_data)
+                    offer.machine_type = "interruptible"
+                    offer.min_bid = offer_data.get("min_bid", 0)
+                    offers.append(offer)
+                except Exception as e:
+                    logger.debug(f"Failed to parse offer: {e}")
+                    continue
+
+            logger.info(f"Found {len(offers)} interruptible offers")
+            return offers
+
+        except Exception as e:
+            logger.error(f"Error fetching interruptible offers: {e}")
+            return []
 
     def get_instance(self, instance_id: int) -> Instance:
         """Get instance details by ID"""
-        from ....core.exceptions import NotFoundException
         try:
             resp = requests.get(
                 f"{self.api_url}/instances/{instance_id}/",
@@ -509,6 +809,165 @@ class VastProvider(IGpuProvider):
             logger.error(f"Failed to get balance: {e}")
             return {"error": str(e), "credit": 0}
 
+    # =========================================================================
+    # PRÉ-VALIDAÇÕES - Verificar antes de executar operações
+    # =========================================================================
+
+    def validate_before_create(self, offer_id: int, min_balance: float = 0.10) -> Dict[str, Any]:
+        """
+        Valida pré-requisitos antes de criar uma instância.
+
+        Retorna dict com:
+            - valid: bool - Se pode prosseguir
+            - errors: list - Lista de erros encontrados
+            - warnings: list - Lista de avisos
+            - balance: float - Saldo atual
+            - offer: dict - Dados da oferta (se válida)
+
+        Raises:
+            InsufficientBalanceException: Se saldo insuficiente
+            OfferUnavailableException: Se oferta não disponível
+            ServiceUnavailableException: Se API inacessível
+        """
+        result = {
+            "valid": True,
+            "errors": [],
+            "warnings": [],
+            "balance": 0,
+            "offer": None
+        }
+
+        # 1. Verificar conectividade com VAST.ai
+        try:
+            balance_info = self.get_balance()
+            if "error" in balance_info:
+                result["valid"] = False
+                result["errors"].append(f"Não foi possível verificar saldo: {balance_info['error']}")
+                raise ServiceUnavailableException("Não foi possível conectar à API VAST.ai")
+
+            result["balance"] = balance_info.get("credit", 0) + balance_info.get("balance", 0)
+        except ServiceUnavailableException:
+            raise
+        except Exception as e:
+            result["valid"] = False
+            result["errors"].append(f"Erro ao verificar conectividade: {e}")
+            raise ServiceUnavailableException(f"Falha ao conectar com VAST.ai: {e}")
+
+        # 2. Verificar saldo mínimo
+        if result["balance"] < min_balance:
+            result["valid"] = False
+            result["errors"].append(
+                f"Saldo insuficiente: ${result['balance']:.2f} (mínimo: ${min_balance:.2f})"
+            )
+            raise InsufficientBalanceException(required=min_balance, available=result["balance"])
+
+        if result["balance"] < 1.0:
+            result["warnings"].append(f"Saldo baixo: ${result['balance']:.2f}")
+
+        # 3. Verificar se oferta ainda existe e está disponível
+        try:
+            # Buscar oferta específica
+            resp = requests.get(
+                f"{self.api_url}/bundles/",
+                params={"q": json.dumps({"id": {"eq": offer_id}, "rentable": {"eq": True}})},
+                headers=self.headers,
+                timeout=self.timeout,
+            )
+
+            if not resp.ok:
+                self._handle_vast_error(resp, "verificar oferta", offer_id)
+
+            data = resp.json()
+            offers = data.get("offers", [])
+
+            if not offers:
+                result["valid"] = False
+                result["errors"].append(f"Oferta {offer_id} não está mais disponível")
+                raise OfferUnavailableException(offer_id, "A máquina pode ter sido alugada ou saiu do ar")
+
+            offer = offers[0]
+            result["offer"] = offer
+
+            # Verificar se temos saldo para pelo menos 1 hora
+            price_per_hour = offer.get("dph_total", 0)
+            if price_per_hour > 0 and result["balance"] < price_per_hour:
+                result["valid"] = False
+                result["errors"].append(
+                    f"Saldo insuficiente para esta máquina. "
+                    f"Preço: ${price_per_hour:.4f}/hora, Saldo: ${result['balance']:.2f}"
+                )
+                raise InsufficientBalanceException(required=price_per_hour, available=result["balance"])
+
+            # Avisar se saldo baixo para operação prolongada
+            hours_available = result["balance"] / price_per_hour if price_per_hour > 0 else 999
+            if hours_available < 2:
+                result["warnings"].append(
+                    f"Saldo permite apenas ~{hours_available:.1f}h de uso. "
+                    f"Considere adicionar créditos."
+                )
+
+        except (OfferUnavailableException, InsufficientBalanceException):
+            raise
+        except Exception as e:
+            result["valid"] = False
+            result["errors"].append(f"Erro ao verificar oferta: {e}")
+            logger.error(f"Error validating offer {offer_id}: {e}")
+
+        return result
+
+    def check_api_health(self) -> Dict[str, Any]:
+        """
+        Verifica saúde da API VAST.ai.
+
+        Retorna:
+            - healthy: bool
+            - latency_ms: float
+            - message: str
+        """
+        import time as _time
+
+        start = _time.time()
+        try:
+            resp = requests.get(
+                f"{self.api_url}/bundles/",
+                params={"q": json.dumps({"rentable": {"eq": True}}), "limit": 1},
+                headers=self.headers,
+                timeout=5,
+            )
+            latency = (_time.time() - start) * 1000
+
+            if resp.ok:
+                return {
+                    "healthy": True,
+                    "latency_ms": round(latency, 2),
+                    "message": "API VAST.ai operacional"
+                }
+            else:
+                return {
+                    "healthy": False,
+                    "latency_ms": round(latency, 2),
+                    "message": f"API retornou erro: HTTP {resp.status_code}"
+                }
+
+        except requests.exceptions.Timeout:
+            return {
+                "healthy": False,
+                "latency_ms": 5000,
+                "message": "API VAST.ai não respondeu (timeout)"
+            }
+        except requests.exceptions.ConnectionError:
+            return {
+                "healthy": False,
+                "latency_ms": 0,
+                "message": "Não foi possível conectar à API VAST.ai"
+            }
+        except Exception as e:
+            return {
+                "healthy": False,
+                "latency_ms": 0,
+                "message": f"Erro: {e}"
+            }
+
     # Helper methods
 
     def _get_region_codes(self, region: str) -> List[str]:
@@ -623,10 +1082,15 @@ class VastProvider(IGpuProvider):
 
     def _parse_instance(self, data: Dict[str, Any]) -> Instance:
         """Parse instance data from vast.ai API"""
-        # Extract SSH info from ports
+        # VAST.ai returns ssh_port directly in response
+        # See: https://docs.vast.ai/api
+        ssh_port = data.get("ssh_port")
         ports = data.get("ports", {})
-        ssh_mapping = ports.get("22/tcp", [{}])
-        ssh_port = ssh_mapping[0].get("HostPort") if ssh_mapping else None
+
+        # Fallback: try to extract from ports mapping if direct field not available
+        if not ssh_port:
+            ssh_mapping = ports.get("22/tcp", [{}])
+            ssh_port = ssh_mapping[0].get("HostPort") if ssh_mapping else None
 
         # Parse dates
         start_date = None

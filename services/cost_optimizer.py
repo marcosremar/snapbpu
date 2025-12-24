@@ -238,35 +238,81 @@ class VastAiProvider(GpuProvider):
 
 
 class TensorDockProvider(GpuProvider):
-    """Implementação para TensorDock"""
-    
+    """
+    Implementação para TensorDock
+
+    Usa a API v2 do TensorDock com autenticação Bearer.
+    Nota: A conta precisa ter saldo mínimo de $1 para start/stop.
+
+    APIs:
+    - v0 (legacy): marketplace.tensordock.com/api/v0 (POST form data)
+    - v2 (atual): dashboard.tensordock.com/api/v2 (Bearer token)
+    """
+
     def __init__(self, api_key: str, api_token: str):
-        self.api_key = api_key
-        self.api_token = api_token
-        self.api_url = "https://marketplace.tensordock.com/api/v0"
+        self.api_key = api_key  # auth_id na v0
+        self.api_token = api_token  # Bearer token na v2
+        self.api_url_v0 = "https://marketplace.tensordock.com/api/v0"
+        self.api_url_v2 = "https://dashboard.tensordock.com/api/v2"
     
     async def list_instances(self) -> List[Instance]:
-        """Lista VMs no TensorDock"""
+        """Lista VMs no TensorDock usando API v2"""
         import aiohttp
-        
+
         async with aiohttp.ClientSession() as session:
-            params = {"api_key": self.api_key, "api_token": self.api_token}
+            headers = {"Authorization": f"Bearer {self.api_token}"}
             async with session.get(
-                f"{self.api_url}/client/list",
-                params=params
+                f"{self.api_url_v2}/instances",
+                headers=headers
             ) as resp:
                 if resp.status != 200:
-                    logger.error(f"TensorDock API error: {resp.status}")
-                    return []
-                
-                data = await resp.json()
+                    logger.error(f"TensorDock v2 API error: {resp.status}")
+                    # Fallback para v0
+                    return await self._list_instances_v0()
+
+                result = await resp.json()
                 instances = []
-                
-                for vm_id, vm in data.get("virtualmachines", {}).items():
+
+                for vm in result.get("data", []):
                     status = InstanceStatus.RUNNING
                     if vm.get("status") == "stopped":
                         status = InstanceStatus.STOPPED
-                    
+
+                    instances.append(Instance(
+                        id=vm.get("id"),
+                        provider=ProviderType.TENSOR_DOCK,
+                        name=vm.get("name", f"td-{vm.get('id')}"),
+                        gpu_name=vm.get("gpu_model", "unknown"),
+                        status=status,
+                        ip_address=vm.get("ip"),
+                        hourly_cost=vm.get("cost_per_hour", 0),
+                        metadata=vm
+                    ))
+
+                return instances
+
+    async def _list_instances_v0(self) -> List[Instance]:
+        """Fallback para API v0 (legacy)"""
+        import aiohttp
+
+        async with aiohttp.ClientSession() as session:
+            data = {"api_key": self.api_key, "api_token": self.api_token}
+            async with session.post(
+                f"{self.api_url_v0}/client/list",
+                data=data
+            ) as resp:
+                if resp.status != 200:
+                    logger.error(f"TensorDock v0 API error: {resp.status}")
+                    return []
+
+                result = await resp.json()
+                instances = []
+
+                for vm_id, vm in result.get("virtualmachines", {}).items():
+                    status = InstanceStatus.RUNNING
+                    if vm.get("status") == "stopped":
+                        status = InstanceStatus.STOPPED
+
                     instances.append(Instance(
                         id=vm_id,
                         provider=ProviderType.TENSOR_DOCK,
@@ -277,7 +323,7 @@ class TensorDockProvider(GpuProvider):
                         hourly_cost=vm.get("cost_per_hour", 0),
                         metadata=vm
                     ))
-                
+
                 return instances
     
     async def get_gpu_metrics(self, instance: Instance) -> Optional[GpuMetrics]:
@@ -310,61 +356,79 @@ class TensorDockProvider(GpuProvider):
         return None
     
     async def pause_instance(self, instance: Instance) -> bool:
-        """Para VM no TensorDock"""
+        """Para VM no TensorDock usando API v2"""
         import aiohttp
-        
+
         async with aiohttp.ClientSession() as session:
-            params = {
-                "api_key": self.api_key,
-                "api_token": self.api_token,
-                "server": instance.id
-            }
-            async with session.get(
-                f"{self.api_url}/client/stop",
-                params=params
+            headers = {"Authorization": f"Bearer {self.api_token}"}
+            async with session.post(
+                f"{self.api_url_v2}/instances/{instance.id}/stop",
+                headers=headers
             ) as resp:
-                success = resp.status == 200
-                if success:
+                if resp.status == 200:
                     logger.info(f"Stopped TensorDock VM {instance.id}")
-                return success
-    
+                    return True
+
+                # Verificar erro específico
+                try:
+                    error = await resp.json()
+                    logger.error(f"TensorDock stop error: {error}")
+                except:
+                    logger.error(f"TensorDock stop failed: {resp.status}")
+
+                return False
+
     async def resume_instance(self, instance: Instance) -> bool:
-        """Inicia VM no TensorDock"""
+        """
+        Inicia VM no TensorDock usando API v2
+
+        Nota: Requer saldo mínimo de $1 na conta.
+        """
         import aiohttp
-        
+
         async with aiohttp.ClientSession() as session:
-            params = {
-                "api_key": self.api_key,
-                "api_token": self.api_token,
-                "server": instance.id
-            }
-            async with session.get(
-                f"{self.api_url}/client/start",
-                params=params
+            headers = {"Authorization": f"Bearer {self.api_token}"}
+            async with session.post(
+                f"{self.api_url_v2}/instances/{instance.id}/start",
+                headers=headers
             ) as resp:
-                success = resp.status == 200
-                if success:
+                if resp.status == 200:
                     logger.info(f"Started TensorDock VM {instance.id}")
-                return success
-    
+                    return True
+
+                # Verificar erro específico (ex: saldo insuficiente)
+                try:
+                    error = await resp.text()
+                    if "balance" in error.lower():
+                        logger.error(f"TensorDock start failed: Insufficient balance")
+                    else:
+                        logger.error(f"TensorDock start error: {error}")
+                except:
+                    logger.error(f"TensorDock start failed: {resp.status}")
+
+                return False
+
     async def delete_instance(self, instance: Instance) -> bool:
-        """Deleta VM no TensorDock"""
+        """Deleta VM no TensorDock usando API v2"""
         import aiohttp
-        
+
         async with aiohttp.ClientSession() as session:
-            params = {
-                "api_key": self.api_key,
-                "api_token": self.api_token,
-                "server": instance.id
-            }
-            async with session.get(
-                f"{self.api_url}/client/delete",
-                params=params
+            headers = {"Authorization": f"Bearer {self.api_token}"}
+            async with session.delete(
+                f"{self.api_url_v2}/instances/{instance.id}",
+                headers=headers
             ) as resp:
-                success = resp.status == 200
-                if success:
+                if resp.status == 200:
                     logger.info(f"Deleted TensorDock VM {instance.id}")
-                return success
+                    return True
+
+                try:
+                    error = await resp.json()
+                    logger.error(f"TensorDock delete error: {error}")
+                except:
+                    logger.error(f"TensorDock delete failed: {resp.status}")
+
+                return False
 
 
 class GcpProvider(GpuProvider):

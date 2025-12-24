@@ -55,6 +55,14 @@ class GpuOfferResponse(BaseModel):
     verified: bool
     static_ip: bool
 
+    # Machine History fields (from blacklist/history system)
+    machine_id: Optional[str] = None
+    is_blacklisted: bool = False
+    blacklist_reason: Optional[str] = None
+    success_rate: Optional[float] = None  # 0.0 to 1.0
+    total_attempts: int = 0
+    reliability_status: Optional[str] = None  # excellent, good, fair, poor, unknown
+
     @field_validator('cuda_version', mode='before')
     @classmethod
     def convert_cuda_version(cls, v):

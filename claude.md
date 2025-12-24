@@ -75,7 +75,25 @@ Use o decorator `Depends()` do FastAPI para injetar serviços e repositórios. N
 ### 3. SSH Otimizado
 Evite comandos inline complexos. Use `src/infrastructure/providers/vast_provider.py` para abstrair operações SSH.
 
-## Status Atual (Atualizado 2024-12-17)
+## Testes - Regras Importantes
+
+### SEMPRE rodar TODOS os testes juntos
+- **NÃO segregar** testes por tipo (GPU, CPU, integration, unit, etc.)
+- **SEMPRE** rodar todos os testes em paralelo com 10 workers
+- Testes de GPU rodam em máquinas separadas na VAST.ai, não na máquina local
+- Comando padrão: `cd cli && pytest` (já configurado com `-n 10`)
+
+### Configuração (pyproject.toml)
+```toml
+addopts = ["-n", "10", "-v", "--tb=short", "--dist=loadscope"]
+```
+
+### Por que paralelo?
+- Testes de GPU rodam em instâncias VAST.ai separadas
+- Não há conflito entre testes - cada um usa recursos independentes
+- Execução 5-10x mais rápida
+
+## Status Atual (Atualizado 2024-12-23)
 
 - [x] Migração Flask → FastAPI (100%)
 - [x] Autenticação JWT (100%)
@@ -85,5 +103,15 @@ Evite comandos inline complexos. Use `src/infrastructure/providers/vast_provider
 - [x] Dashboard de Economia Real (100%) - Endpoints e componentes React prontos
 - [x] Endpoint de Heartbeats `/api/agent/status` (100%)
 - [x] CPU Standby/Failover Backend (100%)
-- [/] CPU Standby UI (70%) - Componente Config pronto, falta badge detalhado
-- [ ] Testes E2E (0%)
+- [x] CPU Standby UI (100%) - Componente Config pronto com badges
+- [x] Machine History/Blacklist (100%) - Sistema de rastreamento de confiabilidade
+- [x] Testes E2E Machine History (100%) - 20/20 testes passando
+
+### Machine History (Novo - 2024-12-22)
+
+Sistema de rastreamento de confiabilidade de máquinas GPU:
+- **Blacklist automático**: Máquinas com taxa de sucesso < 30% são bloqueadas
+- **Integração no Deploy Wizard**: Ofertas filtradas automaticamente
+- **API `/api/v1/machines/history`**: Gerenciar blacklist e ver estatísticas
+- **UI atualizada**: Cards de oferta mostram indicadores de confiabilidade
+- **Banco PostgreSQL**: Tabelas `machine_attempts`, `machine_blacklist`, `machine_stats`

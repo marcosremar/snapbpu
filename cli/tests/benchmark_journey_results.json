@@ -1,0 +1,12 @@
+{
+  "timestamp": "2025-12-23T08:42:38.051277",
+  "results": [],
+  "summary": {
+    "vast_pause_avg": 0.0,
+    "vast_resume_avg": 0.0,
+    "tensordock_start_avg": 0.0,
+    "tensordock_stop_avg": 0.0,
+    "gcp_start_avg": 0.0,
+    "gcp_stop_avg": 0.0
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "timestamp": "2025-12-23T08:42:39.243177",
+  "modes": {
+    "economic": {
+      "provider": "vast",
+      "gpu": "RTX 5070",
+      "pause": 11.55379605293274,
+      "resume": 153.57426142692566,
+      "total": 165.1280574798584
+    },
+    "fast": {
+      "provider": "gcp",
+      "instance": "code-server-build",
+      "start": 9.77528190612793,
+      "stop": 135.21077609062195,
+      "total": 144.98605799674988
+    },
+    "ultrafast": {
+      "mode": "ultra-fast",
+      "provider": "tensordock",
+      "vm_id": "e6f45fbd-473b-4a9d-a869-ab1869e5614d",
+      "gpu": "V100-SXM2-16GB",
+      "stop_seconds": 57.99,
+      "start_seconds": 7.63,
+      "total_seconds": 65.61,
+      "timestamp": "2025-12-22T11:52:55"
+    },
+    "spot": {
+      "provider": "vast",
+      "search": 1.5678040981292725,
+      "total_estimated": 71.56780409812927
+    }
+  },
+  "summary": {
+    "fastest": "ultrafast",
+    "most_economical": "spot",
+    "most_reliable": "fast"
+  }
+}

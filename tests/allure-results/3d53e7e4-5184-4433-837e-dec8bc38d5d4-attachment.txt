@@ -1,0 +1,1 @@
+2025-12-21 06:31:51,473 - tests.backend.conftest - INFO - PASS: Concorrência: 3/3 sucesso, avg=0.002s

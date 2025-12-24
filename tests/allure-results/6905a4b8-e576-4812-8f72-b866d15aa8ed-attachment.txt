@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbyPricing
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preços do standby
+INFO     tests.backend.conftest:conftest.py:265 INFO: Estrutura de preços: ['machine_type', 'disk_gb', 'spot', 'estimated_hourly_usd', 'estimated_monthly_usd', 'breakdown', 'note']
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preços do standby obtidos

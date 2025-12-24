@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,440 - tests.backend.conftest - INFO - PASS: Precisão numérica
+2025-12-21 06:31:51,440 - tests.backend.conftest - INFO - PASS: Precisão numérica validada (máx 2 casas decimais)

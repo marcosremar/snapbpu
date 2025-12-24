@@ -379,7 +379,7 @@ case "$1" in
         ;;
     config)
         echo "=== Configuracao Atual ==="
-        cat "$INSTALL_DIR/config.env" 2>/dev/null | grep -v "KEY\|PASSWORD" || echo "Sem config"
+        cat "$INSTALL_DIR/config.env" 2>/dev/null | grep -v "KEY\\|PASSWORD" || echo "Sem config"
         ;;
     *)
         echo "DumontAgent Control v2.0"

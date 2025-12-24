@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots filtrados por GPU: RTX 3090
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro GPU 'RTX 3090': 100 snapshots

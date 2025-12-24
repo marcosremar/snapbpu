@@ -351,9 +351,9 @@ export default function GPUMetrics() {
       {/* Header with Breadcrumb */}
       <div className="mb-8">
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-          <a href="/app" className="hover:text-emerald-400 transition-colors">Home</a>
+          <a href="/app" className="hover:text-brand-400 transition-colors">Home</a>
           <span className="text-gray-600">/</span>
-          <a href="/app/metrics" className="hover:text-emerald-400 transition-colors">Métricas</a>
+          <a href="/app/metrics" className="hover:text-brand-400 transition-colors">Métricas</a>
           <span className="text-gray-600">/</span>
           <span className="text-white font-medium">{getTabTitle()}</span>
         </nav>
@@ -411,10 +411,10 @@ export default function GPUMetrics() {
           {/* GPU Select */}
           <div className="relative group">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Cpu size={16} className="text-emerald-400" />
+              <Cpu size={16} className="text-brand-400" />
             </div>
             <select
-              className="pl-10 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 appearance-none min-w-[200px] cursor-pointer hover:bg-white/10 transition-colors"
+              className="pl-10 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500/50 appearance-none min-w-[200px] cursor-pointer hover:bg-white/10 transition-colors"
               value={selectedGPU}
               onChange={(e) => setSelectedGPU(e.target.value)}
             >
@@ -433,10 +433,10 @@ export default function GPUMetrics() {
           {/* Type Select */}
           <div className="relative group">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Package size={16} className="text-emerald-400" />
+              <Package size={16} className="text-brand-400" />
             </div>
             <select
-              className="pl-10 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 appearance-none min-w-[200px] cursor-pointer hover:bg-white/10 transition-colors"
+              className="pl-10 pr-8 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500/50 appearance-none min-w-[200px] cursor-pointer hover:bg-white/10 transition-colors"
               value={selectedType}
               onChange={(e) => setSelectedType(e.target.value)}
             >
@@ -458,7 +458,7 @@ export default function GPUMetrics() {
               <button
                 key={hours}
                 className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${timeRange === hours
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
+                    ? 'bg-brand-500 text-white shadow-lg shadow-brand-500/20'
                     : 'text-gray-400 hover:text-white hover:bg-white/5'
                   }`}
                 onClick={() => setTimeRange(hours)}
@@ -476,11 +476,11 @@ export default function GPUMetrics() {
           {/* Market Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-8">
             {Object.entries(marketSummary).map(([gpuName, types]) => (
-              <div key={gpuName} className="ta-card group hover:border-emerald-500/30 transition-all duration-300">
+              <div key={gpuName} className="ta-card group hover:border-brand-500/30 transition-all duration-300">
                 <div className="ta-card-header flex items-center justify-between pb-4 border-b border-white/5">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/10 flex items-center justify-center border border-emerald-500/20 group-hover:scale-110 transition-transform duration-300">
-                      <Cpu size={20} className="text-emerald-400" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500/20 to-teal-500/10 flex items-center justify-center border border-brand-500/20 group-hover:scale-110 transition-transform duration-300">
+                      <Cpu size={20} className="text-brand-400" />
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-white tracking-tight">{gpuName}</h3>
@@ -499,17 +499,17 @@ export default function GPUMetrics() {
 
                     return (
                       <div key={type} className={`relative p-3 rounded-xl border transition-all ${isSpot
-                          ? 'bg-emerald-500/5 border-emerald-500/20 hover:bg-emerald-500/10'
+                          ? 'bg-brand-500/5 border-brand-500/20 hover:bg-brand-500/10'
                           : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05]'
                         }`}>
                         {isBestPrice && (
-                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-emerald-500 text-white text-[9px] font-bold uppercase tracking-wider rounded-full shadow-lg shadow-emerald-500/20">
+                          <div className="absolute -top-2 -right-2 px-2 py-0.5 bg-brand-500 text-white text-[9px] font-bold uppercase tracking-wider rounded-full shadow-lg shadow-brand-500/20">
                             Melhor Preço
                           </div>
                         )}
                         <div className="flex items-center justify-between mb-2">
                           <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${type === 'on-demand' ? 'bg-blue-500/10 text-blue-400' :
-                              type === 'interruptible' ? 'bg-emerald-500/10 text-emerald-400' :
+                              type === 'interruptible' ? 'bg-brand-500/10 text-brand-400' :
                                 'bg-yellow-500/10 text-yellow-400'
                             }`}>
                             {getMachineTypeLabel(type)}
@@ -533,9 +533,9 @@ export default function GPUMetrics() {
 
                           {/* Price Bar Visualization */}
                           <div className="w-16 h-8 flex items-end justify-between gap-0.5">
-                            <div className="w-full bg-emerald-500/20 rounded-t-sm" style={{ height: '40%' }}></div>
-                            <div className="w-full bg-emerald-500/40 rounded-t-sm" style={{ height: '70%' }}></div>
-                            <div className="w-full bg-emerald-500/20 rounded-t-sm" style={{ height: '50%' }}></div>
+                            <div className="w-full bg-brand-500/20 rounded-t-sm" style={{ height: '40%' }}></div>
+                            <div className="w-full bg-brand-500/40 rounded-t-sm" style={{ height: '70%' }}></div>
+                            <div className="w-full bg-brand-500/20 rounded-t-sm" style={{ height: '50%' }}></div>
                           </div>
                         </div>
                       </div>
@@ -561,7 +561,7 @@ export default function GPUMetrics() {
             <div className="ta-card mb-6">
               <div className="ta-card-header">
                 <h2 className="ta-card-title flex items-center gap-2">
-                  <TrendingUp size={22} className="text-emerald-400" />
+                  <TrendingUp size={22} className="text-brand-400" />
                   Histórico de Preços
                 </h2>
               </div>
@@ -623,7 +623,7 @@ export default function GPUMetrics() {
         <div className="ta-card">
           <div className="ta-card-header">
             <h2 className="ta-card-title flex items-center gap-2">
-              <Shield size={22} className="text-emerald-400" />
+              <Shield size={22} className="text-brand-400" />
               Ranking de Provedores por Confiabilidade
             </h2>
           </div>
@@ -718,7 +718,7 @@ export default function GPUMetrics() {
                       <div className="flex items-center justify-between mb-4 pt-1">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10">
-                            <Cpu className="w-4 h-4 text-emerald-400" />
+                            <Cpu className="w-4 h-4 text-brand-400" />
                           </div>
                           <div>
                             <span className="text-white font-bold text-sm block">{item.gpu_name}</span>
@@ -856,7 +856,7 @@ export default function GPUMetrics() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Preços</p>
-                      <p className="text-2xl font-bold text-emerald-400">Monitor</p>
+                      <p className="text-2xl font-bold text-brand-400">Monitor</p>
                       <p className="text-xs text-gray-500 mt-1">Acompanhe em tempo real</p>
                     </div>
                     <div className="stat-card-icon stat-card-icon-success">
@@ -880,7 +880,7 @@ export default function GPUMetrics() {
                   <div className="flex items-start justify-between">
                     <div>
                       <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Confiabilidade</p>
-                      <p className="text-2xl font-bold text-emerald-400">Score</p>
+                      <p className="text-2xl font-bold text-brand-400">Score</p>
                       <p className="text-xs text-gray-500 mt-1">Provedores verificados</p>
                     </div>
                     <div className="stat-card-icon stat-card-icon-success">

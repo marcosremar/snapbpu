@@ -22,6 +22,7 @@ from src.api.price_reports import price_reports_bp
 from src.api.snapshots_ans import snapshots_ans_bp
 from src.api.hibernation import hibernation_bp
 from src.api.cpu_standby import cpu_standby_bp, init_standby_service
+from src.api.chat import chat_bp
 
 
 def create_app():
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(gpu_bp)
     app.register_blueprint(price_reports_bp)
     app.register_blueprint(cpu_standby_bp)
+    app.register_blueprint(chat_bp)
 
     # Inicializar sistema de agentes
     def init_agents():
@@ -85,13 +87,28 @@ def create_app():
             try:
                 r2_endpoint = os.getenv('R2_ENDPOINT', 'https://142ed673a5cc1a9e91519c099af3d791.r2.cloudflarestorage.com')
                 r2_bucket = os.getenv('R2_BUCKET', 'musetalk')
+                
+                # Carregar credenciais TensorDock do primeiro usuário
+                tensordock_auth_id = None
+                tensordock_api_token = None
+                gcp_credentials = None
+                
+                for user_data in config.get('users', {}).values():
+                    if not tensordock_auth_id and user_data.get('tensordock_auth_id'):
+                        tensordock_auth_id = user_data.get('tensordock_auth_id')
+                        tensordock_api_token = user_data.get('tensordock_api_token')
+                    if not gcp_credentials and user_data.get('settings', {}).get('gcp_credentials'):
+                        gcp_credentials = user_data.get('settings', {}).get('gcp_credentials')
 
                 hibernation_manager = agent_manager.register_agent(
                     AutoHibernationManager,
                     vast_api_key=vast_api_key,
                     r2_endpoint=r2_endpoint,
                     r2_bucket=r2_bucket,
-                    check_interval=30
+                    check_interval=30,
+                    tensordock_auth_id=tensordock_auth_id,
+                    tensordock_api_token=tensordock_api_token,
+                    gcp_credentials=gcp_credentials,
                 )
 
                 # Salvar referência no app para uso nos endpoints
@@ -159,7 +176,7 @@ def create_app():
             try:
                 with open(config_path, 'r') as f:
                     return json.load(f)
-            except:
+            except (json.JSONDecodeError, IOError):
                 pass
         return {"users": {}}
 

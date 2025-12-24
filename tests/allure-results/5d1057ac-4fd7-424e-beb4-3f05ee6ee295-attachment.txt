@@ -1,0 +1,3 @@
+2025-12-21 06:31:46,320 - tests.backend.conftest - INFO - Usando cache para TestDashboardHealth
+2025-12-21 06:31:46,321 - tests.backend.conftest - INFO - PASS: Health check
+2025-12-21 06:31:46,321 - tests.backend.conftest - INFO - PASS: Health check OK

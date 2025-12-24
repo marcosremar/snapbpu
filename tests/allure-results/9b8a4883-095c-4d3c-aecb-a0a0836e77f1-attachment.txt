@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: GCP credentials não configuradas

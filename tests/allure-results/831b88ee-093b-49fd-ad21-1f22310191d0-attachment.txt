@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,101 - tests.backend.conftest - INFO - INFO: GCP credentials não configuradas

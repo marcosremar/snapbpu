@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com limit=10
+INFO     tests.backend.conftest:conftest.py:255 PASS: Limit 10: 10 snapshots retornados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com limit=50
+INFO     tests.backend.conftest:conftest.py:255 PASS: Limit 50: 50 snapshots retornados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com limit=100
+INFO     tests.backend.conftest:conftest.py:255 PASS: Limit 100: 100 snapshots retornados

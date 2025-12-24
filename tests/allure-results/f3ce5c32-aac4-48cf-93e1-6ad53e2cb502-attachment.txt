@@ -1,0 +1,4 @@
+2025-12-21 06:32:13,003 - tests.backend.conftest - INFO - INFO: Critério de otimização: latency
+2025-12-21 06:32:13,003 - tests.backend.conftest - INFO - INFO: Critério de otimização: price
+2025-12-21 06:32:13,003 - tests.backend.conftest - INFO - INFO: Critério de otimização: availability
+2025-12-21 06:32:13,003 - tests.backend.conftest - INFO - INFO: Critério de otimização: gpu_count

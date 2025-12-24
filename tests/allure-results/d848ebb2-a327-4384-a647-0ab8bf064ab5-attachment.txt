@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,434 - tests.backend.conftest - INFO - PASS: Resposta vazia
+2025-12-21 06:31:51,435 - tests.backend.conftest - INFO - PASS: Resposta vazia válida (sem hibernações)

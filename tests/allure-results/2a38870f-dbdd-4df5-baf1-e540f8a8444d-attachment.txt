@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestMigrationEndpoints
+INFO     tests.backend.conftest:conftest.py:265 INFO: Migrate estimate para instância inexistente: 500

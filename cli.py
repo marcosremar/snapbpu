@@ -64,7 +64,7 @@ class DumontCLI:
             try:
                 config = json.loads(CONFIG_FILE.read_text())
                 return config.get('vast_api_key')
-            except:
+            except (json.JSONDecodeError, IOError):
                 pass
         
         # Try to get from API
@@ -72,7 +72,7 @@ class DumontCLI:
             result = self.call_api_silent("GET", "/api/v1/settings")
             if result:
                 return result.get('vast_api_key')
-        except:
+        except (requests.exceptions.RequestException, KeyError):
             pass
         
         return None
@@ -168,7 +168,7 @@ class DumontCLI:
         except:
             return None
 
-    def wizard_deploy(self, gpu_name: str = None, speed: str = "fast", max_price: float = 2.0, region: str = "global"):
+    def wizard_deploy(self, gpu_name: str = None, speed: str = "fast", max_price: float = 2.0, region: str = "global", model: str = None):
         """
         Deploy a GPU instance using the wizard strategy.
         
@@ -185,6 +185,8 @@ class DumontCLI:
         print(f"   Speed:     {speed}")
         print(f"   Max Price: ${max_price}/hr")
         print(f"   Region:    {region}")
+        if model:
+            print(f"   Model:     {model}")
         print("=" * 60)
         
         # Import the wizard service
@@ -216,6 +218,7 @@ class DumontCLI:
             max_price=max_price,
             disk_space=50,
             setup_codeserver=True,
+            model=model,
         )
         
         # Get offers
@@ -653,6 +656,7 @@ ollama list
             speed = "fast"
             max_price = 2.0
             region = "global"
+            model = None
             
             for arg in args:
                 if "=" in arg:
@@ -665,12 +669,14 @@ ollama list
                         max_price = float(value)
                     elif key == "region":
                         region = value
+                    elif key == "model":
+                        model = value
                 else:
                     # First positional arg is GPU name
                     if not gpu_name:
                         gpu_name = arg
             
-            self.wizard_deploy(gpu_name=gpu_name, speed=speed, max_price=max_price, region=region)
+            self.wizard_deploy(gpu_name=gpu_name, speed=speed, max_price=max_price, region=region, model=model)
             return
 
         # Handle model install

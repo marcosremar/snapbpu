@@ -1,0 +1,2 @@
+[92m✓[0m Comparação tipo 'on-demand': 2 GPUs
+[92m✓[0m Comparação tipo 'interruptible': 2 GPUs

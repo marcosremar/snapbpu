@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestHealthTelemetry
+INFO     tests.backend.conftest:conftest.py:255 PASS: Health check
+INFO     tests.backend.conftest:conftest.py:255 PASS: Health status: healthy

@@ -1,0 +1,3 @@
+2025-12-21 06:32:11,861 - tests.backend.conftest - INFO - Usando cache para TestMetadataEndpoints
+2025-12-21 06:32:11,863 - tests.backend.conftest - INFO - PASS: Lista de GPUs
+2025-12-21 06:32:11,863 - tests.backend.conftest - INFO - PASS: GPUs disponíveis: 3 (RTX 3090, RTX 4090, RTX 5090...)

@@ -1,0 +1,4 @@
+2025-12-21 06:32:13,113 - tests.backend.conftest - INFO - Usando cache para TestStandbyPricing
+2025-12-21 06:32:13,114 - tests.backend.conftest - INFO - PASS: Preços do standby
+2025-12-21 06:32:13,114 - tests.backend.conftest - INFO - INFO: Estrutura de preços: ['machine_type', 'disk_gb', 'spot', 'estimated_hourly_usd', 'estimated_monthly_usd', 'breakdown', 'note']
+2025-12-21 06:32:13,114 - tests.backend.conftest - INFO - PASS: Preços do standby obtidos

@@ -1,0 +1,6 @@
+[94mℹ[0m ML Researcher: Buscando ofertas de GPU
+[92m✓[0m Ofertas carregadas
+[94mℹ[0m ML Researcher: Analisando mercado
+[92m✓[0m Métricas de mercado carregadas
+[94mℹ[0m ML Researcher: Verificando instâncias
+[92m✓[0m Instâncias verificadas

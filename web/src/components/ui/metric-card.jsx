@@ -60,10 +60,10 @@ export const MetricCard = ({
 
   const colorClasses = {
     green: {
-      bg: 'bg-white dark:bg-[#0f1210] from-emerald-50 to-white dark:from-emerald-900/10 dark:to-[#0f1210]',
-      border: 'border-emerald-100 dark:border-emerald-500/10',
-      icon: 'bg-emerald-100 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
-      text: 'text-emerald-600 dark:text-emerald-400',
+      bg: 'bg-white dark:bg-[#0f1210] from-brand-50 to-white dark:from-brand-900/10 dark:to-[#0f1210]',
+      border: 'border-brand-100 dark:border-brand-500/10',
+      icon: 'bg-brand-100 dark:bg-brand-900/20 text-brand-600 dark:text-brand-400',
+      text: 'text-brand-600 dark:text-brand-400',
     },
     blue: {
       bg: 'bg-white dark:bg-[#0f1210] from-cyan-50 to-white dark:from-cyan-900/10 dark:to-[#0f1210]',

@@ -1,0 +1,8 @@
+2025-12-21 06:32:11,812 - tests.backend.conftest - INFO - PASS: Providers com filtro: {'verified_only': True}
+2025-12-21 06:32:11,812 - tests.backend.conftest - INFO - PASS: Filtro {'verified_only': True}: 0 providers
+2025-12-21 06:32:11,814 - tests.backend.conftest - INFO - PASS: Providers com filtro: {'min_observations': 10}
+2025-12-21 06:32:11,814 - tests.backend.conftest - INFO - PASS: Filtro {'min_observations': 10}: 50 providers
+2025-12-21 06:32:11,816 - tests.backend.conftest - INFO - PASS: Providers com filtro: {'min_reliability': 0.5}
+2025-12-21 06:32:11,816 - tests.backend.conftest - INFO - PASS: Filtro {'min_reliability': 0.5}: 50 providers
+2025-12-21 06:32:11,817 - tests.backend.conftest - INFO - PASS: Providers com filtro: {'limit': 20}
+2025-12-21 06:32:11,817 - tests.backend.conftest - INFO - PASS: Filtro {'limit': 20}: 20 providers

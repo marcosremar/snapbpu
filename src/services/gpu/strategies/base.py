@@ -62,6 +62,11 @@ class ProvisionConfig:
     max_batches: int = 3
     check_interval: float = 2.0  # seconds
 
+    # SSH failover options
+    max_ssh_retries: int = 3  # Max machines to try if SSH fails after win
+    ssh_command_timeout: int = 30  # Timeout for SSH commands (seconds)
+    verify_ssh_with_command: bool = True  # Run 'echo ok' to verify SSH works
+
 
 @dataclass
 class MachineCandidate:

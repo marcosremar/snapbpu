@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbyPerformance
+INFO     tests.backend.conftest:conftest.py:255 PASS: Status do standby
+INFO     tests.backend.conftest:conftest.py:255 PASS: Tempo de resposta do status: 0.001s

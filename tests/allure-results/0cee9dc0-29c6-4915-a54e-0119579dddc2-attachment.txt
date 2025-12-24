@@ -1,0 +1,2 @@
+[92m✓[0m Savings history
+[92m✓[0m Savings history retornou dados

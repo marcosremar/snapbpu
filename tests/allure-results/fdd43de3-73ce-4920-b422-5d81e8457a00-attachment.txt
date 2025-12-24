@@ -1,0 +1,6 @@
+2025-12-21 06:32:11,763 - tests.backend.conftest - INFO - PASS: Snapshots com limit=10
+2025-12-21 06:32:11,763 - tests.backend.conftest - INFO - PASS: Limit 10: 10 snapshots retornados
+2025-12-21 06:32:11,765 - tests.backend.conftest - INFO - PASS: Snapshots com limit=50
+2025-12-21 06:32:11,765 - tests.backend.conftest - INFO - PASS: Limit 50: 50 snapshots retornados
+2025-12-21 06:32:11,767 - tests.backend.conftest - INFO - PASS: Snapshots com limit=100
+2025-12-21 06:32:11,767 - tests.backend.conftest - INFO - PASS: Limit 100: 100 snapshots retornados

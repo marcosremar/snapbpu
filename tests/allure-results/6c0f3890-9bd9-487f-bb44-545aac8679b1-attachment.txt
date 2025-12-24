@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: API rejeitou parâmetro inválido: {'hours': -1}
+INFO     tests.backend.conftest:conftest.py:255 PASS: API rejeitou parâmetro inválido: {'hours': 200}
+INFO     tests.backend.conftest:conftest.py:255 PASS: API rejeitou parâmetro inválido: {'limit': 2000}
+INFO     tests.backend.conftest:conftest.py:265 INFO: API usou valor padrão para parâmetro inválido: {'limit': 0}

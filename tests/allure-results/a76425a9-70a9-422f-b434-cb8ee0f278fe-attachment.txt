@@ -1,0 +1,3 @@
+[92m✓[0m Estatísticas de hibernação
+[92m✓[0m JSON keys OK: ['total_hibernations', 'total_hours_saved', 'total_savings', 'machines']
+[92m✓[0m Stats: 0 hibernações, 0h salvos, $0 economia

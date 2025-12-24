@@ -1,0 +1,6 @@
+2025-12-21 06:32:11,819 - tests.backend.conftest - INFO - PASS: Providers ordenados por: reliability_score
+2025-12-21 06:32:11,819 - tests.backend.conftest - INFO - PASS: Ordenação por 'reliability_score' verificada OK
+2025-12-21 06:32:11,820 - tests.backend.conftest - INFO - PASS: Providers ordenados por: availability_score
+2025-12-21 06:32:11,820 - tests.backend.conftest - INFO - PASS: Ordenação por 'availability_score' verificada OK
+2025-12-21 06:32:11,822 - tests.backend.conftest - INFO - PASS: Providers ordenados por: price_stability_score
+2025-12-21 06:32:11,822 - tests.backend.conftest - INFO - PASS: Ordenação por 'price_stability_score' verificada OK

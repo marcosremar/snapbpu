@@ -1,0 +1,4 @@
+2025-12-21 06:31:49,199 - tests.backend.conftest - INFO - INFO: Cost Optimizer: Analisando savings
+2025-12-21 06:31:49,202 - tests.backend.conftest - INFO - PASS: Savings summary OK
+2025-12-21 06:31:49,202 - tests.backend.conftest - INFO - INFO: Cost Optimizer: Hibernation stats
+2025-12-21 06:31:49,204 - tests.backend.conftest - INFO - PASS: Hibernation stats OK

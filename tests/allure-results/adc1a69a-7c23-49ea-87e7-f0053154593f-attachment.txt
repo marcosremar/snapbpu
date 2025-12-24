@@ -1,0 +1,4 @@
+[94mℹ[0m Cost Optimizer: Analisando savings
+[92m✓[0m Savings summary OK
+[94mℹ[0m Cost Optimizer: Hibernation stats
+[92m✓[0m Hibernation stats OK

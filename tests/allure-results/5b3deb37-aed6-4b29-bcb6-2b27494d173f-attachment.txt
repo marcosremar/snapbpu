@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,163 - tests.backend.conftest - INFO - Usando cache para TestTelemetryEndpoints
+2025-12-21 06:32:13,164 - tests.backend.conftest - INFO - PASS: Endpoint de telemetry verificado

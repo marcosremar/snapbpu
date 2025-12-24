@@ -68,6 +68,7 @@ class ModelDeployService:
         port: int = 8000,
         name: Optional[str] = None,
         env_vars: Optional[Dict[str, str]] = None,
+        label: Optional[str] = None,  # Custom label (for testing use dumont:test:*)
     ) -> ModelDeployment:
         """Create a new model deployment"""
         template = get_template(model_type)
@@ -92,11 +93,13 @@ class ModelDeployService:
         _user_deployments[user_id].append(deployment.id)
 
         # Start deployment in background
-        asyncio.create_task(self._deploy_model(deployment, gpu_type, max_price))
+        asyncio.create_task(self._deploy_model(deployment, gpu_type, max_price, label))
 
         return deployment
 
-    async def _deploy_model(self, deployment: ModelDeployment, gpu_type: Optional[str], max_price: float):
+    async def _deploy_model(
+        self, deployment: ModelDeployment, gpu_type: Optional[str], max_price: float, label: Optional[str] = None
+    ):
         """
         Background task to deploy the model using MachineProvisionerService.
 
@@ -117,6 +120,9 @@ class ModelDeployService:
                 deployment.update_status(ModelStatus.DEPLOYING, f"Searching for {gpu_type or 'any'} GPU...", 15)
 
                 # Configure provisioning with ports for model serving
+                # Use custom label if provided (for testing use dumont:test:*)
+                # Default to dumont:model-deploy for production
+                instance_label = label or "dumont:model-deploy"
                 config = ProvisionConfig(
                     gpu_name=gpu_type,
                     max_price=max_price,
@@ -125,7 +131,7 @@ class ModelDeployService:
                     region="global",
                     image="pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime",
                     ports=[22, deployment.port],  # SSH + model port
-                    label="dumont:model-deploy",
+                    label=instance_label,
                 )
 
                 # Progress callback to update deployment status

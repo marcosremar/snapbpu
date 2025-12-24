@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Listar associações
+INFO     tests.backend.conftest:conftest.py:255 PASS: Tempo de resposta das associações: 0.001s

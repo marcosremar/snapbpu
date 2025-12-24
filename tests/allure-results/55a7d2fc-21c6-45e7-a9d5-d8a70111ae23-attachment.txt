@@ -1,0 +1,2 @@
+[92m✓[0m Status do standby
+[92m✓[0m Tempo de resposta do status: 0.001s

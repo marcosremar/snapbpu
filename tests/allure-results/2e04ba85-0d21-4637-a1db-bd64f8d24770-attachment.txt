@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,076 - tests.backend.conftest - INFO - Usando cache para TestSnapshotEdgeCases
+2025-12-21 06:32:13,079 - tests.backend.conftest - INFO - PASS: instance_id negativo tratado

@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Ofertas sem limit: 64
+INFO     tests.backend.conftest:conftest.py:255 PASS: Limite de 10 ofertas
+INFO     tests.backend.conftest:conftest.py:255 PASS: Limite aplicado: 64 ofertas (default era 64)

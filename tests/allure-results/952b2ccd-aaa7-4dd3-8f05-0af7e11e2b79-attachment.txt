@@ -1,0 +1,4 @@
+[94mℹ[0m Critério de otimização: latency
+[94mℹ[0m Critério de otimização: price
+[94mℹ[0m Critério de otimização: availability
+[94mℹ[0m Critério de otimização: gpu_count

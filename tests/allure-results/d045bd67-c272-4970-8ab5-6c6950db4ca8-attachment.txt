@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,029 - tests.backend.conftest - INFO - PASS: Tipo de instance_id validado

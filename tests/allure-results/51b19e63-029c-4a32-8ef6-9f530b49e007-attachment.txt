@@ -1,0 +1,1 @@
+[92m✓[0m Erro de configuração ou validação detectado

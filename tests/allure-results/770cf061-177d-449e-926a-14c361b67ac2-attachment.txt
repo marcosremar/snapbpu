@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Isolamento de usuários
+INFO     tests.backend.conftest:conftest.py:255 PASS: Resposta contém apenas dados do usuário autenticado

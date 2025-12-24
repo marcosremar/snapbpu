@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestSecurityAndValidation
+INFO     tests.backend.conftest:conftest.py:255 PASS: Todos os endpoints requerem autenticação corretamente

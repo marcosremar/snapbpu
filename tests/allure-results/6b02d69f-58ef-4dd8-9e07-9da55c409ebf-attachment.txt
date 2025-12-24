@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,683 - tests.backend.conftest - INFO - PASS: Verificação de tamanho
+2025-12-21 06:32:11,683 - tests.backend.conftest - INFO - PASS: Tamanho da resposta: 0.53KB

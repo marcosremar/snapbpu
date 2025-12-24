@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,060 - tests.backend.conftest - INFO - PASS: XSS em tags aceito (deve ser sanitizado)

@@ -1,0 +1,6 @@
+2025-12-21 06:32:13,118 - tests.backend.conftest - INFO - PASS: Estimativa de custos
+2025-12-21 06:32:13,118 - tests.backend.conftest - INFO - PASS: Custo em disk_gb: $100
+2025-12-21 06:32:13,118 - tests.backend.conftest - INFO - PASS: Custo em spot: $True
+2025-12-21 06:32:13,118 - tests.backend.conftest - INFO - PASS: Custo em estimated_hourly_usd: $0.01
+2025-12-21 06:32:13,118 - tests.backend.conftest - INFO - PASS: Custo em estimated_monthly_usd: $11.2
+2025-12-21 06:32:13,118 - tests.backend.conftest - INFO - PASS: Custo em breakdown.vm_monthly: $7.2

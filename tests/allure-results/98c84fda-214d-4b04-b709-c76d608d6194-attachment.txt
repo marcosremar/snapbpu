@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestDashboardSavings
+INFO     tests.backend.conftest:conftest.py:255 PASS: Savings summary
+INFO     tests.backend.conftest:conftest.py:255 PASS: Savings summary retornou dados válidos

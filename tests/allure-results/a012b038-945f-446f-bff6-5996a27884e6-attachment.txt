@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,432 - tests.backend.conftest - INFO - PASS: Estrutura de máquinas
+2025-12-21 06:31:51,432 - tests.backend.conftest - INFO - INFO: Nenhuma máquina com hibernação encontrada

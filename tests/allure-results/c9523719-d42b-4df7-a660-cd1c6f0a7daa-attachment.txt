@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Tipo de alerta planejado: gpu_usage_high
+INFO     tests.backend.conftest:conftest.py:265 INFO: Tipo de alerta planejado: gpu_memory_high
+INFO     tests.backend.conftest:conftest.py:265 INFO: Tipo de alerta planejado: instance_unhealthy
+INFO     tests.backend.conftest:conftest.py:265 INFO: Tipo de alerta planejado: cost_threshold
+INFO     tests.backend.conftest:conftest.py:265 INFO: Tipo de alerta planejado: hibernation_triggered
+INFO     tests.backend.conftest:conftest.py:265 INFO: Tipo de alerta planejado: sync_failed

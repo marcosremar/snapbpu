@@ -1,0 +1,2 @@
+[92m✓[0m Token válido
+[92m✓[0m Usuário validado: test@test.com

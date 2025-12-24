@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Endpoint /api/v1/regions não implementado (status 200)
+INFO     tests.backend.conftest:conftest.py:265 INFO: Endpoint /api/v1/regions/detect não implementado (status 200)

@@ -59,7 +59,7 @@ export default function InstantAvailability({ getAuthHeaders }) {
     return (
       <Card>
         <div className="flex items-center justify-center min-h-[300px]">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-emerald-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-brand-500 rounded-full animate-spin" />
         </div>
       </Card>
     )

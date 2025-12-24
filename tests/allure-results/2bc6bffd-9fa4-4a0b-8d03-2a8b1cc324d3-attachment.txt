@@ -1,0 +1,5 @@
+2025-12-21 06:32:11,844 - tests.backend.conftest - INFO - Usando cache para TestPricePredictions
+2025-12-21 06:32:11,846 - tests.backend.conftest - INFO - INFO: Previsão não disponível para 'RTX 4090'
+2025-12-21 06:32:11,847 - tests.backend.conftest - INFO - INFO: Previsão não disponível para 'RTX 3090'
+2025-12-21 06:32:11,848 - tests.backend.conftest - INFO - INFO: Previsão não disponível para 'A100'
+2025-12-21 06:32:11,848 - tests.backend.conftest - INFO - INFO: Nenhuma previsão disponível (serviço ML não executado)

@@ -1,0 +1,4 @@
+2025-12-21 06:32:01,790 - tests.backend.conftest - INFO - Usando cache para TestInstanceList
+2025-12-21 06:32:02,344 - tests.backend.conftest - INFO - PASS: Listagem de instâncias
+2025-12-21 06:32:02,345 - tests.backend.conftest - INFO - PASS: JSON keys OK: ['instances', 'count']
+2025-12-21 06:32:02,345 - tests.backend.conftest - INFO - PASS: Instâncias listadas: 1

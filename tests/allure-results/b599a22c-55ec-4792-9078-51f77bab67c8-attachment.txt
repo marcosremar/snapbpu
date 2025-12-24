@@ -1,0 +1,2 @@
+[92m✓[0m Market snapshots com limit=1000
+[92m✓[0m Large limit test: 1000 registros em 0.01s

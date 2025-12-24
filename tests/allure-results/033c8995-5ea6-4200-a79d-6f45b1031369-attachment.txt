@@ -1,0 +1,2 @@
+[94mℹ[0m Testando resiliência com requisições concorrentes
+[92m✓[0m Resiliência: 5/5 endpoints OK

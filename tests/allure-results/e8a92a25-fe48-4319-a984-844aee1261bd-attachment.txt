@@ -1,0 +1,1 @@
+[92m✓[0m Estrutura aceita, offer_id não encontrado (esperado)

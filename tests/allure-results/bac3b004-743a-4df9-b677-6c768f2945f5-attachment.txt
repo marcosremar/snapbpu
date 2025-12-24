@@ -1,0 +1,2 @@
+2025-12-21 06:32:12,976 - tests.backend.conftest - INFO - Usando cache para TestMigrationPerformance
+2025-12-21 06:32:12,986 - tests.backend.conftest - INFO - PASS: Migrate estimate response time: 0.008s

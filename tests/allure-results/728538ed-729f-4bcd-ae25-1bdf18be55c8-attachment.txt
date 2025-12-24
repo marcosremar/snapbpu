@@ -1,0 +1,4 @@
+[94mℹ[0m Previsão não disponível para 'RTX 4090'
+[94mℹ[0m Previsão não disponível para 'RTX 3090'
+[94mℹ[0m Previsão não disponível para 'A100'
+[94mℹ[0m Nenhuma previsão disponível (serviço ML não executado)

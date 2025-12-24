@@ -1,0 +1,9 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestCompleteSystemFlow
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 1: Registro de novo usuário
+INFO     tests.backend.conftest:conftest.py:255 PASS: Usuário registrado: e2e_test_1766295106@example.com
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 2: Login
+INFO     tests.backend.conftest:conftest.py:255 PASS: Login bem-sucedido
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 3: Verificar /me
+INFO     tests.backend.conftest:conftest.py:255 PASS: Autenticação verificada
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 4: Acessar dashboard
+INFO     tests.backend.conftest:conftest.py:255 PASS: Dashboard acessível

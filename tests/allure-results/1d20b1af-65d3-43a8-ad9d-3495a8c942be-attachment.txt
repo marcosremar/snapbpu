@@ -1,0 +1,3 @@
+2025-12-21 06:32:13,159 - tests.backend.conftest - INFO - Usando cache para TestHealthTelemetry
+2025-12-21 06:32:13,160 - tests.backend.conftest - INFO - PASS: Health check
+2025-12-21 06:32:13,160 - tests.backend.conftest - INFO - PASS: Health status: healthy

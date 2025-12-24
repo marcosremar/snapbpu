@@ -1,0 +1,2 @@
+[92m✓[0m Health version
+[92m✓[0m Versão da API: 3.0.0

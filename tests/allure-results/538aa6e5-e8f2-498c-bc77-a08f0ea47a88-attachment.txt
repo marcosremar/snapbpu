@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Validação: dados requeridos
+INFO     tests.backend.conftest:conftest.py:255 PASS: Validação: offer_id inválido rejeitado

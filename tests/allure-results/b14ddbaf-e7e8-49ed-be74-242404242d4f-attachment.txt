@@ -1,0 +1,3 @@
+2025-12-21 06:32:11,769 - tests.backend.conftest - INFO - Usando cache para TestMarketSummary
+2025-12-21 06:32:11,788 - tests.backend.conftest - INFO - PASS: Market summary (todas GPUs)
+2025-12-21 06:32:11,788 - tests.backend.conftest - INFO - PASS: Summary: 3 GPUs, primeira: RTX 5090

@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,126 - tests.backend.conftest - INFO - Usando cache para TestStandbySecurity
+2025-12-21 06:32:13,128 - tests.backend.conftest - INFO - PASS: Todos os endpoints de standby protegidos por autenticação

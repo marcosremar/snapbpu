@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,437 - tests.backend.conftest - INFO - PASS: Consistência de cálculos
+2025-12-21 06:31:51,437 - tests.backend.conftest - INFO - INFO: Sem máquinas para validar consistência

@@ -1,0 +1,2 @@
+[92m✓[0m Market snapshots básico
+[92m✓[0m Snapshots: 100 registros, GPU: RTX 5090, Avg: $0.373/h

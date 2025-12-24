@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestAuthentication
+INFO     tests.backend.conftest:conftest.py:255 PASS: Login bem-sucedido
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON keys OK: ['success', 'user', 'token']
+INFO     tests.backend.conftest:conftest.py:255 PASS: Token gerado: eyJhbGciOiJIUzI1NiIs...

@@ -1,0 +1,20 @@
+{
+  "test": "rapid_cycles",
+  "provider": "tensordock",
+  "instance_id": "e6f45fbd-473b-4a9d-a869-ab1869e5614d",
+  "cycles": [
+    {
+      "cycle": 1,
+      "stop_seconds": 4.6419517993927,
+      "start_seconds": 7.368610620498657
+    },
+    {
+      "cycle": 2,
+      "stop_seconds": 4.267895221710205,
+      "start_seconds": 6.756834983825684
+    }
+  ],
+  "avg_stop": 4.454923510551453,
+  "avg_start": 7.06272280216217,
+  "timestamp": "2025-12-22T14:06:58.046963"
+}

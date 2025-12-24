@@ -1,0 +1,4 @@
+[94mℹ[0m Região planejada: us-east (US East)
+[94mℹ[0m Região planejada: us-west (US West)
+[94mℹ[0m Região planejada: eu-west (Europe West)
+[94mℹ[0m Região planejada: asia-east (Asia East)

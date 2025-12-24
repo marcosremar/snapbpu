@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Requisições concorrentes: 4/4 OK, tempo médio: 0.01s

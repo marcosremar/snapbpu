@@ -1,0 +1,2 @@
+2025-12-21 06:31:58,947 - tests.backend.conftest - INFO - PASS: Busca com filtros de especificação
+2025-12-21 06:31:58,948 - tests.backend.conftest - INFO - PASS: Filtros aplicados: 64 ofertas

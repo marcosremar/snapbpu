@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbyConfiguration
+INFO     tests.backend.conftest:conftest.py:265 INFO: GCP credentials não configuradas (esperado em ambiente de teste)

@@ -38,13 +38,13 @@ export default function InterruptionRate({ getAuthHeaders }) {
   const formatPercent = (value) => `${(value * 100)?.toFixed(1) || '0'}%`
 
   const getRateColor = (rate) => {
-    if (rate < 0.05) return 'text-emerald-400'
+    if (rate < 0.05) return 'text-brand-400'
     if (rate < 0.15) return 'text-yellow-400'
     return 'text-red-400'
   }
 
   const getRateBgColor = (rate) => {
-    if (rate < 0.05) return 'bg-emerald-500'
+    if (rate < 0.05) return 'bg-brand-500'
     if (rate < 0.15) return 'bg-yellow-500'
     return 'bg-red-500'
   }
@@ -100,7 +100,7 @@ export default function InterruptionRate({ getAuthHeaders }) {
                 </div>
               </div>
               <span className="block text-[11px] text-gray-400 uppercase tracking-wide mb-1">Provedores Seguros (&lt;5%)</span>
-              <span className="text-2xl font-extrabold text-emerald-400">{data.global_stats.safe_providers}</span>
+              <span className="text-2xl font-extrabold text-brand-400">{data.global_stats.safe_providers}</span>
             </div>
           </div>
         )}
@@ -110,10 +110,10 @@ export default function InterruptionRate({ getAuthHeaders }) {
           <div className="flex flex-col gap-2">
             {data?.providers?.slice(0, 8).map((provider, idx) => (
               <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-white/[0.03] hover:bg-white/[0.06] rounded-lg transition-colors animate-fade-in" style={{ animationDelay: `${idx * 40}ms` }}>
-                <div className="text-emerald-400 font-bold text-lg hidden sm:block">#{idx + 1}</div>
+                <div className="text-brand-400 font-bold text-lg hidden sm:block">#{idx + 1}</div>
                 <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center flex-shrink-0">
-                    <Server size={16} className="text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500/20 to-teal-500/20 flex items-center justify-center flex-shrink-0">
+                    <Server size={16} className="text-brand-400" />
                   </div>
                   <div>
                     <span className="text-white font-medium">{provider.hostname || `Host ${provider.machine_id}`}</span>
@@ -133,7 +133,7 @@ export default function InterruptionRate({ getAuthHeaders }) {
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <span>{provider.total_rentals} aluguéis</span>
-                  {provider.verified && <Shield size={14} className="text-emerald-400" />}
+                  {provider.verified && <Shield size={14} className="text-brand-400" />}
                 </div>
               </div>
             ))}

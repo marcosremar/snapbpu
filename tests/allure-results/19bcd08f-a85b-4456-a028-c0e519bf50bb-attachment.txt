@@ -1,0 +1,3 @@
+[92m✓[0m Login bem-sucedido
+[92m✓[0m JSON keys OK: ['success', 'user', 'token']
+[92m✓[0m Token gerado: eyJhbGciOiJIUzI1NiIs...

@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Requisições concorrentes: 10/10 sucesso em 0.00s

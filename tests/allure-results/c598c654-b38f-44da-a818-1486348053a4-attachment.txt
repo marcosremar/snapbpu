@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestSnapshotConfiguration
+INFO     tests.backend.conftest:conftest.py:255 PASS: Restic não configurado detectado corretamente

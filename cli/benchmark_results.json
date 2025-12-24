@@ -1,0 +1,32 @@
+[
+  {
+    "timestamp": "2025-12-22T03:34:26.706645",
+    "instance_id": 29093249,
+    "gpu_name": "Unknown",
+    "mode": "economic",
+    "cycles": 3,
+    "pause_times": [],
+    "resume_times": [],
+    "avg_pause": 0,
+    "avg_resume": 0
+  },
+  {
+    "timestamp": "2025-12-22T03:44:03.039334",
+    "instance_id": 29093202,
+    "gpu_name": "RTX 4060 Ti",
+    "mode": "economic_direct",
+    "cycles": 3,
+    "pause_times": [
+      15.62503433227539,
+      38.00095582008362,
+      35.49667406082153
+    ],
+    "resume_times": [
+      41.805639028549194,
+      42.15614676475525,
+      41.03288817405701
+    ],
+    "avg_pause": 29.70755473772685,
+    "avg_resume": 41.66489132245382
+  }
+]

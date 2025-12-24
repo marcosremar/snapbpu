@@ -1,0 +1,2 @@
+[92m✓[0m Market summary (todas GPUs)
+[92m✓[0m Summary: 3 GPUs, primeira: RTX 5090

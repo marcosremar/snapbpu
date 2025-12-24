@@ -1,0 +1,1 @@
+[92m✓[0m Requisições concorrentes: 3/3 processadas

@@ -1,0 +1,1 @@
+[94mℹ[0m Rate limiting não detectado (pode não estar configurado ou limite alto)

@@ -1,0 +1,1 @@
+2025-12-21 06:32:11,938 - tests.backend.conftest - INFO - PASS: Requisições concorrentes: 4/4 OK, tempo médio: 0.01s

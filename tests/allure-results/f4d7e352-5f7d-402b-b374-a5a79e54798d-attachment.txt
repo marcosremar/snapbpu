@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,039 - tests.backend.conftest - INFO - PASS: instance_id obrigatório validado

@@ -1,0 +1,2 @@
+2025-12-21 06:31:46,943 - tests.backend.conftest - INFO - INFO: Testando resiliência com requisições concorrentes
+2025-12-21 06:31:47,500 - tests.backend.conftest - INFO - PASS: Resiliência: 5/5 endpoints OK

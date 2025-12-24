@@ -1,0 +1,1 @@
+[92m✓[0m Deleção não executada (Restic não configurado - OK)

@@ -1,0 +1,2 @@
+[92m✓[0m Market summary para GPU: RTX 3090
+[92m✓[0m Summary específico para 'RTX 3090' OK

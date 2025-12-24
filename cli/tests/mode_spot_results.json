@@ -1,0 +1,19 @@
+{
+  "mode": "spot_vs_economic",
+  "instance_id": 29136863,
+  "gpu_name": "RTX 3060",
+  "economic": {
+    "pause_seconds": 25.506768226623535,
+    "resume_seconds": 180.9014618396759,
+    "total_seconds": 206.40823006629944
+  },
+  "spot": {
+    "search_seconds": 1.0000815391540527,
+    "detection_seconds": 10,
+    "deploy_estimated_seconds": 30,
+    "restore_estimated_seconds": 30,
+    "total_estimated_seconds": 71.00008153915405
+  },
+  "offers_available": 64,
+  "timestamp": "2025-12-23T08:43:31.688266"
+}

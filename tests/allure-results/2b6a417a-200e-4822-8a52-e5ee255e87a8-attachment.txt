@@ -1,0 +1,10 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 1: Verificar autenticação
+INFO     tests.backend.conftest:conftest.py:255 PASS: Usuário autenticado
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 2: Listar instâncias
+INFO     tests.backend.conftest:conftest.py:255 PASS: Instâncias listadas: 1
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 3: Ver savings
+INFO     tests.backend.conftest:conftest.py:255 PASS: Savings carregado
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 4: Ver standby status
+INFO     tests.backend.conftest:conftest.py:255 PASS: Standby status carregado
+INFO     tests.backend.conftest:conftest.py:265 INFO: Passo 5: Ver hibernation stats
+INFO     tests.backend.conftest:conftest.py:255 PASS: Hibernation stats carregado

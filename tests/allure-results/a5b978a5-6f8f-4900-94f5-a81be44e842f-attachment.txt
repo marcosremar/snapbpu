@@ -1,0 +1,1 @@
+[94mℹ[0m Start sync retornou: 422 (associação pode não existir)

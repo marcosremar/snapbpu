@@ -1,0 +1,4 @@
+2025-12-21 06:31:51,426 - tests.backend.conftest - INFO - Usando cache para TestHibernationStats
+2025-12-21 06:31:51,429 - tests.backend.conftest - INFO - PASS: Estatísticas de hibernação
+2025-12-21 06:31:51,429 - tests.backend.conftest - INFO - PASS: JSON keys OK: ['total_hibernations', 'total_hours_saved', 'total_savings', 'machines']
+2025-12-21 06:31:51,429 - tests.backend.conftest - INFO - PASS: Stats: 0 hibernações, 0h salvos, $0 economia

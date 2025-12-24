@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,033 - tests.backend.conftest - INFO - PASS: source_path padrão aceito (falhou por outro motivo)

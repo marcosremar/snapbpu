@@ -38,13 +38,13 @@ export default function FleetStrategy({ getAuthHeaders }) {
   const formatPercent = (value) => `${(value * 100)?.toFixed(0) || '0'}%`
 
   const getRiskColor = (risk) => {
-    if (risk === 'low') return 'text-emerald-400'
+    if (risk === 'low') return 'text-brand-400'
     if (risk === 'medium') return 'text-yellow-400'
     return 'text-red-400'
   }
 
   const getRiskBgColor = (risk) => {
-    if (risk === 'low') return 'bg-emerald-500'
+    if (risk === 'low') return 'bg-brand-500'
     if (risk === 'medium') return 'bg-yellow-500'
     return 'bg-red-500'
   }
@@ -100,12 +100,12 @@ export default function FleetStrategy({ getAuthHeaders }) {
         {data?.recommended_strategy && (
           <div className="spot-highlight mb-5">
             <div className="flex items-center justify-center gap-3 relative z-10">
-              <CheckCircle size={28} className="text-emerald-400" />
+              <CheckCircle size={28} className="text-brand-400" />
               <div className="text-left">
-                <span className="block text-xs text-emerald-300/70 uppercase font-semibold">Estratégia Recomendada</span>
+                <span className="block text-xs text-brand-300/70 uppercase font-semibold">Estratégia Recomendada</span>
                 <span className="block text-xl font-bold text-white">{data.recommended_strategy.name}</span>
-                <span className="block text-sm text-emerald-200/60">
-                  Custo estimado: <strong className="text-emerald-300">{formatPrice(data.recommended_strategy.estimated_cost)}</strong>
+                <span className="block text-sm text-brand-200/60">
+                  Custo estimado: <strong className="text-brand-300">{formatPrice(data.recommended_strategy.estimated_cost)}</strong>
                 </span>
               </div>
             </div>
@@ -119,10 +119,10 @@ export default function FleetStrategy({ getAuthHeaders }) {
               {data.fleet_composition.map((item, idx) => (
                 <div key={idx} className="stat-card flex flex-col gap-1.5">
                   <div className="flex items-center gap-1.5 text-white font-medium">
-                    <Zap size={16} className="text-emerald-400" />
+                    <Zap size={16} className="text-brand-400" />
                     {item.gpu_name}
                   </div>
-                  <div className="text-xl font-extrabold text-emerald-400">x{item.count}</div>
+                  <div className="text-xl font-extrabold text-brand-400">x{item.count}</div>
                   <div className="text-xs text-gray-400">{formatPrice(item.price_per_gpu)}</div>
                   <div className={`flex items-center gap-1 text-xs ${getRiskColor(item.risk_level)}`}>
                     <Shield size={14} />

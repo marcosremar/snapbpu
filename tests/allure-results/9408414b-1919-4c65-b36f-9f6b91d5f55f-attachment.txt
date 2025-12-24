@@ -1,0 +1,1 @@
+2025-12-21 06:31:51,447 - tests.backend.conftest - INFO - PASS: Todos os 5 tokens malformados rejeitados

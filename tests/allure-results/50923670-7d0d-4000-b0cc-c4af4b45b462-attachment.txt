@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Resposta vazia
+INFO     tests.backend.conftest:conftest.py:255 PASS: Resposta vazia válida (sem hibernações)

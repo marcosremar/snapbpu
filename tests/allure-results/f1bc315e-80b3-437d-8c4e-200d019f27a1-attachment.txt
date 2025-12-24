@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,732 - tests.backend.conftest - INFO - PASS: Snapshots filtrados por GPU: RTX 3090
+2025-12-21 06:32:11,733 - tests.backend.conftest - INFO - PASS: Filtro GPU 'RTX 3090': 100 snapshots

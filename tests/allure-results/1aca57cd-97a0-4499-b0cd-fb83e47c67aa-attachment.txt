@@ -1,0 +1,3 @@
+2025-12-21 06:32:06,230 - tests.backend.conftest - INFO - Usando cache para TestInstancePerformance
+2025-12-21 06:32:06,778 - tests.backend.conftest - INFO - PASS: Performance da listagem
+2025-12-21 06:32:06,779 - tests.backend.conftest - INFO - PASS: Performance listagem: 0.546s

@@ -265,9 +265,18 @@ class AIWizardService:
         Analyze a project description and return GPU recommendations
         Iterates through multiple models until finding a valid response
         """
+        # Se não tiver API key, usar modo simplificado
         if not self.api_key:
-            logger.error("OpenRouter API key not configured - AI Wizard requires LLM access")
-            raise ValueError("AI Wizard requires OpenRouter API key to function. Please configure OPENROUTER_API_KEY environment variable.")
+            logger.warning("OpenRouter API key not configured - using simplified fallback mode")
+            messages = [{"role": "user", "content": project_description}]
+            simplified_result = await self._try_simplified_approach(messages)
+            return {
+                "success": True,
+                "data": simplified_result,
+                "model_used": "simplified_fallback",
+                "attempts": 0,
+                "warning": "Usando modo simplificado (sem API key configurada)"
+            }
 
         messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 

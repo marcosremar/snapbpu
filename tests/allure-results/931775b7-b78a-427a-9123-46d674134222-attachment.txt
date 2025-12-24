@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Estrutura de máquinas
+INFO     tests.backend.conftest:conftest.py:265 INFO: Nenhuma máquina com hibernação encontrada

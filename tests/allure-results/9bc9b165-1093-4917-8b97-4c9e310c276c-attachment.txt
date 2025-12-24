@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Rate limiting funcionando (sem quebrar servidor)

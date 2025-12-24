@@ -1,0 +1,2 @@
+2025-12-21 06:31:39,463 - tests.backend.conftest - INFO - Usando cache para TestAIWizardValidation
+2025-12-21 06:31:39,466 - tests.backend.conftest - INFO - PASS: Validação de campos obrigatórios OK

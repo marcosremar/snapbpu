@@ -1,0 +1,2 @@
+[92m✓[0m Listar associações
+[92m✓[0m Tempo de resposta das associações: 0.001s

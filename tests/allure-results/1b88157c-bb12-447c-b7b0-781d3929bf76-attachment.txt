@@ -1,0 +1,2 @@
+[92m✓[0m Performance da busca
+[92m✓[0m Performance busca: 1.000s

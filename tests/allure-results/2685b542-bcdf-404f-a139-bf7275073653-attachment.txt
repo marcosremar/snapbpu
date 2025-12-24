@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,151 - tests.backend.conftest - INFO - PASS: Endpoints de sync protegidos

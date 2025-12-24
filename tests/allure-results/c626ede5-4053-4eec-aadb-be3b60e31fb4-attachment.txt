@@ -1,0 +1,2 @@
+ERROR    tests.backend.conftest:conftest.py:260 FAIL: Descrição com caracteres especiais falhou: 500
+ERROR    tests.backend.conftest:conftest.py:260 FAIL: Response: {'error': 'Internal server error', 'details': 'AI Wizard requires OpenRouter API key to function. Please configure OPENROUTER_API_KEY environment variable.'}

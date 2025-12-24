@@ -49,7 +49,7 @@ export default function SafeWindows({ getAuthHeaders, selectedGPU = 'RTX 4090' }
   const formatPercent = (value) => `${(value * 100)?.toFixed(0) || '0'}%`
 
   const getHourColor = (confidence) => {
-    if (confidence > 0.8) return 'bg-emerald-500'
+    if (confidence > 0.8) return 'bg-brand-500'
     if (confidence > 0.5) return 'bg-yellow-500'
     return 'bg-red-500'
   }
@@ -80,12 +80,12 @@ export default function SafeWindows({ getAuthHeaders, selectedGPU = 'RTX 4090' }
         {data?.recommendation && (
           <div className="spot-highlight mb-5">
             <div className="flex items-center justify-center gap-3 relative z-10">
-              <CheckCircle size={28} className="text-emerald-400" />
+              <CheckCircle size={28} className="text-brand-400" />
               <div className="text-left">
-                <span className="block text-xs text-emerald-300/70 uppercase font-semibold">Melhor Horário para Alugar</span>
+                <span className="block text-xs text-brand-300/70 uppercase font-semibold">Melhor Horário para Alugar</span>
                 <span className="block text-2xl font-bold text-white">{data.recommendation.best_hours_utc?.map(formatHour).join(', ')}</span>
-                <span className="block text-sm text-emerald-200/60">
-                  Confiança: <strong className="text-emerald-300">{formatPercent(data.recommendation.confidence)}</strong>
+                <span className="block text-sm text-brand-200/60">
+                  Confiança: <strong className="text-brand-300">{formatPercent(data.recommendation.confidence)}</strong>
                 </span>
               </div>
             </div>
@@ -108,7 +108,7 @@ export default function SafeWindows({ getAuthHeaders, selectedGPU = 'RTX 4090' }
           </div>
           <div className="flex flex-wrap gap-3 sm:gap-4 text-xs text-gray-400 pt-3 border-t border-white/5">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30"></span>
+              <span className="w-3 h-3 rounded-full bg-brand-500 shadow-lg shadow-brand-500/30"></span>
               Alta estabilidade
             </span>
             <span className="flex items-center gap-1.5">

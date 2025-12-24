@@ -1,0 +1,1 @@
+[93m⚠[0m Status inesperado ao parar sync: 422

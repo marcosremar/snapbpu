@@ -1,0 +1,4 @@
+[92m✓[0m API rejeitou parâmetro inválido: {'hours': -1}
+[92m✓[0m API rejeitou parâmetro inválido: {'hours': 200}
+[92m✓[0m API rejeitou parâmetro inválido: {'limit': 2000}
+[94mℹ[0m API usou valor padrão para parâmetro inválido: {'limit': 0}

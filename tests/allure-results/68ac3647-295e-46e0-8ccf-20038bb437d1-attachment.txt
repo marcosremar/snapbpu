@@ -1,0 +1,2 @@
+2025-12-21 06:32:02,925 - tests.backend.conftest - INFO - PASS: Validação de estrutura
+2025-12-21 06:32:02,925 - tests.backend.conftest - INFO - PASS: Campos opcionais presentes: 14/14

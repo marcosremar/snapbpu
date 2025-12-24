@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, TrendingUp, TrendingDown, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -16,7 +17,7 @@ export function PageHeader({ title, subtitle, breadcrumbs = [], actions }) {
                   {item.label}
                 </Link>
               ) : (
-                <span className="text-gray-900 dark:text-white font-medium">{item.label}</span>
+                <span className="text-white font-medium">{item.label}</span>
               )}
             </span>
           ))}
@@ -24,7 +25,7 @@ export function PageHeader({ title, subtitle, breadcrumbs = [], actions }) {
       )}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{title}</h1>
+          <h1 className="text-2xl font-semibold text-white">{title}</h1>
           {subtitle && <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>}
         </div>
         {actions && <div className="flex items-center gap-3">{actions}</div>}
@@ -60,7 +61,7 @@ export function StatCard({
 
   return (
     <div
-      className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5 shadow-sm hover:shadow-md transition-all duration-200 ${onClick ? 'cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 hover:-translate-y-0.5' : ''} ${loading ? 'animate-pulse' : ''}`}
+      className={`bg-dark-surface-card rounded-xl border border-white/10 p-5 shadow-sm hover:shadow-md transition-all duration-200 ${onClick ? 'cursor-pointer hover:border-brand-300 dark:hover:border-brand-700 hover:-translate-y-0.5' : ''} ${loading ? 'animate-pulse' : ''}`}
       onClick={onClick}
     >
       <div className="flex items-start justify-between gap-4">
@@ -69,7 +70,7 @@ export function StatCard({
           {loading ? (
             <div className="h-8 bg-gray-200 dark:bg-gray-800 rounded animate-pulse w-24" />
           ) : (
-            <p className={`text-2xl font-bold transition-colors ${isEmpty ? 'text-gray-400 dark:text-gray-600' : 'text-gray-900 dark:text-white'}`}>
+            <p className={`text-2xl font-bold transition-colors ${isEmpty ? 'text-gray-400 dark:text-gray-600' : 'text-white'}`}>
               {displayValue}
             </p>
           )}
@@ -96,7 +97,7 @@ export function StatCard({
 // Card Component - Dark theme by default
 export function Card({ children, className = '', header, footer, noPadding = false }) {
   return (
-    <div className={`bg-[#111411] rounded-xl border border-white/10 shadow-xl ${className}`}>
+    <div className={`bg-dark-surface-card rounded-xl border border-white/10 shadow-xl ${className}`}>
       {header && (
         <div className="px-6 py-4 border-b border-white/10">
           {typeof header === 'string' ? (
@@ -145,7 +146,7 @@ export function CardContent({ children, className = '' }) {
 
 export function CardFooter({ children, className = '' }) {
   return (
-    <div className={`px-6 py-4 border-t border-white/10 bg-white/5 rounded-b-xl ${className}`}>
+    <div className={`px-6 py-4 border-t border-gray-800 bg-gray-800/50 rounded-b-xl ${className}`}>
       {children}
     </div>
   );
@@ -164,13 +165,13 @@ export function Button({
   ...props
 }) {
   const variants = {
-    primary: 'bg-emerald-300 text-gray-900 hover:bg-emerald-400 focus:ring-emerald-300 font-semibold shadow-lg shadow-emerald-500/20',
-    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-300 dark:hover:bg-white/20',
+    primary: 'bg-brand-500 text-white hover:bg-brand-600 focus:ring-brand-500 font-semibold shadow-lg shadow-brand-500/20',
+    secondary: 'bg-white/10 text-gray-300 hover:bg-white/20',
     success: 'bg-success-500 text-white hover:bg-success-600 focus:ring-success-500',
     error: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-500',
     warning: 'bg-warning-500 text-white hover:bg-warning-600 focus:ring-warning-500',
-    outline: 'border border-gray-300 bg-transparent text-gray-700 hover:bg-gray-50 dark:border-white/20 dark:text-gray-300 dark:hover:bg-white/10',
-    ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/10',
+    outline: 'border border-white/20 bg-transparent text-gray-300 hover:bg-white/10',
+    ghost: 'bg-transparent text-gray-400 hover:bg-white/10',
   };
 
   const sizes = {
@@ -232,7 +233,7 @@ export function Table({ columns, data, onRowClick, emptyMessage = 'Nenhum dado e
   return (
     <div className="overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-gray-50 dark:bg-gray-800">
+        <thead className="bg-dark-surface-secondary">
           <tr>
             {columns.map((col, i) => (
               <th
@@ -255,7 +256,7 @@ export function Table({ columns, data, onRowClick, emptyMessage = 'Nenhum dado e
             data.map((row, rowIndex) => (
               <tr
                 key={rowIndex}
-                className={`border-b border-gray-200 dark:border-gray-800 ${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50' : ''} transition-colors`}
+                className={`border-b border-gray-800 ${onRowClick ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50' : ''} transition-colors`}
                 onClick={() => onRowClick?.(row)}
               >
                 {columns.map((col, colIndex) => (
@@ -288,7 +289,7 @@ export function Input({ label, error, helper, icon: Icon, className = '', ...pro
           </div>
         )}
         <input
-          className={`w-full ${Icon ? 'pl-12' : 'px-4'} pr-4 py-3.5 text-sm text-gray-900 bg-white border rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-gray-500 dark:focus:border-emerald-400 transition-all ${error ? 'border-error-500' : 'border-gray-200 dark:border-white/10'}`}
+          className={`w-full ${Icon ? 'pl-12' : 'px-4'} pr-4 py-3.5 text-sm text-white bg-dark-surface-card border rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 border-white/10 placeholder:text-gray-500 transition-all ${error ? 'border-error-500' : 'border-white/10'}`}
           {...props}
         />
       </div>
@@ -311,7 +312,7 @@ export function SelectSimple({ label, error, helper, options = [], className = '
         </label>
       )}
       <select
-        className={`w-full px-4 py-2.5 text-sm text-gray-900 bg-white border rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white cursor-pointer ${error ? 'border-error-500' : 'border-gray-300'}`}
+        className={`w-full px-4 py-2.5 text-sm text-white bg-dark-surface-card border border-white/10 rounded-lg focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 cursor-pointer ${error ? 'border-error-500' : ''}`}
         {...props}
       >
         {options.map((opt) => (
@@ -398,7 +399,7 @@ export function EmptyState({ icon: Icon, title, description, action }) {
           <Icon size={64} />
         </div>
       )}
-      <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{title}</h3>
+      <h3 className="text-lg font-medium text-white mb-2">{title}</h3>
       {description && (
         <p className="text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-4">{description}</p>
       )}
@@ -458,10 +459,10 @@ export function Checkbox({ label, checked, onChange, disabled = false, className
         checked={checked}
         onChange={onChange}
         disabled={disabled}
-        className="w-4 h-4 text-brand-500 bg-white border-gray-300 rounded focus:ring-brand-500 focus:ring-2 dark:bg-gray-900 dark:border-gray-700 cursor-pointer disabled:cursor-not-allowed"
+        className="w-4 h-4 text-brand-500 bg-dark-surface-card border-white/20 rounded focus:ring-brand-500 focus:ring-2 cursor-pointer disabled:cursor-not-allowed"
         {...props}
       />
-      {label && <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>}
+      {label && <span className="text-sm text-gray-300">{label}</span>}
     </label>
   );
 }
@@ -500,10 +501,10 @@ export function Switch({ checked, onChange, onCheckedChange, disabled = false, l
           disabled={disabled}
           className="sr-only peer"
         />
-        <div className={`w-11 h-6 rounded-full transition-colors ${checked ? 'bg-brand-500' : 'bg-gray-300 dark:bg-gray-700'} ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}></div>
+        <div className={`w-11 h-6 rounded-full transition-colors ${checked ? 'bg-brand-500' : 'bg-gray-700'} ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}></div>
         <div className={`absolute left-1 top-1 w-4 h-4 bg-white rounded-full transition-transform ${checked ? 'translate-x-5' : 'translate-x-0'}`}></div>
       </div>
-      {label && <span className="text-sm text-gray-700 dark:text-gray-300">{label}</span>}
+      {label && <span className="text-sm text-gray-300">{label}</span>}
     </label>
   );
 }
@@ -523,7 +524,7 @@ export function Tabs({ children, value, onValueChange, className = '' }) {
 
 export function TabsList({ children, className = '' }) {
   return (
-    <div className={`inline-flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-800 rounded-lg ${className}`}>
+    <div className={`inline-flex items-center gap-1 p-1 bg-dark-surface-secondary rounded-lg ${className}`}>
       {children}
     </div>
   );
@@ -538,8 +539,8 @@ export function TabsTrigger({ children, value, className = '' }) {
       onClick={() => onValueChange(value)}
       className={`px-4 py-2 text-sm font-semibold rounded-md transition-all flex items-center ${
         isActive
-          ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-md'
-          : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800/50'
+          ? 'bg-gray-800 text-white shadow-md'
+          : 'text-gray-300 hover:text-white hover:bg-gray-800/50'
       } ${className}`}
       data-state={isActive ? 'active' : 'inactive'}
     >
@@ -573,36 +574,77 @@ export function Slider({ value = [0], onValueChange, min = 0, max = 100, step = 
   );
 }
 
-// Dropdown Menu Components
-export function DropdownMenu({ children, open, onOpenChange }) {
+// Dropdown Menu Components with state management
+const DropdownContext = React.createContext({ isOpen: false, setIsOpen: () => {} });
+
+export function DropdownMenu({ children }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isOpen]);
+
   return (
-    <div className="relative inline-block" data-open={open} data-onOpenChange={onOpenChange}>
-      {children}
-    </div>
+    <DropdownContext.Provider value={{ isOpen, setIsOpen }}>
+      <div ref={dropdownRef} className="relative inline-block">
+        {children}
+      </div>
+    </DropdownContext.Provider>
   );
 }
 
 export function DropdownMenuTrigger({ children, asChild, ...props }) {
+  const { isOpen, setIsOpen } = React.useContext(DropdownContext);
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+
   if (asChild) {
-    return <>{children}</>;
+    return React.cloneElement(children, { onClick: handleClick });
   }
-  return <button {...props}>{children}</button>;
+  return <button onClick={handleClick} {...props}>{children}</button>;
 }
 
 export function DropdownMenuContent({ children, align = 'end', className = '' }) {
+  const { isOpen } = React.useContext(DropdownContext);
+
+  if (!isOpen) return null;
+
   const alignClass = align === 'end' ? 'right-0' : 'left-0';
   return (
-    <div className={`absolute ${alignClass} mt-2 w-56 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg z-50 py-1 ${className}`}>
+    <div className={`absolute ${alignClass} mt-2 w-56 rounded-lg bg-dark-surface-card border border-white/10 shadow-lg z-50 py-1 ${className}`}>
       {children}
     </div>
   );
 }
 
-export function DropdownMenuItem({ children, onClick, className = '' }) {
+export function DropdownMenuItem({ children, onClick, className = '', disabled }) {
+  const { setIsOpen } = React.useContext(DropdownContext);
+
+  const handleClick = (e) => {
+    if (disabled) return;
+    setIsOpen(false);
+    if (onClick) onClick(e);
+  };
+
   return (
     <button
-      onClick={onClick}
-      className={`w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 ${className}`}
+      onClick={handleClick}
+      disabled={disabled}
+      className={`w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {children}
     </button>
@@ -621,17 +663,22 @@ export function DropdownMenuLabel({ children, className = '' }) {
   );
 }
 
-// Alert Dialog Components
+// Alert Dialog Components (usando Portal)
 export function AlertDialog({ children, open, onOpenChange }) {
   if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={() => onOpenChange?.(false)} />
-      <div className="relative z-50" data-open={open} data-onOpenChange={onOpenChange}>
-        {children}
+
+  const modalContent = (
+    <>
+      <div className="fixed inset-0 z-[999] bg-black/80 backdrop-blur-sm" onClick={() => onOpenChange?.(false)} />
+      <div className="fixed inset-0 z-[1000] flex items-center justify-center pointer-events-none p-4">
+        <div className="pointer-events-auto relative" data-open={open} data-onOpenChange={onOpenChange}>
+          {children}
+        </div>
       </div>
-    </div>
+    </>
   );
+
+  return createPortal(modalContent, document.body);
 }
 
 export function AlertDialogTrigger({ children, asChild, ...props }) {
@@ -643,7 +690,7 @@ export function AlertDialogTrigger({ children, asChild, ...props }) {
 
 export function AlertDialogContent({ children, className = '' }) {
   return (
-    <div className={`bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl max-w-md w-full mx-4 ${className}`}>
+    <div className={`bg-dark-surface-card rounded-xl border border-white/10 shadow-xl max-w-md w-full mx-4 ${className}`}>
       {children}
     </div>
   );
@@ -654,7 +701,7 @@ export function AlertDialogHeader({ children, className = '' }) {
 }
 
 export function AlertDialogTitle({ children, className = '' }) {
-  return <h2 className={`text-lg font-semibold text-gray-900 dark:text-white ${className}`}>{children}</h2>;
+  return <h2 className={`text-lg font-semibold text-white ${className}`}>{children}</h2>;
 }
 
 export function AlertDialogDescription({ children, className = '' }) {
@@ -700,7 +747,7 @@ export function PopoverTrigger({ children, asChild, ...props }) {
 export function PopoverContent({ children, align = 'center', className = '' }) {
   const alignClass = align === 'end' ? 'right-0' : align === 'start' ? 'left-0' : 'left-1/2 -translate-x-1/2';
   return (
-    <div className={`absolute ${alignClass} mt-2 w-80 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-lg z-50 p-4 ${className}`}>
+    <div className={`absolute ${alignClass} mt-2 w-80 rounded-lg bg-dark-surface-card border border-white/10 shadow-lg z-50 p-4 ${className}`}>
       {children}
     </div>
   );
@@ -793,7 +840,7 @@ export function SelectTrigger({ children, className = '', ...props }) {
     <button
       type="button"
       onClick={() => setIsOpen(!isOpen)}
-      className={`w-full px-4 py-3.5 text-sm text-left text-gray-900 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 dark:bg-white/5 dark:border-white/10 dark:text-white flex items-center justify-between transition-all ${className}`}
+      className={`w-full px-4 py-3.5 text-sm text-left text-white bg-dark-surface-card border border-white/10 rounded-xl focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 flex items-center justify-between transition-all ${className}`}
       {...props}
     >
       {children}
@@ -816,7 +863,7 @@ export function SelectContent({ children, className = '' }) {
   // Always render children for option registration, but hide when closed
   return (
     <div
-      className={`absolute mt-2 w-full rounded-xl bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-white/10 shadow-2xl z-50 max-h-60 overflow-auto py-2 ${className}`}
+      className={`absolute mt-2 w-full rounded-xl bg-dark-surface-card border border-white/10 shadow-2xl z-50 max-h-60 overflow-auto py-2 ${className}`}
       style={{
         visibility: isOpen ? 'visible' : 'hidden',
         opacity: isOpen ? 1 : 0,
@@ -848,14 +895,14 @@ export function SelectItem({ children, value, className = '' }) {
       onClick={() => onValueChange(value, children)}
       className={`w-full px-4 py-3 text-left text-sm transition-all flex items-center justify-between mx-2 rounded-lg ${
         isSelected
-          ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-medium'
-          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/5'
+          ? 'bg-brand-500/10 text-brand-400 font-medium'
+          : 'text-gray-300 hover:bg-white/5'
       } ${className}`}
       style={{ width: 'calc(100% - 16px)' }}
     >
       <span>{children}</span>
       {isSelected && (
-        <svg className="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+        <svg className="w-4 h-4 text-brand-500" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
         </svg>
       )}

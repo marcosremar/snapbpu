@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Caching headers
+INFO     tests.backend.conftest:conftest.py:265 INFO: Cache headers: {'Cache-Control': None, 'ETag': None, 'Last-Modified': None}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Headers de resposta validados

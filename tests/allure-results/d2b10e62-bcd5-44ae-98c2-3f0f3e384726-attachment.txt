@@ -1,0 +1,1 @@
+[92m✓[0m Validação de senha: senhas fracas rejeitadas

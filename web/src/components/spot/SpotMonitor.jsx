@@ -42,7 +42,7 @@ export default function SpotMonitor({ getAuthHeaders }) {
     return (
       <Card>
         <div className="flex items-center justify-center min-h-[300px]">
-          <div className="w-8 h-8 border-4 border-gray-200 border-t-emerald-500 rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-gray-200 border-t-brand-500 rounded-full animate-spin" />
         </div>
       </Card>
     )
@@ -61,8 +61,8 @@ export default function SpotMonitor({ getAuthHeaders }) {
       header={
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <TrendingUp size={20} className="text-emerald-400" />
+            <div className="w-10 h-10 rounded-xl bg-brand-500/10 flex items-center justify-center">
+              <TrendingUp size={20} className="text-brand-400" />
             </div>
             <div>
               <h3 className="text-lg font-semibold text-white">Monitor de Preços Spot</h3>

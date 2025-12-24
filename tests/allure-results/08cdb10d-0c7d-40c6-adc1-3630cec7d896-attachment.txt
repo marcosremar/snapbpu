@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,031 - tests.backend.conftest - INFO - PASS: Erro de configuração ou instância não encontrada

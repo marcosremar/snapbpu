@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,044 - tests.backend.conftest - INFO - PASS: Flag verify aceita

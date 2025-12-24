@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,166 - tests.backend.conftest - INFO - INFO: Endpoint /api/v1/telemetry/stats não implementado (status 200)
+2025-12-21 06:32:13,168 - tests.backend.conftest - INFO - INFO: Endpoint /api/v1/telemetry/events não implementado (status 200)

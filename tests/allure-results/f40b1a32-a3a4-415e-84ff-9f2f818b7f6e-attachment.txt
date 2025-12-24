@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestEfficiencyRankings
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency rankings básico
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency rankings: 50 ofertas, Top: RTX 4090 (score: 86.9)

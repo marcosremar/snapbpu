@@ -1,0 +1,2 @@
+2025-12-21 06:31:46,323 - tests.backend.conftest - INFO - PASS: Health version
+2025-12-21 06:31:46,324 - tests.backend.conftest - INFO - PASS: Versão: 3.0.0

@@ -1,0 +1,8 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers com filtro: {'verified_only': True}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'verified_only': True}: 0 providers
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers com filtro: {'min_observations': 10}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'min_observations': 10}: 50 providers
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers com filtro: {'min_reliability': 0.5}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'min_reliability': 0.5}: 50 providers
+INFO     tests.backend.conftest:conftest.py:255 PASS: Providers com filtro: {'limit': 20}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'limit': 20}: 20 providers

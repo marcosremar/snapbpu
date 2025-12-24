@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,138 - tests.backend.conftest - INFO - PASS: Preços do standby
+2025-12-21 06:32:13,139 - tests.backend.conftest - INFO - PASS: Tempo de resposta dos preços: 0.001s

@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbySecurity
+INFO     tests.backend.conftest:conftest.py:255 PASS: Todos os endpoints de standby protegidos por autenticação

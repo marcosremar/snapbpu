@@ -134,17 +134,20 @@ def get_instance_service(
         gpu_provider = DemoProvider()
         return InstanceService(gpu_provider=gpu_provider)
 
-    # Get user's vast API key
+    # Get user's vast API key, fallback to env var
     user_repo = next(get_user_repository())
     user = user_repo.get_user(user_email)
 
-    if not user or not user.vast_api_key:
+    # Try user's key first, then fall back to system key from .env
+    api_key = (user.vast_api_key if user else None) or settings.vast.api_key
+
+    if not api_key:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vast.ai API key not configured. Please update settings.",
         )
 
-    gpu_provider = VastProvider(api_key=user.vast_api_key)
+    gpu_provider = VastProvider(api_key=api_key)
     return InstanceService(gpu_provider=gpu_provider)
 
 
@@ -191,24 +194,27 @@ def get_migration_service(
     from ...services.gpu.vast import VastService
 
     # Get user's settings
+    settings = get_settings()
     user_repo = next(get_user_repository())
     user = user_repo.get_user(user_email)
 
-    if not user or not user.vast_api_key:
+    # Try user's key first, then fall back to system key from .env
+    api_key = (user.vast_api_key if user else None) or settings.vast.api_key
+
+    if not api_key:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vast.ai API key not configured. Please update settings.",
         )
 
     # Get settings for snapshot provider
-    settings = get_settings()
-    repo = user.settings.get("restic_repo") or settings.r2.restic_repo
-    password = user.settings.get("restic_password") or settings.restic.password
-    access_key = user.settings.get("r2_access_key") or settings.r2.access_key
-    secret_key = user.settings.get("r2_secret_key") or settings.r2.secret_key
+    repo = (user.settings.get("restic_repo") if user else None) or settings.r2.restic_repo
+    password = (user.settings.get("restic_password") if user else None) or settings.restic.password
+    access_key = (user.settings.get("r2_access_key") if user else None) or settings.r2.access_key
+    secret_key = (user.settings.get("r2_secret_key") if user else None) or settings.r2.secret_key
 
     # Create services
-    gpu_provider = VastProvider(api_key=user.vast_api_key)
+    gpu_provider = VastProvider(api_key=api_key)
     instance_service = InstanceService(gpu_provider=gpu_provider)
 
     snapshot_provider = ResticProvider(
@@ -220,7 +226,7 @@ def get_migration_service(
     snapshot_service = SnapshotService(snapshot_provider=snapshot_provider)
 
     # Direct vast service for CPU operations
-    vast_service = VastService(api_key=user.vast_api_key)
+    vast_service = VastService(api_key=api_key)
 
     return MigrationService(
         instance_service=instance_service,
@@ -240,24 +246,27 @@ def get_sync_service(
     global _sync_service_instance
 
     # Get user's settings
+    settings = get_settings()
     user_repo = next(get_user_repository())
     user = user_repo.get_user(user_email)
 
-    if not user or not user.vast_api_key:
+    # Try user's key first, then fall back to system key from .env
+    api_key = (user.vast_api_key if user else None) or settings.vast.api_key
+
+    if not api_key:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Vast.ai API key not configured. Please update settings.",
         )
 
     # Get settings for providers
-    settings = get_settings()
-    repo = user.settings.get("restic_repo") or settings.r2.restic_repo
-    password = user.settings.get("restic_password") or settings.restic.password
-    access_key = user.settings.get("r2_access_key") or settings.r2.access_key
-    secret_key = user.settings.get("r2_secret_key") or settings.r2.secret_key
+    repo = (user.settings.get("restic_repo") if user else None) or settings.r2.restic_repo
+    password = (user.settings.get("restic_password") if user else None) or settings.restic.password
+    access_key = (user.settings.get("r2_access_key") if user else None) or settings.r2.access_key
+    secret_key = (user.settings.get("r2_secret_key") if user else None) or settings.r2.secret_key
 
     # Create services
-    gpu_provider = VastProvider(api_key=user.vast_api_key)
+    gpu_provider = VastProvider(api_key=api_key)
     instance_service = InstanceService(gpu_provider=gpu_provider)
 
     snapshot_provider = ResticProvider(
@@ -276,3 +285,40 @@ def get_sync_service(
         )
 
     return _sync_service_instance
+
+
+def get_job_manager(
+    request: Request,
+    user_email: str = Depends(get_current_user_email),
+):
+    """Get job manager service"""
+    from ...services.job import JobManager
+    import logging
+    logger = logging.getLogger(__name__)
+
+    settings = get_settings()
+
+    # Check for demo mode (from env or query param)
+    demo_param = request.query_params.get("demo", "").lower() == "true"
+    is_demo = settings.app.demo_mode or demo_param
+    logger.info(f"get_job_manager: demo_param={demo_param}, is_demo={is_demo}")
+
+    # In demo mode, use demo provider
+    if is_demo:
+        logger.info("Using demo mode for JobManager")
+        return JobManager(vast_api_key="demo", demo_mode=True)
+
+    # Get user's vast API key, fallback to env var
+    user_repo = next(get_user_repository())
+    user = user_repo.get_user(user_email)
+
+    # Try user's key first, then fall back to system key from .env
+    api_key = (user.vast_api_key if user else None) or settings.vast.api_key
+
+    if not api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vast.ai API key not configured. Please update settings.",
+        )
+
+    return JobManager(vast_api_key=api_key)

@@ -47,25 +47,26 @@ async def lifespan(app: FastAPI):
     try:
         settings = get_settings()
         
-        # Initialize Auto-Hibernation Manager
-        from .services.standby.hibernation import init_auto_hibernation_manager
-        
-        vast_api_key = os.environ.get("VAST_API_KEY", "")
-        r2_endpoint = os.environ.get("R2_ENDPOINT", "")
-        r2_bucket = os.environ.get("R2_BUCKET", "")
-        
-        if vast_api_key and r2_endpoint:
-            hibernation_manager = init_auto_hibernation_manager(
-                vast_api_key=vast_api_key,
-                r2_endpoint=r2_endpoint,
-                r2_bucket=r2_bucket,
-                check_interval=30
-            )
-            hibernation_manager.start()
-            agents_started.append("AutoHibernationManager")
-            logger.info("✓ AutoHibernationManager started")
-        else:
-            logger.warning("⚠ AutoHibernationManager not started (missing VAST_API_KEY or R2_ENDPOINT)")
+#         # Initialize Auto-Hibernation Manager
+#         from .services.standby.hibernation import init_auto_hibernation_manager
+#         
+#         vast_api_key = os.environ.get("VAST_API_KEY", "")
+#         r2_endpoint = os.environ.get("R2_ENDPOINT", "")
+#         r2_bucket = os.environ.get("R2_BUCKET", "")
+#         
+#         if vast_api_key and r2_endpoint:
+#             hibernation_manager = init_auto_hibernation_manager(
+#                 vast_api_key=vast_api_key,
+#                 r2_endpoint=r2_endpoint,
+#                 r2_bucket=r2_bucket,
+#                 check_interval=30
+#             )
+#             hibernation_manager.start()
+#             agents_started.append("AutoHibernationManager")
+#             logger.info("✓ AutoHibernationManager started")
+#         else:
+#             logger.warning("⚠ AutoHibernationManager not started (missing VAST_API_KEY or R2_ENDPOINT)")
+        logger.warning("⚠ AutoHibernationManager not started (missing VAST_API_KEY or R2_ENDPOINT)")
         
         # Initialize CPU Standby Manager
         try:
@@ -324,9 +325,16 @@ def create_app() -> FastAPI:
 
     # Catch-all route for React SPA - must be last
     @app.get("/{full_path:path}")
-    async def serve_spa(full_path: str):
+    async def serve_spa(full_path: str, request: Request):
         """Serve React SPA for all non-API routes"""
-        # Skip special routes - note: API routes are handled above, don't block them here
+        # Skip API routes - they should be handled by the router
+        # If we get here with an API route, it means the route doesn't exist
+        if full_path.startswith("api/") or full_path.startswith("api"):
+            # Don't serve SPA for API routes - return proper 404
+            from fastapi import HTTPException
+            raise HTTPException(status_code=404, detail=f"API endpoint not found: /{full_path}")
+
+        # Skip special routes
         if full_path in ["docs", "redoc", "openapi.json", "health"]:
             return JSONResponse({"error": "Not Found"}, status_code=404)
 

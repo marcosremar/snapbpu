@@ -1,0 +1,1 @@
+[92m✓[0m Input sanitização OK (inputs maliciosos rejeitados)

@@ -48,3 +48,6 @@ web/build/
 
 # Credentials
 .credentials/
+
+# pytest-testmon cache
+.testmondata

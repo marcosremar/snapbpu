@@ -1,0 +1,2 @@
+[92m✓[0m Isolamento de usuários
+[92m✓[0m Resposta contém apenas dados do usuário autenticado

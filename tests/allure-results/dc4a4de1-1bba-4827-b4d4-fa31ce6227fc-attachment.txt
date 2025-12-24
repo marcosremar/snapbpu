@@ -1,0 +1,3 @@
+2025-12-21 06:32:13,124 - tests.backend.conftest - INFO - PASS: Buscar preços
+2025-12-21 06:32:13,124 - tests.backend.conftest - INFO - PASS: Preços obtidos
+2025-12-21 06:32:13,125 - tests.backend.conftest - INFO - INFO: GCP credentials não configuradas - pulando configuração

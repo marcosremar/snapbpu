@@ -36,7 +36,7 @@ export default function SavingsCalculator({ getAuthHeaders, selectedGPU = 'all' 
   const formatPercent = (value) => `${value?.toFixed(1) || '0'}%`
 
   const getRiskColor = (risk) => {
-    const colors = { low: 'bg-emerald-500', medium: 'bg-yellow-500', high: 'bg-red-500' }
+    const colors = { low: 'bg-brand-500', medium: 'bg-yellow-500', high: 'bg-red-500' }
     return colors[risk] || 'bg-gray-500'
   }
 
@@ -67,8 +67,8 @@ export default function SavingsCalculator({ getAuthHeaders, selectedGPU = 'all' 
             {formatPrice(data?.total_potential_savings_month || 0)}
           </div>
           <div className="spot-highlight-label">economia potencial/mês</div>
-          <div className="text-sm text-emerald-300/70 mt-2 relative z-10">
-            Economia média: <strong className="text-emerald-300">{formatPercent(data?.avg_savings_percent)}</strong>
+          <div className="text-sm text-brand-300/70 mt-2 relative z-10">
+            Economia média: <strong className="text-brand-300">{formatPercent(data?.avg_savings_percent)}</strong>
           </div>
         </div>
 
@@ -80,7 +80,7 @@ export default function SavingsCalculator({ getAuthHeaders, selectedGPU = 'all' 
             max="24"
             value={hoursPerDay}
             onChange={(e) => setHoursPerDay(parseInt(e.target.value))}
-            className="flex-1 accent-emerald-500"
+            className="flex-1 accent-brand-500"
           />
           <span className="text-white font-semibold min-w-[60px]">{hoursPerDay}h/dia</span>
         </div>
@@ -102,9 +102,9 @@ export default function SavingsCalculator({ getAuthHeaders, selectedGPU = 'all' 
                 return (
                   <tr key={idx}>
                     <td className="font-semibold text-white">{item.gpu_name}</td>
-                    <td className="text-emerald-400">${item.spot_price?.toFixed(2)}/h</td>
+                    <td className="text-brand-400">${item.spot_price?.toFixed(2)}/h</td>
                     <td className="text-gray-300">${item.ondemand_price?.toFixed(2)}/h</td>
-                    <td className="text-emerald-400 flex items-center gap-1">
+                    <td className="text-brand-400 flex items-center gap-1">
                       <DollarSign size={14} />
                       {monthlySavings.toFixed(2)}
                     </td>

@@ -1,0 +1,1 @@
+[92m✓[0m Requisições concorrentes: 10/10 sucesso em 0.00s

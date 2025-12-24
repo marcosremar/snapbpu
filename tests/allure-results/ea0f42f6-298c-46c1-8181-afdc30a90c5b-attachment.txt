@@ -1,0 +1,1 @@
+[92m✓[0m Proteção contra path traversal validada

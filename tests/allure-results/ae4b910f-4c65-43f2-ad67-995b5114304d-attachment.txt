@@ -1,0 +1,4 @@
+2025-12-21 06:31:55,695 - tests.backend.conftest - INFO - PASS: Filtro de preço: $2.0/h
+2025-12-21 06:31:55,695 - tests.backend.conftest - INFO - PASS: Preço max $2.0: 64 ofertas (64 dentro do limite)
+2025-12-21 06:31:57,333 - tests.backend.conftest - INFO - PASS: Filtro de preço: $5.0/h
+2025-12-21 06:31:57,334 - tests.backend.conftest - INFO - PASS: Preço max $5.0: 64 ofertas (64 dentro do limite)

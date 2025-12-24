@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Tamanho da resposta
+INFO     tests.backend.conftest:conftest.py:255 PASS: Tamanho da resposta: 78 bytes, JSON: 85 chars

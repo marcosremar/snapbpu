@@ -1,0 +1,2 @@
+[92m✓[0m Market summary tipo: on-demand
+[92m✓[0m Summary filtrado por 'on-demand' OK

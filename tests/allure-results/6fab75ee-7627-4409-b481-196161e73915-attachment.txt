@@ -1,0 +1,6 @@
+[92m✓[0m Providers ordenados por: reliability_score
+[92m✓[0m Ordenação por 'reliability_score' verificada OK
+[92m✓[0m Providers ordenados por: availability_score
+[92m✓[0m Ordenação por 'availability_score' verificada OK
+[92m✓[0m Providers ordenados por: price_stability_score
+[92m✓[0m Ordenação por 'price_stability_score' verificada OK

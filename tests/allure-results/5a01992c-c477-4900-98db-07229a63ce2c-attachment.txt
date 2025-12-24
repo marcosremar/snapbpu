@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Estimativa de custos
+INFO     tests.backend.conftest:conftest.py:255 PASS: Custo em disk_gb: $100
+INFO     tests.backend.conftest:conftest.py:255 PASS: Custo em spot: $True
+INFO     tests.backend.conftest:conftest.py:255 PASS: Custo em estimated_hourly_usd: $0.01
+INFO     tests.backend.conftest:conftest.py:255 PASS: Custo em estimated_monthly_usd: $11.2
+INFO     tests.backend.conftest:conftest.py:255 PASS: Custo em breakdown.vm_monthly: $7.2

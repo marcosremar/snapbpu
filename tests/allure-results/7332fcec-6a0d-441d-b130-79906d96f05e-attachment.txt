@@ -1,0 +1,8 @@
+[94mℹ[0m Passo 1: Registro de novo usuário
+[92m✓[0m Usuário registrado: e2e_test_1766295106@example.com
+[94mℹ[0m Passo 2: Login
+[92m✓[0m Login bem-sucedido
+[94mℹ[0m Passo 3: Verificar /me
+[92m✓[0m Autenticação verificada
+[94mℹ[0m Passo 4: Acessar dashboard
+[92m✓[0m Dashboard acessível

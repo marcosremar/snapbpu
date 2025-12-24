@@ -1,0 +1,6 @@
+[92m✓[0m Busca por GPU: RTX_4090
+[93m⚠[0m Sem ofertas disponíveis para GPU: RTX_4090
+[92m✓[0m Busca por GPU: RTX_3090
+[93m⚠[0m Sem ofertas disponíveis para GPU: RTX_3090
+[92m✓[0m Busca por GPU: A100
+[93m⚠[0m Sem ofertas disponíveis para GPU: A100

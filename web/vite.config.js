@@ -27,20 +27,20 @@ export default defineConfig({
     },
     proxy: {
       "/admin/doc/live": {
-        target: "http://localhost:8081",
+        target: "http://192.168.139.80:8081",
         changeOrigin: true,
       },
       "/api/docs": {
-        target: "http://localhost:8081",
+        target: "http://192.168.139.80:8081",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/docs/, "/api"),
       },
       "/api": {
-        target: "http://localhost:8766",
+        target: "http://192.168.139.80:8000",
         changeOrigin: true,
       },
       "/admin": {
-        target: "http://localhost:8766",
+        target: "http://192.168.139.80:8000",
         changeOrigin: true,
       },
     },

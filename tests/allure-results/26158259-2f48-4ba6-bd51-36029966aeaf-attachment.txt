@@ -1,0 +1,1 @@
+[92m✓[0m Concorrência: 5/5 OK, avg=2.352s

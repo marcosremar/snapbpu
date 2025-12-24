@@ -1,0 +1,2 @@
+2025-12-21 06:32:02,935 - tests.backend.conftest - INFO - PASS: Validação: dados requeridos
+2025-12-21 06:32:03,582 - tests.backend.conftest - INFO - PASS: Validação: offer_id inválido rejeitado

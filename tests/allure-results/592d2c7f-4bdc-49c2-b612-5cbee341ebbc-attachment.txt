@@ -1,0 +1,2 @@
+[92m✓[0m JSON válido
+[92m✓[0m JSON válido e serializável

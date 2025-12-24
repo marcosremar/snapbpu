@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,037 - tests.backend.conftest - INFO - Usando cache para TestSnapshotRestoration
+2025-12-21 06:32:13,038 - tests.backend.conftest - INFO - PASS: snapshot_id obrigatório validado

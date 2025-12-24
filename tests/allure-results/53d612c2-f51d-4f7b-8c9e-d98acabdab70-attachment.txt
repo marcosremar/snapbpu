@@ -1,0 +1,4 @@
+2025-12-21 06:32:13,130 - tests.backend.conftest - INFO - PASS: Input inválido rejeitado
+2025-12-21 06:32:13,130 - tests.backend.conftest - INFO - PASS: Input inválido rejeitado
+2025-12-21 06:32:13,131 - tests.backend.conftest - INFO - PASS: Input inválido rejeitado
+2025-12-21 06:32:13,131 - tests.backend.conftest - INFO - PASS: Validação de input testada

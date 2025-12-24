@@ -73,3 +73,32 @@ class IGpuProvider(ABC):
     def get_instance_metrics(self, instance_id: int) -> Dict[str, Any]:
         """Get real-time metrics for an instance"""
         pass
+
+    @abstractmethod
+    def get_balance(self) -> Dict[str, Any]:
+        """Get account balance"""
+        pass
+
+    @abstractmethod
+    def validate_before_create(self, offer_id: int, min_balance: float = 0.10) -> Dict[str, Any]:
+        """
+        Validate prerequisites before creating an instance.
+
+        Args:
+            offer_id: Offer ID to validate
+            min_balance: Minimum required balance
+
+        Returns:
+            Dict with: valid, errors, warnings, balance, offer
+        """
+        pass
+
+    @abstractmethod
+    def check_api_health(self) -> Dict[str, Any]:
+        """
+        Check API provider health.
+
+        Returns:
+            Dict with: healthy, latency_ms, message
+        """
+        pass

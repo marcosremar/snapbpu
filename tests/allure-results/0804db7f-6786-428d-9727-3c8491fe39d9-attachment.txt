@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,926 - tests.backend.conftest - INFO - PASS: Market snapshots com limit=1000
+2025-12-21 06:32:11,928 - tests.backend.conftest - INFO - PASS: Large limit test: 1000 registros em 0.01s

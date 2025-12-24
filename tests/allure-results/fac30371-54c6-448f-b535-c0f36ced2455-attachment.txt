@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,150 - tests.backend.conftest - INFO - INFO: Sync trigger para instância inexistente: 500

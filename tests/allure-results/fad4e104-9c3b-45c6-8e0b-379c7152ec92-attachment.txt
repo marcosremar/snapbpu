@@ -1,0 +1,3 @@
+2025-12-21 06:32:13,121 - tests.backend.conftest - INFO - PASS: Listar associações
+2025-12-21 06:32:13,121 - tests.backend.conftest - INFO - PASS: Testando sync para GPU: 12345
+2025-12-21 06:32:13,122 - tests.backend.conftest - INFO - INFO: Sync retornou status: 500

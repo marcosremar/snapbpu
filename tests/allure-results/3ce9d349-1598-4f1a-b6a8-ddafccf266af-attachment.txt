@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,096 - tests.backend.conftest - INFO - PASS: Status com config
+2025-12-21 06:32:13,096 - tests.backend.conftest - INFO - PASS: Campo 'config' presente no status

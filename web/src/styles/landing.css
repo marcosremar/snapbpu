@@ -10,12 +10,12 @@
   --landing-border: #2a352a;
   --landing-text: #e5e7eb;
   --landing-text-muted: #9ca3af;
-  --landing-accent: #34d399;
-  /* emerald-400 - More vibrant/neon */
-  --landing-accent-light: #6ee7b7;
-  /* emerald-300 */
-  --landing-accent-dark: #10b981;
-  /* emerald-500 */
+  --landing-accent: #2e7d32;
+  /* brand-800 - Primary Dumont green */
+  --landing-accent-light: #4caf50;
+  /* brand-500 - Logo color */
+  --landing-accent-dark: #1b5e20;
+  /* brand-900 */
   --landing-purple: #a855f7;
   --landing-gradient: linear-gradient(135deg, #34d399 0%, #6ee7b7 50%, #34d399 100%);
 }
@@ -65,14 +65,41 @@
   align-items: center;
   gap: 0.75rem;
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: white;
 }
 
 .nav-brand .brand-icon {
   color: var(--landing-accent);
 }
+.brand-name {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+  line-height: 1;
+}
 
+.brand-dumont {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1.4rem;
+  color: #4caf50;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.brand-cloud {
+  font-family: "Space Grotesk", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1;
+  margin-top: 2px;
+}
 .nav-links {
   display: flex;
   gap: 2rem;
@@ -114,24 +141,50 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(52, 211, 153, 0.9);
-  backdrop-filter: blur(8px);
-  color: #022c22;
-  border: 1px solid rgba(52, 211, 153, 0.4);
-  padding: 0.625rem 1.25rem;
-  border-radius: 0.5rem;
+  padding: 0.7rem 1.4rem;
   font-size: 0.875rem;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: #2e7d32;
+  border: none;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+  transition: all 0.3s ease;
 }
 
 .nav-cta:hover {
-  background: rgba(52, 211, 153, 1);
-  box-shadow: 0 0 25px rgba(52, 211, 153, 0.4);
+  background: #256029;
   transform: translateY(-1px);
 }
+
+.nav-cta:active {
+  transform: translateY(0);
+  background: #1b5e20;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ==========================================
    HERO SECTION
@@ -217,11 +270,11 @@
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+  background: linear-gradient(135deg, #4caf50 0%, #81c784 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-shadow: 0 0 40px rgba(52, 211, 153, 0.3);
+  text-shadow: 0 0 40px rgba(76, 175, 80, 0.3);
 }
 
 .hero-description {
@@ -466,7 +519,8 @@
 
 .gpu-price {
   color: var(--landing-accent);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   font-family: 'JetBrains Mono', monospace;
 }
 
@@ -495,7 +549,8 @@
 
 .pain-section h2 {
   font-size: 1.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin-bottom: 2.5rem;
 }
 
@@ -629,7 +684,8 @@
 
 .feature-card h3 {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin: 0 0 0.75rem;
 }
 
@@ -689,7 +745,8 @@
 
 .comparison-header h3 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin: 0 0 0.5rem;
 }
 
@@ -790,7 +847,8 @@
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.625rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
 }
 
 .cloud-logo {
@@ -870,7 +928,8 @@
 
 .annual-projection .value.annual {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: var(--landing-purple);
 }
 
@@ -1028,7 +1087,8 @@
   padding: 0.375rem 1rem;
   border-radius: 2rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1rem;
@@ -1049,7 +1109,8 @@
 
 .pricing-main-price .currency {
   font-size: 2rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: var(--landing-accent);
 }
 
@@ -1116,7 +1177,8 @@
   padding: 1rem 2rem;
   border-radius: 0.75rem;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -1156,7 +1218,8 @@
 
 .gpu-table-header h4 {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin: 0 0 0.25rem;
 }
 
@@ -1198,7 +1261,8 @@
 }
 
 .gpu-name {
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   font-size: 1rem;
 }
 
@@ -1213,7 +1277,8 @@
 
 .gpu-price .price {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: var(--landing-accent);
   font-family: 'JetBrains Mono', monospace;
 }
@@ -1290,7 +1355,8 @@
   padding: 0.75rem 0;
   margin-top: 0.5rem;
   border-top: 1px solid var(--landing-border);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
 }
 
 .calc-total .calc-value {
@@ -1310,7 +1376,8 @@
 
 .example-comparison .savings {
   color: var(--landing-accent);
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
 }
 
 /* Legacy pricing (mantido para compatibilidade) */
@@ -1356,7 +1423,8 @@
   padding: 0.375rem 1rem;
   border-radius: 2rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
 }
 
 .pricing-header {
@@ -1368,7 +1436,8 @@
 
 .pricing-header h3 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin: 0 0 1rem;
 }
 
@@ -1399,7 +1468,8 @@
 
 .price .custom {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: var(--landing-purple);
 }
 
@@ -1532,7 +1602,8 @@
   padding: 0.375rem 1rem;
   border-radius: 2rem;
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   white-space: nowrap;
 }
 
@@ -1545,7 +1616,8 @@
 
 .plan-header h3 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin: 0 0 0.75rem;
 }
 
@@ -1558,7 +1630,8 @@
 
 .plan-price .currency {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: var(--landing-accent);
 }
 
@@ -1603,7 +1676,8 @@
   background: var(--landing-border);
   color: var(--landing-text-muted);
   font-size: 0.6875rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   text-transform: uppercase;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
@@ -1751,7 +1825,8 @@
 
 .ref-price {
   font-size: 0.875rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: var(--landing-accent);
   font-family: 'JetBrains Mono', monospace;
 }
@@ -1991,7 +2066,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   font-size: 0.875rem;
   color: white;
 }
@@ -2087,7 +2163,8 @@
 
 .footer-brand span {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
 }
 
 .footer-brand p {
@@ -2213,7 +2290,8 @@
 
 .branding-logo span {
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   color: white;
 }
 
@@ -2337,7 +2415,8 @@
 
 .form-header h3 {
   font-size: 1.5rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   margin: 0 0 0.5rem;
 }
 
@@ -2532,7 +2611,8 @@
   padding: 0.9375rem 1.5rem;
   border-radius: 0.625rem;
   font-size: 0.9375rem;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 1.6rem;
   cursor: pointer;
   transition: all 0.2s;
   margin-top: 0.5rem;
@@ -2947,5 +3027,135 @@
 
   .section-header h2 {
     font-size: 1.75rem;
+  }
+}
+/* Hero Decoration Circles */
+.hero-decoration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.hero-decoration .decoration-circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(34, 197, 94, 0.08);
+  animation: float 20s ease-in-out infinite;
+}
+
+.hero-decoration .decoration-circle.c1 {
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  right: -150px;
+  background: radial-gradient(circle, rgba(34, 197, 94, 0.08) 0%, transparent 70%);
+  animation-delay: 0s;
+}
+
+.hero-decoration .decoration-circle.c2 {
+  width: 400px;
+  height: 400px;
+  bottom: -100px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.06) 0%, transparent 70%);
+  animation-delay: -5s;
+}
+
+.hero-decoration .decoration-circle.c3 {
+  width: 300px;
+  height: 300px;
+  top: 40%;
+  left: 10%;
+  border-color: rgba(34, 197, 94, 0.06);
+  animation-delay: -10s;
+}
+
+.hero-decoration .decoration-circle.c4 {
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  right: 20%;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+  animation-delay: -7s;
+}
+
+.hero-decoration .decoration-circle.c5 {
+  width: 250px;
+  height: 250px;
+  top: 20%;
+  right: 30%;
+  border-color: rgba(52, 211, 153, 0.08);
+  animation-delay: -12s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  25% {
+    transform: translate(10px, -15px) scale(1.02);
+  }
+  50% {
+    transform: translate(-5px, 10px) scale(0.98);
+  }
+  75% {
+    transform: translate(-15px, -5px) scale(1.01);
+  }
+}
+
+/* 14-Bis Abstract Background */
+.hero-14bis {
+  z-index: 1;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.hero-14bis::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Cg stroke='rgba(34,197,94,0.15)' fill='none' stroke-width='2'%3E%3C!-- Fuselagem central --%3E%3Cpath d='M200 200 L600 200' stroke-width='2'/%3E%3C!-- Asas superiores (estrutura biplano) --%3E%3Cpath d='M250 200 L250 140 L550 140 L550 200'/%3E%3Cpath d='M270 140 L270 100 L530 100 L530 140'/%3E%3C!-- Asas inferiores --%3E%3Cpath d='M250 200 L250 260 L550 260 L550 200'/%3E%3C!-- Montantes verticais das asas --%3E%3Cpath d='M300 100 L300 260'/%3E%3Cpath d='M400 100 L400 260'/%3E%3Cpath d='M500 100 L500 260'/%3E%3C!-- Cabos de sustentação diagonais --%3E%3Cpath d='M300 100 L350 140'/%3E%3Cpath d='M400 100 L450 140'/%3E%3Cpath d='M500 100 L450 140'/%3E%3Cpath d='M300 260 L350 220'/%3E%3Cpath d='M500 260 L450 220'/%3E%3C!-- Leme frontal (canard) --%3E%3Cpath d='M600 200 L680 200'/%3E%3Cpath d='M650 180 L700 180 L700 220 L650 220'/%3E%3C!-- Cauda --%3E%3Cpath d='M200 200 L150 200'/%3E%3Cpath d='M150 170 L150 230'/%3E%3Cpath d='M120 180 L150 200 L120 220'/%3E%3C!-- Hélice --%3E%3Cellipse cx='720' cy='200' rx='8' ry='30' stroke-width='1.5'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 80% auto;
+  opacity: 0.5;
+  animation: fly14bis 30s ease-in-out infinite;
+}
+
+.hero-14bis::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Cg stroke='rgba(168,85,247,0.10)' fill='none' stroke-width='2'%3E%3C!-- Segunda silhueta offset --%3E%3Cpath d='M200 200 L600 200' stroke-width='2'/%3E%3Cpath d='M250 200 L250 140 L550 140 L550 200'/%3E%3Cpath d='M270 140 L270 100 L530 100 L530 140'/%3E%3Cpath d='M250 200 L250 260 L550 260 L550 200'/%3E%3Cpath d='M300 100 L300 260'/%3E%3Cpath d='M400 100 L400 260'/%3E%3Cpath d='M500 100 L500 260'/%3E%3Cpath d='M600 200 L680 200'/%3E%3Cpath d='M650 180 L700 180 L700 220 L650 220'/%3E%3Cellipse cx='720' cy='200' rx='8' ry='30'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 60% auto;
+  opacity: 0.4;
+  animation: fly14bis 25s ease-in-out infinite reverse;
+  transform: translate(50px, 30px);
+}
+
+@keyframes fly14bis {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 0.5;
+  }
+  25% {
+    transform: translate(20px, -10px) rotate(0.5deg);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(-10px, 5px) rotate(-0.3deg);
+    opacity: 0.4;
+  }
+  75% {
+    transform: translate(15px, 8px) rotate(0.2deg);
+    opacity: 0.55;
   }
 }

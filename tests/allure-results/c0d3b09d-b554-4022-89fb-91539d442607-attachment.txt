@@ -1,0 +1,2 @@
+2025-12-21 06:31:49,761 - tests.backend.conftest - INFO - Usando cache para TestErrorRecovery
+2025-12-21 06:31:50,302 - tests.backend.conftest - INFO - PASS: Sistema se recuperou de endpoint inválido

@@ -1,0 +1,2 @@
+[92m✓[0m Lista de tipos de máquina
+[92m✓[0m Tipos de máquina: on-demand, interruptible, bid

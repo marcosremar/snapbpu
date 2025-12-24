@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Precisão numérica
+INFO     tests.backend.conftest:conftest.py:255 PASS: Precisão numérica validada (máx 2 casas decimais)

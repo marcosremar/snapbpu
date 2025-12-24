@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,797 - tests.backend.conftest - INFO - PASS: Market summary para GPU: RTX 3090
+2025-12-21 06:32:11,797 - tests.backend.conftest - INFO - PASS: Summary específico para 'RTX 3090' OK

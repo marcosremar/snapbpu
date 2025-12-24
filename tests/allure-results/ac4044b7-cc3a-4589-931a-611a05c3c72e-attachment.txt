@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestMarketSummary
+INFO     tests.backend.conftest:conftest.py:255 PASS: Market summary (todas GPUs)
+INFO     tests.backend.conftest:conftest.py:255 PASS: Summary: 3 GPUs, primeira: RTX 5090

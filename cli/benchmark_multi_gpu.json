@@ -1,0 +1,36 @@
+{
+  "timestamp": "2025-12-22T03:49:44.448034",
+  "mode": "multi_gpu_comparison",
+  "results": [
+    {
+      "instance_id": 29093202,
+      "gpu_name": "RTX 4060 Ti",
+      "pause_time": 47.48142433166504,
+      "resume_time": 38.404927492141724
+    },
+    {
+      "instance_id": 29093203,
+      "gpu_name": "RTX 5060 Ti",
+      "pause_time": 43.577388525009155,
+      "resume_time": 41.088780641555786
+    },
+    {
+      "instance_id": 29093204,
+      "gpu_name": "RTX A2000",
+      "pause_time": 6.948179721832275,
+      "resume_time": 9.95827865600586
+    },
+    {
+      "instance_id": 29093217,
+      "gpu_name": "RTX A4000",
+      "pause_time": 33.51642179489136,
+      "resume_time": 38.20473885536194
+    },
+    {
+      "instance_id": 29093218,
+      "gpu_name": "RTX 5070",
+      "pause_time": 9.88798975944519,
+      "resume_time": 9.889442682266235
+    }
+  ]
+}

@@ -137,7 +137,7 @@ function Toast({ message, title = 'Saldo Baixo!', type = 'warning', onClose }) {
       setTimeout(() => { oscillator.frequency.value = 880 }, 200)
       setTimeout(() => { oscillator.stop(); audioContext.close() }, 300)
     } catch (e) {
-      console.log('Audio not supported')
+      // Audio not supported - silent fail
     }
 
     // Animação de entrada
@@ -577,7 +577,7 @@ export default function Settings() {
                     onClick={() => setActiveTab(item.id)}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-left mb-1 ${
                       isActive
-                        ? 'bg-emerald-500/10 text-emerald-400'
+                        ? 'bg-brand-500/10 text-brand-400'
                         : 'text-gray-400 hover:bg-white/10 hover:text-gray-200'
                     }`}
                   >
@@ -606,15 +606,15 @@ export default function Settings() {
             <div className="space-y-6">
           {/* Vast.ai Configuration */}
           <Card
-            className="border-green-500/20 bg-gradient-to-br from-[#1a2418] to-[#161a16]"
+            className="border-white/10 bg-dark-surface-card"
             header={
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/20">
-                  <Key className="w-5 h-5 text-green-400" />
+                <div className="p-2 rounded-lg bg-brand-500/10">
+                  <Key className="w-5 h-5 text-brand-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Vast.ai</h3>
-                  <p className="text-gray-400 text-sm mt-1">Configuração para acesso à plataforma Vast.ai</p>
+                  <p className="text-gray-500 text-sm mt-1">Configuração para acesso à plataforma Vast.ai</p>
                 </div>
               </div>
             }
@@ -633,15 +633,15 @@ export default function Settings() {
 
           {/* Cloudflare R2 Configuration */}
           <Card
-            className="border-cyan-500/20 bg-gradient-to-br from-cyan-900/10 to-dark-surface-card"
+            className="border-white/10 bg-dark-surface-card"
             header={
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-cyan-500/20">
-                  <Database className="w-5 h-5 text-cyan-400" />
+                <div className="p-2 rounded-lg bg-brand-500/10">
+                  <Database className="w-5 h-5 text-brand-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Cloudflare R2</h3>
-                  <p className="text-gray-400 text-sm mt-1">Armazenamento em nuvem para snapshots e backups</p>
+                  <p className="text-gray-500 text-sm mt-1">Armazenamento em nuvem para snapshots e backups</p>
                 </div>
               </div>
             }
@@ -696,15 +696,15 @@ export default function Settings() {
             <div className="space-y-6">
           {/* Restic Configuration */}
           <Card
-            className="border-purple-500/20 bg-gradient-to-br from-[#1f1a26] to-[#161617]"
+            className="border-white/10 bg-dark-surface-card"
             header={
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-purple-500/20">
-                  <Lock className="w-5 h-5 text-purple-400" />
+                <div className="p-2 rounded-lg bg-brand-500/10">
+                  <Lock className="w-5 h-5 text-brand-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Restic</h3>
-                  <p className="text-gray-400 text-sm mt-1">Proteção e criptografia de repositórios</p>
+                  <p className="text-gray-500 text-sm mt-1">Proteção e criptografia de repositórios</p>
                 </div>
               </div>
             }
@@ -727,15 +727,15 @@ export default function Settings() {
             <div className="space-y-6">
               {/* Header Card */}
               <Card
-                className="border-purple-500/20 bg-gradient-to-br from-[#1f1a26] to-[#161617]"
+                className="border-white/10 bg-dark-surface-card"
                 header={
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-purple-500/20">
-                      <Cloud className="w-5 h-5 text-purple-400" />
+                    <div className="p-2 rounded-lg bg-brand-500/10">
+                      <Cloud className="w-5 h-5 text-brand-400" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-white">Cloud Storage Failover</h3>
-                      <p className="text-gray-400 text-sm mt-1">Configure provedores de storage para failover global</p>
+                      <p className="text-gray-500 text-sm mt-1">Configure provedores de storage para failover global</p>
                     </div>
                   </div>
                 }
@@ -757,7 +757,7 @@ export default function Settings() {
                         onChange={handleCloudStorageChange}
                         className="sr-only peer"
                       />
-                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                      <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
                     </label>
                   </div>
 
@@ -830,15 +830,15 @@ export default function Settings() {
               {/* Backblaze B2 Configuration */}
               {cloudStorageSettings.primary_provider === 'backblaze_b2' && (
                 <Card
-                  className="border-red-500/20 bg-gradient-to-br from-[#261a1a] to-[#171616]"
+                  className="border-white/10 bg-dark-surface-card"
                   header={
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-red-500/20">
+                      <div className="p-2 rounded-lg bg-white/5">
                         <span className="text-xl">🅱️</span>
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">Backblaze B2</h3>
-                        <p className="text-gray-400 text-sm mt-1">Armazenamento de baixo custo (~$0.005/GB/mês)</p>
+                        <p className="text-gray-500 text-sm mt-1">Armazenamento de baixo custo (~$0.005/GB/mês)</p>
                       </div>
                     </div>
                   }
@@ -882,15 +882,15 @@ export default function Settings() {
               {/* AWS S3 Configuration */}
               {cloudStorageSettings.primary_provider === 'aws_s3' && (
                 <Card
-                  className="border-yellow-500/20 bg-gradient-to-br from-[#26251a] to-[#171716]"
+                  className="border-white/10 bg-dark-surface-card"
                   header={
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-yellow-500/20">
+                      <div className="p-2 rounded-lg bg-white/5">
                         <span className="text-xl">📦</span>
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">Amazon S3</h3>
-                        <p className="text-gray-400 text-sm mt-1">Alta disponibilidade, multi-região</p>
+                        <p className="text-gray-500 text-sm mt-1">Alta disponibilidade, multi-região</p>
                       </div>
                     </div>
                   }
@@ -954,15 +954,15 @@ export default function Settings() {
               {/* Google Cloud Storage Configuration */}
               {cloudStorageSettings.primary_provider === 'google_gcs' && (
                 <Card
-                  className="border-blue-500/20 bg-gradient-to-br from-[#1a1f26] to-[#161617]"
+                  className="border-white/10 bg-dark-surface-card"
                   header={
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-500/20">
+                      <div className="p-2 rounded-lg bg-white/5">
                         <span className="text-xl">🔷</span>
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">Google Cloud Storage</h3>
-                        <p className="text-gray-400 text-sm mt-1">Integração com GCP, multi-região</p>
+                        <p className="text-gray-500 text-sm mt-1">Integração com GCP, multi-região</p>
                       </div>
                     </div>
                   }
@@ -1000,21 +1000,21 @@ export default function Settings() {
               {/* Cloudflare R2 - Usa as mesmas settings de R2 */}
               {cloudStorageSettings.primary_provider === 'cloudflare_r2' && (
                 <Card
-                  className="border-orange-500/20 bg-gradient-to-br from-[#261f1a] to-[#171616]"
+                  className="border-white/10 bg-dark-surface-card"
                   header={
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-orange-500/20">
+                      <div className="p-2 rounded-lg bg-white/5">
                         <span className="text-xl">☁️</span>
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">Cloudflare R2</h3>
-                        <p className="text-gray-400 text-sm mt-1">Zero egress fees (~$0.015/GB/mês)</p>
+                        <p className="text-gray-500 text-sm mt-1">Zero egress fees (~$0.015/GB/mês)</p>
                       </div>
                     </div>
                   }
                 >
-                  <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <p className="text-blue-300 text-sm">
+                  <div className="p-4 bg-brand-500/10 border border-brand-500/20 rounded-lg">
+                    <p className="text-brand-300 text-sm">
                       <strong>Nota:</strong> As credenciais do Cloudflare R2 são configuradas na aba "APIs & Credenciais".
                       Se você já configurou o R2 lá, ele estará pronto para uso.
                     </p>
@@ -1024,37 +1024,37 @@ export default function Settings() {
 
               {/* Comparativo de Tempos */}
               <Card
-                className="border-gray-500/20 bg-gradient-to-br from-[#1a1a1f] to-[#161617]"
+                className="border-white/10 bg-dark-surface-card"
                 header={
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-gray-500/20">
+                    <div className="p-2 rounded-lg bg-white/5">
                       <HardDrive className="w-5 h-5 text-gray-400" />
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-white">Comparativo de Estratégias</h3>
-                      <p className="text-gray-400 text-sm mt-1">Tempo estimado de failover para cada estratégia</p>
+                      <p className="text-gray-500 text-sm mt-1">Tempo estimado de failover para cada estratégia</p>
                     </div>
                   </div>
                 }
               >
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <div className="text-2xl font-bold text-green-400">~6s</div>
+                  <div className="text-center p-4 bg-brand-500/10 border border-brand-500/20 rounded-lg">
+                    <div className="text-2xl font-bold text-brand-400">~6s</div>
                     <div className="text-gray-400 text-sm mt-1">GPU Warm Pool</div>
                     <div className="text-gray-500 text-xs">Mesmo host</div>
                   </div>
-                  <div className="text-center p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-400">~23s</div>
+                  <div className="text-center p-4 bg-white/5 border border-white/10 rounded-lg">
+                    <div className="text-2xl font-bold text-white">~23s</div>
                     <div className="text-gray-400 text-sm mt-1">Regional Volume</div>
                     <div className="text-gray-500 text-xs">Mesma região</div>
                   </div>
-                  <div className="text-center p-4 bg-purple-500/10 border border-purple-500/20 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-400">~47s</div>
+                  <div className="text-center p-4 bg-white/5 border border-white/10 rounded-lg">
+                    <div className="text-2xl font-bold text-white">~47s</div>
                     <div className="text-gray-400 text-sm mt-1">Cloud Storage</div>
                     <div className="text-gray-500 text-xs">Qualquer região</div>
                   </div>
-                  <div className="text-center p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <div className="text-2xl font-bold text-red-400">~600s</div>
+                  <div className="text-center p-4 bg-white/5 border border-white/10 rounded-lg">
+                    <div className="text-2xl font-bold text-gray-400">~600s</div>
                     <div className="text-gray-400 text-sm mt-1">CPU Standby</div>
                     <div className="text-gray-500 text-xs">GCP/AWS</div>
                   </div>
@@ -1085,7 +1085,7 @@ export default function Settings() {
                   type="button"
                   onClick={saveCloudStorageSettings}
                   disabled={savingCloudStorage}
-                  className="flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 bg-brand-800/30 hover:bg-brand-800/50 border border-brand-700/40 text-brand-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {savingCloudStorage ? (
                     <>
@@ -1108,15 +1108,15 @@ export default function Settings() {
             <div className="space-y-6">
           {/* Notificações */}
           <Card
-            className="border-yellow-500/20 bg-gradient-to-br from-[#1f1a0f] to-[#161510]"
+            className="border-white/10 bg-dark-surface-card"
             header={
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-yellow-500/20">
-                  <AlertCircle className="w-5 h-5 text-yellow-400" />
+                <div className="p-2 rounded-lg bg-brand-500/10">
+                  <AlertCircle className="w-5 h-5 text-brand-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-white">Notificações</h3>
-                  <p className="text-gray-400 text-sm mt-1">Alertas visuais e sonoros do sistema</p>
+                  <p className="text-gray-500 text-sm mt-1">Alertas visuais e sonoros do sistema</p>
                 </div>
               </div>
             }
@@ -1129,7 +1129,7 @@ export default function Settings() {
               <Button
                 type="button"
                 onClick={testNotification}
-                className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 border border-yellow-500/30"
+                className="bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 border border-brand-500/30"
               >
                 Testar Notificação
               </Button>
@@ -1141,7 +1141,7 @@ export default function Settings() {
                 <button
                   type="submit"
                   disabled={saving || !isFormValid}
-                  className="flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 bg-brand-800/30 hover:bg-brand-800/50 border border-brand-700/40 text-brand-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? (
                     <>
@@ -1170,15 +1170,15 @@ export default function Settings() {
             <div className="space-y-6">
         {/* DumontAgent Configuration */}
         <Card
-          className="border-cyan-500/20 bg-gradient-to-br from-[#1a262f] to-[#161a1f]"
+          className="border-white/10 bg-dark-surface-card"
           header={
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-cyan-500/20">
-                <Server className="w-5 h-5 text-cyan-400" />
+              <div className="p-2 rounded-lg bg-brand-500/10">
+                <Server className="w-5 h-5 text-brand-400" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">DumontAgent</h3>
-                <p className="text-gray-400 text-sm mt-1">Sincronização automática em máquinas GPU</p>
+                <p className="text-gray-500 text-sm mt-1">Sincronização automática em máquinas GPU</p>
               </div>
             </div>
           }
@@ -1230,7 +1230,7 @@ export default function Settings() {
             type="button"
             onClick={saveAgentSettings}
             disabled={savingAgent}
-            className="py-2 px-4 rounded-lg font-semibold transition-all flex items-center gap-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="py-2 px-4 rounded-lg font-semibold transition-all flex items-center gap-2 bg-brand-500/20 hover:bg-brand-500/30 text-brand-300 border border-brand-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {savingAgent ? (
               <>
@@ -1253,15 +1253,15 @@ export default function Settings() {
             <div className="space-y-6">
         {/* R2 Cost Estimator */}
         <Card
-          className="border-orange-500/20 bg-gradient-to-br from-[#1f1510] to-[#161410]"
+          className="border-white/10 bg-dark-surface-card"
           header={
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-orange-500/20">
-                <DollarSign className="w-5 h-5 text-orange-400" />
+              <div className="p-2 rounded-lg bg-brand-500/10">
+                <DollarSign className="w-5 h-5 text-brand-400" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">Estimativa de Custo</h3>
-                <p className="text-gray-400 text-sm mt-1">Cloudflare R2 - Armazenamento em nuvem</p>
+                <p className="text-gray-500 text-sm mt-1">Cloudflare R2 - Armazenamento em nuvem</p>
               </div>
             </div>
           }

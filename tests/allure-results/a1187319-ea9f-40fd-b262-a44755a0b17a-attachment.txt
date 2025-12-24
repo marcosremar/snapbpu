@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestInstancePerformance
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance da listagem
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance listagem: 0.546s

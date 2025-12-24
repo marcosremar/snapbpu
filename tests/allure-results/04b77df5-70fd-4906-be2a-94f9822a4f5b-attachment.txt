@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Health version
+INFO     tests.backend.conftest:conftest.py:255 PASS: Versão: 3.0.0

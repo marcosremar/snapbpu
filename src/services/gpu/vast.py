@@ -2,8 +2,68 @@
 Service para interacao com a API do vast.ai
 """
 import requests
-from typing import Optional, Dict, List, Any
+import time
+import logging
+from typing import Optional, Dict, List, Any, TypeVar, Callable
 from dataclasses import dataclass
+from functools import wraps
+
+logger = logging.getLogger(__name__)
+
+T = TypeVar('T')
+
+
+def retry_on_rate_limit(
+    max_retries: int = 3,
+    initial_delay: float = 1.0,
+    max_delay: float = 10.0,
+    backoff_factor: float = 2.0,
+) -> Callable:
+    """
+    Decorator for retrying API calls on rate limit (429) errors.
+
+    Uses exponential backoff: delay = min(initial_delay * (backoff_factor ** attempt), max_delay)
+    """
+    def decorator(func: Callable[..., T]) -> Callable[..., T]:
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> T:
+            last_exception = None
+            delay = initial_delay
+
+            for attempt in range(max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except requests.exceptions.HTTPError as e:
+                    if e.response is not None and e.response.status_code == 429:
+                        last_exception = e
+                        if attempt < max_retries:
+                            logger.warning(
+                                f"[VastAPI] Rate limited on {func.__name__}, "
+                                f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                            )
+                            time.sleep(delay)
+                            delay = min(delay * backoff_factor, max_delay)
+                            continue
+                    raise
+                except Exception as e:
+                    # Check for 429 in error message (for non-HTTPError cases)
+                    if "429" in str(e) or "too many" in str(e).lower():
+                        last_exception = e
+                        if attempt < max_retries:
+                            logger.warning(
+                                f"[VastAPI] Rate limited on {func.__name__}, "
+                                f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                            )
+                            time.sleep(delay)
+                            delay = min(delay * backoff_factor, max_delay)
+                            continue
+                    raise
+
+            if last_exception:
+                raise last_exception
+            return None  # Should not reach here
+        return wrapper
+    return decorator
 
 
 @dataclass
@@ -60,7 +120,7 @@ class VastService:
         """
         import json
 
-        print(f"[DEBUG search_offers] gpu_name={gpu_name}, min_inet_down={min_inet_down}, "
+        logger.debug(f"search_offers: gpu_name={gpu_name}, min_inet_down={min_inet_down}, "
               f"max_price={max_price}, min_disk={min_disk}, region={region}, "
               f"min_reliability={min_reliability}, verified_only={verified_only}, machine_type={machine_type}")
 
@@ -109,12 +169,10 @@ class VastService:
                     if any(code in str(o.get("geolocation", "")) for code in region_codes)
                 ]
 
-            print(f"[DEBUG search_offers] API retornou {len(offers)} ofertas, apos filtro regiao: {len(offers)}")
+            logger.debug(f"search_offers: API retornou {len(offers)} ofertas")
             return offers
         except Exception as e:
-            print(f"Erro ao buscar ofertas: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.exception(f"Erro ao buscar ofertas: {e}")
             return []
 
     def _get_region_codes(self, region: str) -> List[str]:
@@ -206,11 +264,11 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
                 if template_id is None:
                     template_id = int(os.environ.get("VAST_DEFAULT_TEMPLATE_ID", 312840))
                 payload["template_id"] = template_id
-                print(f"[DEBUG create_instance] offer_id={offer_id}, TEMPLATE={template_id}, disk={disk}")
+                logger.debug(f"create_instance: offer_id={offer_id}, TEMPLATE={template_id}, disk={disk}")
             else:
                 # Usar imagem diretamente (sem template)
                 payload["image"] = image
-                print(f"[DEBUG create_instance] offer_id={offer_id}, IMAGE={image}, disk={disk}")
+                logger.debug(f"create_instance: offer_id={offer_id}, IMAGE={image}, disk={disk}")
 
             resp = requests.put(
                 f"{self.API_URL}/asks/{offer_id}/",
@@ -218,91 +276,216 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
                 headers=self.headers,
                 timeout=30,
             )
+            if not resp.ok:
+                error_body = resp.text[:500] if resp.text else "empty response"
+                logger.warning(f"create_instance: Error {resp.status_code} for offer {offer_id}: {error_body}")
             resp.raise_for_status()
             data = resp.json()
             instance_id = data.get("new_contract")
-            print(f"[DEBUG create_instance] Criada instancia {instance_id}")
+            logger.debug(f"create_instance: Criada instancia {instance_id}")
             return instance_id
         except Exception as e:
-            print(f"Erro ao criar instancia: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.exception(f"Erro ao criar instancia: {e}")
             return None
 
-    def get_instance_status(self, instance_id: int) -> Dict[str, Any]:
-        """Retorna status de uma instancia"""
-        try:
-            resp = requests.get(
-                f"{self.API_URL}/instances/{instance_id}/",
-                headers=self.headers,
-                timeout=30,
-            )
-            resp.raise_for_status()
-            data = resp.json()
+    def get_instance_status(self, instance_id: int, max_retries: int = 3) -> Dict[str, Any]:
+        """Retorna status de uma instancia com retry para rate limiting"""
+        delay = 1.0
 
-            instances_data = data.get("instances")
-            if isinstance(instances_data, list):
-                instance = instances_data[0] if instances_data else {}
-            elif isinstance(instances_data, dict):
-                instance = instances_data
-            else:
-                instance = data
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.get(
+                    f"{self.API_URL}/instances/{instance_id}/",
+                    headers=self.headers,
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                data = resp.json()
 
-            return {
-                "id": instance.get("id"),
-                "status": instance.get("actual_status", "unknown"),
-                "ssh_host": instance.get("ssh_host"),
-                "ssh_port": instance.get("ssh_port"),
-                "gpu_name": instance.get("gpu_name"),
-                "num_gpus": instance.get("num_gpus"),
-                "public_ipaddr": instance.get("public_ipaddr"),
-                "ports": instance.get("ports", {}),
-            }
-        except Exception as e:
-            return {"error": str(e), "status": "error"}
+                instances_data = data.get("instances")
+                if isinstance(instances_data, list):
+                    instance = instances_data[0] if instances_data else {}
+                elif isinstance(instances_data, dict):
+                    instance = instances_data
+                else:
+                    instance = data
 
-    def destroy_instance(self, instance_id: int) -> bool:
-        """Destroi uma instancia"""
-        try:
-            resp = requests.delete(
-                f"{self.API_URL}/instances/{instance_id}/",
-                headers=self.headers,
-                timeout=30,
-            )
-            return resp.status_code in [200, 204]
-        except Exception as e:
-            print(f"Erro ao destruir instancia: {e}")
-            return False
+                return {
+                    "id": instance.get("id"),
+                    "status": instance.get("actual_status", "unknown"),
+                    "actual_status": instance.get("actual_status", "unknown"),
+                    "ssh_host": instance.get("ssh_host"),
+                    "ssh_port": instance.get("ssh_port"),
+                    "gpu_name": instance.get("gpu_name"),
+                    "num_gpus": instance.get("num_gpus", 1),
+                    "public_ipaddr": instance.get("public_ipaddr"),
+                    "ports": instance.get("ports", {}),
+                    # Extended fields for tests
+                    "gpu_ram": instance.get("gpu_ram", 0),
+                    "cpu_ram": instance.get("cpu_ram", 0),
+                    "disk_space": instance.get("disk_space", 0),
+                    "disk_usage": instance.get("disk_usage", 0),
+                    "dph_total": instance.get("dph_total", 0),
+                    "inet_up": instance.get("inet_up", 0),
+                    "inet_down": instance.get("inet_down", 0),
+                    "cuda_max_good": instance.get("cuda_max_good", ""),
+                    "driver_version": instance.get("driver_version", ""),
+                    "compute_cap": instance.get("compute_cap", 0),
+                    "reliability": instance.get("reliability2", instance.get("reliability", 0)),
+                    "label": instance.get("label", ""),
+                    "start_date": instance.get("start_date"),
+                }
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on get_instance_status({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                return {"error": str(e), "status": "error"}
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on get_instance_status({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                return {"error": str(e), "status": "error"}
 
-    def pause_instance(self, instance_id: int) -> bool:
-        """Pausa uma instancia (stop sem destruir)"""
-        try:
-            resp = requests.put(
-                f"{self.API_URL}/instances/{instance_id}/",
-                headers={"Accept": "application/json"},
-                params={"api_key": self.api_key},
-                json={"paused": True},
-                timeout=30,
-            )
-            return resp.status_code == 200 and resp.json().get("success", False)
-        except Exception as e:
-            print(f"Erro ao pausar instancia: {e}")
-            return False
+        return {"error": "Max retries exceeded", "status": "error"}
 
-    def resume_instance(self, instance_id: int) -> bool:
-        """Resume uma instancia pausada"""
-        try:
-            resp = requests.put(
-                f"{self.API_URL}/instances/{instance_id}/",
-                headers={"Accept": "application/json"},
-                params={"api_key": self.api_key},
-                json={"paused": False},
-                timeout=30,
-            )
-            return resp.status_code == 200 and resp.json().get("success", False)
-        except Exception as e:
-            print(f"Erro ao resumir instancia: {e}")
-            return False
+    def destroy_instance(self, instance_id: int, max_retries: int = 3) -> bool:
+        """Destroi uma instancia com retry para rate limiting"""
+        delay = 1.0
+
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.delete(
+                    f"{self.API_URL}/instances/{instance_id}/",
+                    headers=self.headers,
+                    timeout=30,
+                )
+                if resp.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on destroy_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                    return False
+                return resp.status_code in [200, 204]
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on destroy_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                logger.error(f"Erro ao destruir instancia: {e}")
+                return False
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on destroy_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                logger.error(f"Erro ao destruir instancia: {e}")
+                return False
+
+        return False
+
+    def pause_instance(self, instance_id: int, max_retries: int = 3) -> bool:
+        """Pausa uma instancia (stop sem destruir) com retry para rate limiting"""
+        delay = 1.0
+
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.put(
+                    f"{self.API_URL}/instances/{instance_id}/",
+                    headers={"Accept": "application/json"},
+                    params={"api_key": self.api_key},
+                    json={"paused": True},
+                    timeout=30,
+                )
+                if resp.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on pause_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                    return False
+                return resp.status_code == 200 and resp.json().get("success", False)
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on pause_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                logger.error(f"Erro ao pausar instancia: {e}")
+                return False
+
+        return False
+
+    def resume_instance(self, instance_id: int, max_retries: int = 3) -> bool:
+        """Resume uma instancia pausada com retry para rate limiting"""
+        delay = 1.0
+
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.put(
+                    f"{self.API_URL}/instances/{instance_id}/",
+                    headers={"Accept": "application/json"},
+                    params={"api_key": self.api_key},
+                    json={"paused": False},
+                    timeout=30,
+                )
+                if resp.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on resume_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                    return False
+                return resp.status_code == 200 and resp.json().get("success", False)
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on resume_instance({instance_id}), "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 10.0)
+                        continue
+                logger.error(f"Erro ao resumir instancia: {e}")
+                return False
+
+        return False
 
     def get_instance_logs(self, instance_id: int) -> str:
         """Retorna logs de uma instancia"""
@@ -389,8 +572,11 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
             data = resp.json()
             return data.get("instances", [])
         except Exception as e:
-            print(f"Erro ao listar instancias: {e}")
+            logger.error(f"Erro ao listar instancias: {e}")
             return []
+
+    # Alias for backwards compatibility
+    list_instances = get_my_instances
 
     def get_balance(self) -> Dict[str, Any]:
         """Retorna o saldo da conta vast.ai"""
@@ -409,7 +595,7 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
                 "email": data.get("email", ""),
             }
         except Exception as e:
-            print(f"Erro ao buscar saldo: {e}")
+            logger.error(f"Erro ao buscar saldo: {e}")
             return {"error": str(e), "credit": 0}
 
     def search_cpu_offers(
@@ -425,7 +611,7 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
         """Busca ofertas de instancias CPU-only (sem GPU)."""
         import json
 
-        print(f"[DEBUG search_cpu_offers] min_cpu_cores={min_cpu_cores}, min_cpu_ram={min_cpu_ram}, "
+        logger.debug(f"search_cpu_offers: min_cpu_cores={min_cpu_cores}, min_cpu_ram={min_cpu_ram}, "
               f"max_price={max_price}, min_disk={min_disk}, region={region}")
 
         query = {
@@ -463,12 +649,10 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
                     if any(code in str(o.get("geolocation", "")) for code in region_codes)
                 ]
 
-            print(f"[DEBUG search_cpu_offers] API retornou {len(offers)} ofertas CPU-only")
+            logger.debug(f"search_cpu_offers: API retornou {len(offers)} ofertas CPU-only")
             return offers
         except Exception as e:
-            print(f"Erro ao buscar ofertas CPU: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.exception(f"Erro ao buscar ofertas CPU: {e}")
             return []
 
     def create_cpu_instance(
@@ -485,7 +669,7 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
             default_ports_str = os.environ.get("VAST_DEFAULT_PORTS", "3000,5173,7860,8000,8080")
             ports = [int(p.strip()) for p in default_ports_str.split(",") if p.strip()]
 
-        onstart_script = """#\!/bin/bash
+        onstart_script = """#!/bin/bash
 touch ~/.no_auto_tmux
 apt-get update -qq && apt-get install -y -qq rsync rclone restic
 """
@@ -503,7 +687,7 @@ apt-get update -qq && apt-get install -y -qq rsync rclone restic
                 "extra_env": extra_env,
             }
 
-            print(f"[DEBUG create_cpu_instance] offer_id={offer_id}, disk={disk}, ports={ports}")
+            logger.debug(f"create_cpu_instance: offer_id={offer_id}, disk={disk}, ports={ports}")
 
             resp = requests.put(
                 f"{self.API_URL}/asks/{offer_id}/",
@@ -514,10 +698,8 @@ apt-get update -qq && apt-get install -y -qq rsync rclone restic
             resp.raise_for_status()
             data = resp.json()
             instance_id = data.get("new_contract")
-            print(f"[DEBUG create_cpu_instance] Criada instancia CPU {instance_id}")
+            logger.debug(f"create_cpu_instance: Criada instancia CPU {instance_id}")
             return instance_id
         except Exception as e:
-            print(f"Erro ao criar instancia CPU: {e}")
-            import traceback
-            traceback.print_exc()
+            logger.exception(f"Erro ao criar instancia CPU: {e}")
             return None

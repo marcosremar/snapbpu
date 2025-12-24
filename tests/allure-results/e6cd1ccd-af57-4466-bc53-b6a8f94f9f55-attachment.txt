@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbyStatus
+INFO     tests.backend.conftest:conftest.py:255 PASS: Status do standby
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON keys OK: ['configured', 'auto_standby_enabled', 'active_associations']
+INFO     tests.backend.conftest:conftest.py:255 PASS: Status: configured=False, auto_standby=False, active=2

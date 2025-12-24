@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestSnapshotInputValidation
+INFO     tests.backend.conftest:conftest.py:255 PASS: SQL Injection em instance_id rejeitado

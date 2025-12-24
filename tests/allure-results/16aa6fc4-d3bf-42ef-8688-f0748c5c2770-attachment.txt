@@ -1,0 +1,1 @@
+[94mℹ[0m Sync status para instância inexistente retornou 500 (esperado)

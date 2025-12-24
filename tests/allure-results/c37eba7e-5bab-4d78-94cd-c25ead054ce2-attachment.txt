@@ -1,0 +1,2 @@
+2025-12-21 06:31:46,239 - tests.backend.conftest - INFO - Usando cache para TestAlertsPlaceholder
+2025-12-21 06:31:46,243 - tests.backend.conftest - INFO - PASS: Endpoints de alerts verificados

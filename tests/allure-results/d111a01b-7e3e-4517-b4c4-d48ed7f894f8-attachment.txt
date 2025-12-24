@@ -1,0 +1,1 @@
+2025-12-21 06:32:04,181 - tests.backend.conftest - INFO - PASS: Proteção contra SQL injection validada

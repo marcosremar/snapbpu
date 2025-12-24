@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Market summary para GPU: RTX 3090
+INFO     tests.backend.conftest:conftest.py:255 PASS: Summary específico para 'RTX 3090' OK

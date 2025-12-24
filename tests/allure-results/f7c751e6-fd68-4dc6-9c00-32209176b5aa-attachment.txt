@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Endpoint /api/v1/alerts não implementado (status 200)
+INFO     tests.backend.conftest:conftest.py:265 INFO: Endpoint /api/v1/alerts/rules não implementado (status 200)

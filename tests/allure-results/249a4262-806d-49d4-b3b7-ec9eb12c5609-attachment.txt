@@ -1,0 +1,2 @@
+[94mℹ[0m Endpoint /api/v1/alerts não implementado (status 200)
+[94mℹ[0m Endpoint /api/v1/alerts/rules não implementado (status 200)

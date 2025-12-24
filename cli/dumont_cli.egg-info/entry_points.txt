@@ -1,2 +1,2 @@
 [console_scripts]
-dumont = cli.__main__:main
+dumont = dumont_cli:main

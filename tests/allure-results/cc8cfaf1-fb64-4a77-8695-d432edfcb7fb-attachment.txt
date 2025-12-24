@@ -1,0 +1,3 @@
+[92m✓[0m Status do standby
+[92m✓[0m JSON keys OK: ['configured', 'auto_standby_enabled', 'active_associations']
+[92m✓[0m Status: configured=False, auto_standby=False, active=2

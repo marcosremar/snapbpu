@@ -137,7 +137,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <Power className="w-5 h-5 text-emerald-400" />
+            <Power className="w-5 h-5 text-brand-400" />
             Configuração de Auto-Hibernação
           </DialogTitle>
           <DialogDescription className="text-gray-400">
@@ -157,7 +157,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
           <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
             <div className="space-y-0.5 flex-1">
               <Label className="text-base font-medium text-white flex items-center gap-2">
-                <Zap className="w-4 h-4 text-emerald-400" />
+                <Zap className="w-4 h-4 text-brand-400" />
                 Auto-Hibernação Inteligente
               </Label>
               <p className="text-sm text-gray-400">
@@ -178,7 +178,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
               {/* Threshold de GPU */}
               <div className="space-y-3">
                 <Label className="text-base font-medium flex items-center gap-2">
-                  <Gauge className="w-4 h-4 text-emerald-400" />
+                  <Gauge className="w-4 h-4 text-brand-400" />
                   Threshold de Uso da GPU
                 </Label>
                 <div className="flex items-center gap-4">
@@ -198,7 +198,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
                   </div>
                 </div>
                 <p className="text-xs text-gray-400 flex items-start gap-2">
-                  <Info className="w-3 h-3 mt-0.5 text-emerald-400" />
+                  <Info className="w-3 h-3 mt-0.5 text-brand-400" />
                   GPU considerada ociosa quando utilização ficar abaixo deste valor
                 </p>
               </div>
@@ -259,7 +259,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
                     <span className="text-gray-400 text-sm">min</span>
                   </div>
                 </div>
-                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-md p-3">
+                <div className="bg-brand-500/10 border border-brand-500/30 rounded-md p-3">
                   <p className="text-xs text-gray-300">
                     Após <strong className="text-red-400">{config.delete_after_minutes} minutos</strong> hibernada, marca como <span className="text-red-400">deleted</span>
                   </p>
@@ -394,16 +394,34 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
                       </div>
                     )}
 
-                    {/* Info about failover times */}
+                    {/* Info about failover times - Based on real benchmarks */}
                     <div className="bg-purple-500/10 border border-purple-500/30 rounded-md p-3">
                       <div className="flex items-start gap-2">
                         <HardDrive className="w-4 h-4 text-purple-400 mt-0.5" />
-                        <div className="text-xs text-gray-300">
-                          <p className="mb-1">
-                            <strong className="text-purple-400">Cloud Storage Failover</strong> permite restaurar em qualquer região (~45-60s)
+                        <div className="text-xs text-gray-300 w-full">
+                          <p className="mb-2">
+                            <strong className="text-purple-400">Tempos de Recovery (Benchmarks Reais)</strong>
                           </p>
-                          <p className="text-gray-400">
-                            Comparativo: Warm Pool (~6s) → Regional Volume (~23s) → Cloud Storage (~47s)
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center">
+                              <span>⚡ CPU Standby (GCP)</span>
+                              <span className="text-green-400 font-medium">~10s</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>🔄 Pause/Resume (VAST)</span>
+                              <span className="text-yellow-400 font-medium">7-45s*</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>🎯 Spot Failover</span>
+                              <span className="text-orange-400 font-medium">~72s</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span>☁️ Cloud Storage</span>
+                              <span className="text-blue-400 font-medium">~45-60s</span>
+                            </div>
+                          </div>
+                          <p className="text-gray-500 text-[10px] mt-2">
+                            *Varia por GPU: RTX A2000 ~7s, RTX 5070 pode chegar a 150s
                           </p>
                         </div>
                       </div>
@@ -414,7 +432,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
 
               {/* Economia Estimada */}
               {savings && (
-                <div className="bg-gradient-to-br from-green-500/10 to-emerald-500/10 border border-green-500/30 rounded-lg p-4">
+                <div className="bg-gradient-to-br from-green-500/10 to-brand-500/10 border border-green-500/30 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-3">
                     <DollarSign className="w-5 h-5 text-green-400" />
                     <h4 className="text-green-400 font-semibold">Economia Estimada</h4>
@@ -452,7 +470,7 @@ export default function HibernationConfigModal({ instance, isOpen, onClose, onSa
           <Button
             onClick={handleSave}
             disabled={loading}
-            className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2"
+            className="bg-brand-500 hover:bg-brand-600 text-white gap-2"
           >
             <Save className="w-4 h-4" />
             {loading ? 'Salvando...' : 'Salvar Configuração'}

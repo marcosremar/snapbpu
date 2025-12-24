@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,940 - tests.backend.conftest - INFO - Usando cache para TestMigrationEndpoints
+2025-12-21 06:32:11,945 - tests.backend.conftest - INFO - INFO: Migrate estimate para instância inexistente: 500

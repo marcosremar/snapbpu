@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Request 1
+INFO     tests.backend.conftest:conftest.py:255 PASS: Request 2
+INFO     tests.backend.conftest:conftest.py:255 PASS: Request 3
+INFO     tests.backend.conftest:conftest.py:255 PASS: Request 4
+INFO     tests.backend.conftest:conftest.py:255 PASS: Request 5
+INFO     tests.backend.conftest:conftest.py:255 PASS: 5 requests - avg: 0.001s, min: 0.001s, max: 0.002s

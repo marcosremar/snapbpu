@@ -1,0 +1,2 @@
+[92m✓[0m Campo username validado
+[92m✓[0m Campo password validado

@@ -50,7 +50,9 @@ class CommandBuilder:
                 parts = [p for p in path.split("/") if p and p not in ["api", "auth"]]
 
             # Singularize resource names (instances -> instance)
-            if resource.endswith("s") and resource not in ["settings", "metrics", "stats", "savings"]:
+            # Exceções: palavras que terminam em 's' mas não devem ser singularizadas
+            no_singularize = ["settings", "metrics", "stats", "savings", "serverless", "status"]
+            if resource.endswith("s") and resource not in no_singularize:
                 resource = resource[:-1]
 
             for method, details in methods.items():
@@ -77,6 +79,71 @@ class CommandBuilder:
 
         self.commands_cache = commands
         return commands
+
+    def _show_resource_help(self, resource: str, actions: Dict[str, Any], failed_action: Optional[str] = None):
+        """Show help for a specific resource"""
+        # Resource-specific titles
+        resource_titles = {
+            "job": "GPU Job Commands",
+            "finetune": "Fine-Tuning Commands",
+            "instance": "Instance Management",
+            "snapshot": "Snapshot Commands",
+            "warmpool": "Warm Pool Commands",
+            "failover": "Failover Commands",
+            "serverless": "Serverless Mode Commands",
+            "auth": "Authentication Commands",
+            "setting": "Settings Commands",
+            "savings": "Savings & Cost Commands",
+            "history": "History Commands",
+            "spot": "Spot GPU Commands",
+        }
+
+        title = resource_titles.get(resource, f"{resource.title()} Commands")
+
+        if failed_action:
+            print(f"❌ Ação desconhecida '{failed_action}' para {resource}\n")
+
+        print(f"🔧 {title}\n")
+        print(f"Usage: dumont {resource} <action> [options]\n")
+        print("Actions:")
+
+        for action_name, info in sorted(actions.items()):
+            summary = info.get("summary", "")
+            method = info.get("method", "")
+            if len(summary) > 50:
+                summary = summary[:47] + "..."
+            print(f"  {action_name:20} {summary}")
+
+        print("")
+
+        # Resource-specific examples
+        examples = {
+            "job": [
+                f"dumont job list",
+                f"dumont job get <job_id>",
+                f"dumont job create instance_id=123 command='python train.py'",
+            ],
+            "finetune": [
+                f"dumont finetune list",
+                f"dumont finetune create model=llama3 dataset=my-data",
+                f"dumont finetune get <job_id>",
+            ],
+            "instance": [
+                f"dumont instance list",
+                f"dumont instance get <instance_id>",
+                f"dumont instance pause <instance_id>",
+            ],
+            "auth": [
+                f"dumont auth login <email> <password>",
+                f"dumont auth me",
+            ],
+        }
+
+        if resource in examples:
+            print("Examples:")
+            for ex in examples[resource]:
+                print(f"  {ex}")
+            print("")
 
     def _determine_action(self, path: str, parts: List[str], method: str) -> str:
         """Determine action name from path and method"""
@@ -169,12 +236,10 @@ class CommandBuilder:
             print(f"\n💡 Recursos disponíveis: {', '.join(sorted(commands.keys()))}")
             sys.exit(1)
 
-        if action not in commands[resource]:
-            print(f"❌ Ação desconhecida '{action}' para {resource}")
-            print(f"\n💡 Ações disponíveis para {resource}:")
-            for act, info in sorted(commands[resource].items()):
-                print(f"   - {act}: {info.get('summary', '')}")
-            sys.exit(1)
+        # Show help for resource when no action is provided
+        if action is None or action not in commands[resource]:
+            self._show_resource_help(resource, commands[resource], action)
+            sys.exit(1 if action is not None else 0)
 
         cmd_info = commands[resource][action]
         method = cmd_info["method"]

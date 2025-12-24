@@ -1,0 +1,3 @@
+[92m✓[0m Buscar preços
+[92m✓[0m Preços obtidos
+[94mℹ[0m GCP credentials não configuradas - pulando configuração

@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,107 - tests.backend.conftest - WARNING - WARN: Status inesperado: 422

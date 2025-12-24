@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Comparação tipo 'on-demand': 2 GPUs
+INFO     tests.backend.conftest:conftest.py:255 PASS: Comparação tipo 'interruptible': 2 GPUs

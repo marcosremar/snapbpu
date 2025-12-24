@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,152 - tests.backend.conftest - INFO - Usando cache para TestSyncStandalone
+2025-12-21 06:32:13,153 - tests.backend.conftest - INFO - PASS: Endpoint de sync verificado

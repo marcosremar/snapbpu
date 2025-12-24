@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbySync
+WARNING  tests.backend.conftest:conftest.py:270 WARN: Status inesperado ao iniciar sync: 422

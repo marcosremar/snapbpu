@@ -1,0 +1,1 @@
+2025-12-21 06:31:46,269 - tests.backend.conftest - INFO - PASS: Rate limiting funcionando (sem quebrar servidor)

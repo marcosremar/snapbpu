@@ -1,0 +1,6 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Busca por GPU: RTX_4090
+WARNING  tests.backend.conftest:conftest.py:270 WARN: Sem ofertas disponíveis para GPU: RTX_4090
+INFO     tests.backend.conftest:conftest.py:255 PASS: Busca por GPU: RTX_3090
+WARNING  tests.backend.conftest:conftest.py:270 WARN: Sem ofertas disponíveis para GPU: RTX_3090
+INFO     tests.backend.conftest:conftest.py:255 PASS: Busca por GPU: A100
+WARNING  tests.backend.conftest:conftest.py:270 WARN: Sem ofertas disponíveis para GPU: A100

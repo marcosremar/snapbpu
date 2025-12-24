@@ -1,0 +1,4 @@
+[92m✓[0m Input inválido rejeitado
+[92m✓[0m Input inválido rejeitado
+[92m✓[0m Input inválido rejeitado
+[92m✓[0m Validação de input testada

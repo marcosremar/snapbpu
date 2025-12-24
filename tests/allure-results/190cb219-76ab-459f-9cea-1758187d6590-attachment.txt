@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Requisições concorrentes: 3/3 OK

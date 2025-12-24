@@ -1,0 +1,111 @@
+[
+  {
+    "task": "Quero ver meu saldo na conta",
+    "start_time": "2025-12-21T20:46:51.711195",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "balance",
+          "list"
+        ],
+        "success": true,
+        "analysis": "Verificando saldo"
+      },
+      {
+        "agent": "verifier",
+        "status": "success",
+        "analysis": "Comando executado com sucesso, dados retornados corretamente"
+      }
+    ],
+    "final_status": "success",
+    "end_time": "2025-12-21T20:46:52.318835"
+  },
+  {
+    "task": "Lista todas as minhas maquinas rodando",
+    "start_time": "2025-12-21T20:46:53.321129",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "instance",
+          "list"
+        ],
+        "success": true,
+        "analysis": "Listando instancias"
+      },
+      {
+        "agent": "verifier",
+        "status": "success",
+        "analysis": "Comando executado com sucesso, dados retornados corretamente"
+      }
+    ],
+    "final_status": "success",
+    "end_time": "2025-12-21T20:46:54.086050"
+  },
+  {
+    "task": "Mostra as ofertas de GPU RTX 3060 ate $0.10/hora",
+    "start_time": "2025-12-21T20:46:55.086981",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "instance",
+          "offers"
+        ],
+        "success": true,
+        "analysis": "Buscando ofertas GPU"
+      },
+      {
+        "agent": "verifier",
+        "status": "success",
+        "analysis": "Comando executado com sucesso, dados retornados corretamente"
+      }
+    ],
+    "final_status": "success",
+    "end_time": "2025-12-21T20:46:56.238614"
+  },
+  {
+    "task": "Qual o status do sistema de failover?",
+    "start_time": "2025-12-21T20:46:57.242060",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "help"
+        ],
+        "success": true,
+        "analysis": "Mostrando ajuda disponivel"
+      },
+      {
+        "agent": "verifier",
+        "status": "success",
+        "analysis": "Comando executado com sucesso, dados retornados corretamente"
+      }
+    ],
+    "final_status": "success",
+    "end_time": "2025-12-21T20:46:57.349883"
+  },
+  {
+    "task": "Quais hosts estao disponiveis para warm pool?",
+    "start_time": "2025-12-21T20:46:58.350474",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "instance",
+          "offers"
+        ],
+        "success": true,
+        "analysis": "Buscando ofertas GPU"
+      },
+      {
+        "agent": "verifier",
+        "status": "success",
+        "analysis": "Comando executado com sucesso, dados retornados corretamente"
+      }
+    ],
+    "final_status": "success",
+    "end_time": "2025-12-21T20:46:59.506445"
+  }
+]

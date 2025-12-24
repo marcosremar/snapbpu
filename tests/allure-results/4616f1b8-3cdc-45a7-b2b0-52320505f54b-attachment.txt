@@ -1,0 +1,3 @@
+2025-12-21 06:32:11,852 - tests.backend.conftest - INFO - Usando cache para TestGpuComparison
+2025-12-21 06:32:11,855 - tests.backend.conftest - INFO - PASS: GPU comparison básico
+2025-12-21 06:32:11,855 - tests.backend.conftest - INFO - PASS: Comparação: 3 GPUs, Mais barata: RTX 3090

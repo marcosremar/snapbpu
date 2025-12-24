@@ -1,0 +1,2 @@
+[92m✓[0m Lista de GPUs
+[92m✓[0m GPUs disponíveis: 3 (RTX 3090, RTX 4090, RTX 5090...)

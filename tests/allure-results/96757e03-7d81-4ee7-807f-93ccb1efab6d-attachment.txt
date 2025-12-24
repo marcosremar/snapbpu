@@ -1,0 +1,3 @@
+2025-12-21 06:32:11,806 - tests.backend.conftest - INFO - Usando cache para TestProviderRankings
+2025-12-21 06:32:11,809 - tests.backend.conftest - INFO - PASS: Provider rankings básico
+2025-12-21 06:32:11,809 - tests.backend.conftest - INFO - PASS: Provider rankings: 50 providers, Top reliability: 0.956

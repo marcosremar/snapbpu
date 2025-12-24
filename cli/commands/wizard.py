@@ -101,9 +101,9 @@ class WizardCommands:
         print(f"   ✓ Found {len(offers)} offers")
 
         # Show top 5 offers
-        print("\n   Top offers:")
-        for i, offer in enumerate(offers[:5]):
-            print(f"   {i+1}. {offer.get('gpu_name')} - ${offer.get('dph_total', 0):.3f}/hr - {offer.get('inet_down', 0):.0f} Mbps")
+#         print("\n   Top offers:")
+#         for i, offer in enumerate(offers[:5]):
+#             print(f"   {i+1}. {offer.get('gpu_name')} - ${offer.get('dph_total', 0):.3f}/hr - {offer.get('inet_down', 0):.0f} Mbps")
 
         # Start deploy
         print(f"\n🔄 Step 2: Starting multi-start deployment...")

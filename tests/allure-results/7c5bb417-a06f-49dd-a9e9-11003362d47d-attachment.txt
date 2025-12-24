@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,960 - dumontcloud.tests.backend.conftest - WARNING - Request erro, tentativa 2: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+2025-12-21 06:32:12,972 - tests.backend.conftest - INFO - PASS: Validação de input para migração OK

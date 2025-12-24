@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preço para e2-micro obtido
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preço para e2-small obtido
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preço para e2-medium obtido

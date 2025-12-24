@@ -1,0 +1,2 @@
+[92m✓[0m Verificação de tamanho
+[92m✓[0m Tamanho da resposta: 0.53KB

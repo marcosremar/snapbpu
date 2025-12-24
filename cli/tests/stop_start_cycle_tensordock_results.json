@@ -1,0 +1,15 @@
+{
+  "test_name": "stop_start_cycle",
+  "provider": "tensordock",
+  "success": true,
+  "instance_id": "e6f45fbd-473b-4a9d-a869-ab1869e5614d",
+  "gpu_name": "My Tensordock Server",
+  "stop_seconds": 4.108987092971802,
+  "start_seconds": 6.778292655944824,
+  "recovery_seconds": 6.778292655944824,
+  "cost_per_hour_running": 0.239,
+  "cost_per_hour_stopped": 0.005,
+  "savings_percent": 97.9,
+  "error": null,
+  "timestamp": "2025-12-22T14:06:17.323598"
+}

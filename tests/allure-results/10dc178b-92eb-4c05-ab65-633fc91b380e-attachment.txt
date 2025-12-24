@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,161 - tests.backend.conftest - INFO - PASS: Health version
+2025-12-21 06:32:13,161 - tests.backend.conftest - INFO - PASS: Versão da API: 3.0.0

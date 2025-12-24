@@ -1,0 +1,4 @@
+[92m✓[0m Filtro de preço: $2.0/h
+[92m✓[0m Preço max $2.0: 64 ofertas (64 dentro do limite)
+[92m✓[0m Filtro de preço: $5.0/h
+[92m✓[0m Preço max $5.0: 64 ofertas (64 dentro do limite)

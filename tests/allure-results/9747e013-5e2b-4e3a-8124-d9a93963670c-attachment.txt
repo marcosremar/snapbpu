@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,119 - tests.backend.conftest - INFO - Usando cache para TestStandbyIntegration
+2025-12-21 06:32:13,120 - tests.backend.conftest - INFO - INFO: GCP credentials não configuradas - pulando teste de integração

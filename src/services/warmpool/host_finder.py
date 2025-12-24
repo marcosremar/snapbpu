@@ -246,28 +246,41 @@ class HostFinder:
         logger.info(f"Found {len(multi_gpu_hosts)} hosts with {min_gpus}+ GPUs")
         return multi_gpu_hosts
 
-    async def get_host_by_machine_id(self, machine_id: int) -> Optional[MultiGPUHost]:
+    async def get_host_by_machine_id(
+        self, machine_id: int, verified: bool = True
+    ) -> Optional[MultiGPUHost]:
         """
         Busca um host especifico pelo machine_id.
 
         Args:
             machine_id: ID da maquina
+            verified: Se True, busca apenas hosts verificados (padrao)
 
         Returns:
             Host ou None se nao encontrado
         """
         try:
             # Buscar ofertas do mesmo machine_id
-            all_offers = await self.search_offers(min_gpus=1, verified=False)
+            # Tenta primeiro com os mesmos critérios do find_multi_gpu_hosts
+            all_offers = await self.search_offers(min_gpus=1, verified=verified)
 
             host_offers = [o for o in all_offers if o.machine_id == machine_id]
 
+            # Se não encontrou com verified=True, tenta sem filtro
+            if not host_offers and verified:
+                logger.info(f"Host {machine_id} not found with verified=True, trying without filter")
+                all_offers = await self.search_offers(min_gpus=1, verified=False)
+                host_offers = [o for o in all_offers if o.machine_id == machine_id]
+
             if not host_offers:
+                logger.warning(f"Host {machine_id} not found in any offers")
                 return None
 
             total_gpus = sum(o.num_gpus for o in host_offers)
             avg_price = sum(o.price_per_hour for o in host_offers) / len(host_offers)
             avg_reliability = sum(o.reliability for o in host_offers) / len(host_offers)
+
+            logger.info(f"Found host {machine_id} with {len(host_offers)} offers, {total_gpus} GPUs")
 
             return MultiGPUHost(
                 machine_id=machine_id,

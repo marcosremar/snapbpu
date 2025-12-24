@@ -56,6 +56,47 @@ class InstanceService:
             **kwargs
         )
 
+    def search_offers_by_type(
+        self,
+        machine_type: str = "on-demand",
+        gpu_name: Optional[str] = None,
+        num_gpus: int = 1,
+        min_gpu_ram: float = 0,
+        max_price: float = 10.0,
+        region: Optional[str] = None,
+        min_reliability: float = 0.0,
+        verified_only: bool = False,
+        limit: int = 100,
+    ) -> List[GpuOffer]:
+        """
+        Search for available GPU offers by machine type (on-demand, interruptible)
+
+        Args:
+            machine_type: Type of machine ("on-demand" or "interruptible")
+            gpu_name: GPU model (e.g., "RTX 4090")
+            num_gpus: Number of GPUs
+            min_gpu_ram: Minimum GPU RAM in GB
+            max_price: Maximum price per hour
+            region: Region filter (e.g., "EU", "US")
+            min_reliability: Minimum reliability score (0-1)
+            verified_only: Only verified hosts
+            limit: Maximum results
+
+        Returns:
+            List of GPU offers
+        """
+        return self.gpu_provider.search_offers_by_type(
+            machine_type=machine_type,
+            gpu_name=gpu_name,
+            num_gpus=num_gpus,
+            min_gpu_ram=min_gpu_ram,
+            max_price=max_price,
+            region=region,
+            min_reliability=min_reliability,
+            verified_only=verified_only,
+            limit=limit,
+        )
+
     def create_instance(
         self,
         offer_id: int,
@@ -190,3 +231,39 @@ class InstanceService:
             Dictionary with credit, balance, etc
         """
         return self.gpu_provider.get_balance()
+
+    def validate_before_create(self, offer_id: int, min_balance: float = 0.10) -> Dict[str, Any]:
+        """
+        Valida pré-requisitos antes de criar uma instância.
+
+        Verificações:
+        - Conectividade com API do provider
+        - Saldo suficiente
+        - Oferta ainda disponível
+
+        Args:
+            offer_id: ID da oferta a validar
+            min_balance: Saldo mínimo necessário
+
+        Returns:
+            Dict com:
+            - valid: bool - Se todas as validações passaram
+            - errors: List[str] - Erros encontrados
+            - warnings: List[str] - Avisos
+            - balance: float - Saldo atual
+            - offer: Dict - Dados da oferta (se disponível)
+        """
+        logger.info(f"Validating prerequisites for offer {offer_id}")
+        return self.gpu_provider.validate_before_create(offer_id, min_balance)
+
+    def check_api_health(self) -> Dict[str, Any]:
+        """
+        Verifica saúde da API do provider.
+
+        Returns:
+            Dict com:
+            - healthy: bool - Se API está respondendo
+            - latency_ms: float - Latência da resposta
+            - message: str - Mensagem de status
+        """
+        return self.gpu_provider.check_api_health()

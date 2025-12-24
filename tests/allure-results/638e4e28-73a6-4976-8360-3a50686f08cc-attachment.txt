@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestStandbyAssociations
+INFO     tests.backend.conftest:conftest.py:255 PASS: Listar associações
+INFO     tests.backend.conftest:conftest.py:255 PASS: Associações: 2 encontradas

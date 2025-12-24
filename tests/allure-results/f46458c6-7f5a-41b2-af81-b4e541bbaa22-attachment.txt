@@ -1,0 +1,5 @@
+2025-12-21 06:32:13,001 - tests.backend.conftest - INFO - Usando cache para TestRegionsReadiness
+2025-12-21 06:32:13,001 - tests.backend.conftest - INFO - INFO: Região planejada: us-east (US East)
+2025-12-21 06:32:13,001 - tests.backend.conftest - INFO - INFO: Região planejada: us-west (US West)
+2025-12-21 06:32:13,001 - tests.backend.conftest - INFO - INFO: Região planejada: eu-west (Europe West)
+2025-12-21 06:32:13,002 - tests.backend.conftest - INFO - INFO: Região planejada: asia-east (Asia East)

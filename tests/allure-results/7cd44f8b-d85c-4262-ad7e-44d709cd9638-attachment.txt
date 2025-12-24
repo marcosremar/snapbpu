@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Input inválido rejeitado
+INFO     tests.backend.conftest:conftest.py:255 PASS: Input inválido rejeitado
+INFO     tests.backend.conftest:conftest.py:255 PASS: Input inválido rejeitado
+INFO     tests.backend.conftest:conftest.py:255 PASS: Validação de input testada

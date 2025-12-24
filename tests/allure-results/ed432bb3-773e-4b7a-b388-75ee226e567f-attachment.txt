@@ -1,0 +1,4 @@
+2025-12-21 06:31:51,489 - tests.backend.conftest - INFO - Usando cache para TestInstanceOffers
+2025-12-21 06:31:52,619 - tests.backend.conftest - INFO - PASS: Busca básica de ofertas
+2025-12-21 06:31:52,620 - tests.backend.conftest - INFO - PASS: JSON keys OK: ['offers', 'count']
+2025-12-21 06:31:52,620 - tests.backend.conftest - INFO - PASS: Ofertas encontradas: 64

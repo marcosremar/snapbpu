@@ -1,0 +1,2 @@
+[92m✓[0m Validação de estrutura
+[92m✓[0m Campos opcionais presentes: 14/14

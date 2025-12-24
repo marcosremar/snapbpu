@@ -1,0 +1,1 @@
+[92m✓[0m Logins concorrentes: 3/3 bem-sucedidos

@@ -1,0 +1,1 @@
+2025-12-21 06:32:11,883 - tests.backend.conftest - INFO - PASS: API retorna 404 para GPU inexistente

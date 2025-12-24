@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { useState, useEffect, createContext, useContext, useMemo, useCallback } from 'react'
+import { Provider } from 'react-redux'
+import { store } from './store'
 import AppLayout from './components/layout/AppLayout'
 import { SidebarProvider } from './context/SidebarContext'
 import { ThemeProvider } from './context/ThemeContext'
@@ -15,6 +17,9 @@ import MachinesReportPage from './pages/MachinesReportPage'
 import FineTuning from './pages/FineTuning'
 import Serverless from './pages/Serverless'
 import GpuOffers from './pages/GpuOffers'
+import Jobs from './pages/Jobs'
+import ChatArena from './pages/ChatArena'
+import Models from './pages/Models'
 import Documentation from './pages/Documentation'
 import ButtonShowcase from './pages/ButtonShowcase'
 import ForgotPassword from './pages/ForgotPassword'
@@ -268,11 +273,12 @@ export default function App() {
   }
 
   return (
-    <ErrorBoundary>
-      <ThemeProvider>
-        <SidebarProvider>
-          <ToastProvider>
-            <Routes>
+    <Provider store={store}>
+      <ErrorBoundary>
+        <ThemeProvider>
+          <SidebarProvider>
+            <ToastProvider>
+              <Routes>
             {/* Rotas Públicas */}
             <Route path="/" element={
               user ? <Navigate to="/app" replace /> : <LandingPage onLogin={handleLogin} />
@@ -351,6 +357,27 @@ export default function App() {
               <ProtectedRoute user={user}>
                 <AppLayout user={user} onLogout={handleLogout}>
                   <GpuOffers />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/jobs" element={
+              <ProtectedRoute user={user}>
+                <AppLayout user={user} onLogout={handleLogout}>
+                  <Jobs />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/chat-arena" element={
+              <ProtectedRoute user={user}>
+                <AppLayout user={user} onLogout={handleLogout}>
+                  <ChatArena />
+                </AppLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/app/models" element={
+              <ProtectedRoute user={user}>
+                <AppLayout user={user} onLogout={handleLogout}>
+                  <Models />
                 </AppLayout>
               </ProtectedRoute>
             } />
@@ -438,6 +465,27 @@ export default function App() {
                 </AppLayout>
               </DemoRoute>
             } />
+            <Route path="/demo-app/jobs" element={
+              <DemoRoute>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
+                  <Jobs />
+                </AppLayout>
+              </DemoRoute>
+            } />
+            <Route path="/demo-app/chat-arena" element={
+              <DemoRoute>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
+                  <ChatArena />
+                </AppLayout>
+              </DemoRoute>
+            } />
+            <Route path="/demo-app/models" element={
+              <DemoRoute>
+                <AppLayout user={user || demoUser} onLogout={handleDemoLogout} isDemo={true}>
+                  <Models />
+                </AppLayout>
+              </DemoRoute>
+            } />
 
             {/* Demo Documentation Routes */}
             <Route path="/demo-docs" element={
@@ -462,5 +510,6 @@ export default function App() {
         </SidebarProvider>
       </ThemeProvider>
     </ErrorBoundary>
+  </Provider>
   )
 }

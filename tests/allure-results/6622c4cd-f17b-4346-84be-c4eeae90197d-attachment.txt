@@ -1,0 +1,1 @@
+[92m✓[0m Restic não configurado (esperado em ambiente de teste)

@@ -1,0 +1,6 @@
+2025-12-21 06:31:46,247 - tests.backend.conftest - INFO - INFO: Tipo de alerta planejado: gpu_usage_high
+2025-12-21 06:31:46,247 - tests.backend.conftest - INFO - INFO: Tipo de alerta planejado: gpu_memory_high
+2025-12-21 06:31:46,247 - tests.backend.conftest - INFO - INFO: Tipo de alerta planejado: instance_unhealthy
+2025-12-21 06:31:46,247 - tests.backend.conftest - INFO - INFO: Tipo de alerta planejado: cost_threshold
+2025-12-21 06:31:46,247 - tests.backend.conftest - INFO - INFO: Tipo de alerta planejado: hibernation_triggered
+2025-12-21 06:31:46,248 - tests.backend.conftest - INFO - INFO: Tipo de alerta planejado: sync_failed

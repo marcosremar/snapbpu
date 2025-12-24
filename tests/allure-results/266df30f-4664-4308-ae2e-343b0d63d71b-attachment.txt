@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,480 - tests.backend.conftest - INFO - PASS: Encoding
+2025-12-21 06:31:51,480 - tests.backend.conftest - INFO - PASS: Resposta em UTF-8 válido

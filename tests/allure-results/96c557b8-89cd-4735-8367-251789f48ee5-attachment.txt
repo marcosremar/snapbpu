@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,482 - tests.backend.conftest - INFO - PASS: JSON válido
+2025-12-21 06:31:51,482 - tests.backend.conftest - INFO - PASS: JSON válido e serializável

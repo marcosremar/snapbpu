@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,804 - tests.backend.conftest - INFO - PASS: Market summary tipo: on-demand
+2025-12-21 06:32:11,805 - tests.backend.conftest - INFO - PASS: Summary filtrado por 'on-demand' OK

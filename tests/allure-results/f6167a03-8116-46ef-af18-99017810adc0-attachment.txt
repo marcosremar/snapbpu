@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestGpuComparison
+INFO     tests.backend.conftest:conftest.py:255 PASS: GPU comparison básico
+INFO     tests.backend.conftest:conftest.py:255 PASS: Comparação: 3 GPUs, Mais barata: RTX 3090

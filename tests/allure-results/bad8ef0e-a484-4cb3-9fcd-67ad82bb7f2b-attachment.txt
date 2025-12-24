@@ -1,0 +1,13 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestPerformance
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance check: /api/v1/metrics/market
+INFO     tests.backend.conftest:conftest.py:255 PASS: /api/v1/metrics/market: 0.003s
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance check: /api/v1/metrics/market/summary
+INFO     tests.backend.conftest:conftest.py:255 PASS: /api/v1/metrics/market/summary: 0.016s
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance check: /api/v1/metrics/providers
+INFO     tests.backend.conftest:conftest.py:255 PASS: /api/v1/metrics/providers: 0.002s
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance check: /api/v1/metrics/efficiency
+INFO     tests.backend.conftest:conftest.py:255 PASS: /api/v1/metrics/efficiency: 0.002s
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance check: /api/v1/metrics/gpus
+INFO     tests.backend.conftest:conftest.py:255 PASS: /api/v1/metrics/gpus: 0.002s
+INFO     tests.backend.conftest:conftest.py:255 PASS: Performance check: /api/v1/metrics/types
+INFO     tests.backend.conftest:conftest.py:255 PASS: /api/v1/metrics/types: 0.001s

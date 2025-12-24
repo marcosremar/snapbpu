@@ -1,17 +1,21 @@
 """API client for Dumont Cloud"""
 import json
+import os
 import sys
 from typing import Dict, Any, Optional
 import requests
 
 from .token_manager import TokenManager
 
+# Default API URL - can be overridden by environment variable
+DEFAULT_API_URL = os.environ.get("DUMONT_API_URL", "http://localhost:8001")
+
 
 class APIClient:
     """HTTP client for Dumont Cloud API"""
 
-    def __init__(self, base_url: str = "http://localhost:8766"):
-        self.base_url = base_url
+    def __init__(self, base_url: str = None):
+        self.base_url = base_url or DEFAULT_API_URL
         self.session = requests.Session()
         self.token_manager = TokenManager()
 
@@ -59,7 +63,7 @@ class APIClient:
                         if not silent:
                             print(f"✅ Login successful! Token saved.")
                         return result
-                except:
+                except (json.JSONDecodeError, KeyError):
                     pass
 
             if "logout" in path and response.ok:
@@ -68,7 +72,7 @@ class APIClient:
                     print("✅ Logged out successfully.")
                 try:
                     return response.json()
-                except:
+                except json.JSONDecodeError:
                     return {"status": "success"}
 
             # Handle errors

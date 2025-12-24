@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,100 - tests.backend.conftest - INFO - PASS: Validação requer cpu_machine_type

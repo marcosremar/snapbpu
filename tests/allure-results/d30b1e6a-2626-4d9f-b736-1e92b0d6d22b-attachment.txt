@@ -1,0 +1,12 @@
+[92m✓[0m Performance check: /api/v1/metrics/market
+[92m✓[0m /api/v1/metrics/market: 0.003s
+[92m✓[0m Performance check: /api/v1/metrics/market/summary
+[92m✓[0m /api/v1/metrics/market/summary: 0.016s
+[92m✓[0m Performance check: /api/v1/metrics/providers
+[92m✓[0m /api/v1/metrics/providers: 0.002s
+[92m✓[0m Performance check: /api/v1/metrics/efficiency
+[92m✓[0m /api/v1/metrics/efficiency: 0.002s
+[92m✓[0m Performance check: /api/v1/metrics/gpus
+[92m✓[0m /api/v1/metrics/gpus: 0.002s
+[92m✓[0m Performance check: /api/v1/metrics/types
+[92m✓[0m /api/v1/metrics/types: 0.001s

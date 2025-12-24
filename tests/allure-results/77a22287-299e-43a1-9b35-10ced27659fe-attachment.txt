@@ -1,0 +1,5 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestRegionsReadiness
+INFO     tests.backend.conftest:conftest.py:265 INFO: Região planejada: us-east (US East)
+INFO     tests.backend.conftest:conftest.py:265 INFO: Região planejada: us-west (US West)
+INFO     tests.backend.conftest:conftest.py:265 INFO: Região planejada: eu-west (Europe West)
+INFO     tests.backend.conftest:conftest.py:265 INFO: Região planejada: asia-east (Asia East)

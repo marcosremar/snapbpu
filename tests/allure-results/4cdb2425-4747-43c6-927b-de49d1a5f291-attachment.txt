@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Concorrência: 3/3 sucesso, avg=0.002s

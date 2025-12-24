@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Critério de otimização: latency
+INFO     tests.backend.conftest:conftest.py:265 INFO: Critério de otimização: price
+INFO     tests.backend.conftest:conftest.py:265 INFO: Critério de otimização: availability
+INFO     tests.backend.conftest:conftest.py:265 INFO: Critério de otimização: gpu_count

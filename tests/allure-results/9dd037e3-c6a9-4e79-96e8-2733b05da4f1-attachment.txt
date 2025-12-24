@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,952 - tests.backend.conftest - INFO - Usando cache para TestMigrationSecurity
+2025-12-21 06:32:11,954 - tests.backend.conftest - INFO - PASS: Endpoints de migrate protegidos

@@ -1,0 +1,1 @@
+2025-12-21 06:32:11,142 - tests.backend.conftest - INFO - PASS: Concorrência: 5/5 OK, avg=2.352s

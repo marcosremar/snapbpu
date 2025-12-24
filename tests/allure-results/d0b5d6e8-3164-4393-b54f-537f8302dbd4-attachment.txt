@@ -1,0 +1,8 @@
+[92m✓[0m Snapshots com período de 1h
+[92m✓[0m Período 1h: 70 snapshots
+[92m✓[0m Snapshots com período de 24h
+[92m✓[0m Período 24h: 100 snapshots
+[92m✓[0m Snapshots com período de 72h
+[92m✓[0m Período 72h: 100 snapshots
+[92m✓[0m Snapshots com período de 168h
+[92m✓[0m Período 168h: 100 snapshots

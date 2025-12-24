@@ -1,0 +1,2 @@
+WARNING  dumontcloud.tests.backend.conftest:conftest.py:198 Request erro, tentativa 2: ('Connection aborted.', ConnectionResetError(104, 'Connection reset by peer'))
+INFO     tests.backend.conftest:conftest.py:255 PASS: Validação de input para migração OK

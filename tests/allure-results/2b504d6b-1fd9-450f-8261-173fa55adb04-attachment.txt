@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,004 - tests.backend.conftest - INFO - Usando cache para TestSnapshotSecurity
+2025-12-21 06:32:13,006 - tests.backend.conftest - INFO - PASS: Acesso não autorizado rejeitado para listar snapshots

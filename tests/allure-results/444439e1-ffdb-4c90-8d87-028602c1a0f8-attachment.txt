@@ -1,0 +1,1 @@
+2025-12-21 06:32:03,609 - tests.backend.conftest - INFO - PASS: Resume em instância inexistente retornou 404

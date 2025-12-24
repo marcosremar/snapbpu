@@ -1,0 +1,2 @@
+[92m✓[0m Encoding
+[92m✓[0m Resposta em UTF-8 válido

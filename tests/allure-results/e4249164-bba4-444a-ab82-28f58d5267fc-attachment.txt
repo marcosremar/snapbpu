@@ -1,0 +1,3 @@
+2025-12-21 06:32:13,104 - tests.backend.conftest - INFO - Usando cache para TestStandbyAssociations
+2025-12-21 06:32:13,105 - tests.backend.conftest - INFO - PASS: Listar associações
+2025-12-21 06:32:13,105 - tests.backend.conftest - INFO - PASS: Associações: 2 encontradas

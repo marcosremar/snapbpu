@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestProviderRankings
+INFO     tests.backend.conftest:conftest.py:255 PASS: Provider rankings básico
+INFO     tests.backend.conftest:conftest.py:255 PASS: Provider rankings: 50 providers, Top reliability: 0.956

@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Market summary tipo: on-demand
+INFO     tests.backend.conftest:conftest.py:255 PASS: Summary filtrado por 'on-demand' OK

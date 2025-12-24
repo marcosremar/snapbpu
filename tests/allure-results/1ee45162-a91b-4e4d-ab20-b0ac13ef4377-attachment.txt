@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preços do standby
+INFO     tests.backend.conftest:conftest.py:255 PASS: Tempo de resposta dos preços: 0.001s

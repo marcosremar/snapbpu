@@ -1,0 +1,6 @@
+[92m✓[0m Request 1
+[92m✓[0m Request 2
+[92m✓[0m Request 3
+[92m✓[0m Request 4
+[92m✓[0m Request 5
+[92m✓[0m 5 requests - avg: 0.001s, min: 0.001s, max: 0.002s

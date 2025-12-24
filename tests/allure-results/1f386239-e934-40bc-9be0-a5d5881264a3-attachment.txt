@@ -1,0 +1,8 @@
+[92m✓[0m Providers com filtro: {'verified_only': True}
+[92m✓[0m Filtro {'verified_only': True}: 0 providers
+[92m✓[0m Providers com filtro: {'min_observations': 10}
+[92m✓[0m Filtro {'min_observations': 10}: 50 providers
+[92m✓[0m Providers com filtro: {'min_reliability': 0.5}
+[92m✓[0m Filtro {'min_reliability': 0.5}: 50 providers
+[92m✓[0m Providers com filtro: {'limit': 20}
+[92m✓[0m Filtro {'limit': 20}: 20 providers

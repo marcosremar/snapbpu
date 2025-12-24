@@ -203,6 +203,117 @@ class MachineProvisionerService:
             "single": "Create single machine and wait (cheapest)",
         }
 
+    def provision_with_failover(
+        self,
+        config: ProvisionConfig,
+        progress_callback: Optional[callable] = None,
+    ) -> ProvisionResult:
+        """
+        Provision with automatic SSH failover.
+
+        This is the recommended method for production use:
+        1. Run race strategy to get a machine
+        2. Verify SSH actually works with a real command
+        3. If SSH fails, destroy machine and try another
+        4. Repeat up to config.max_ssh_retries times
+
+        Use this when you need guaranteed working SSH, especially for:
+        - Model deployment
+        - Long-running jobs
+        - Cold start from pause/hibernation
+
+        Args:
+            config: Provisioning configuration (with max_ssh_retries, ssh_command_timeout)
+            progress_callback: Optional callback for progress updates
+
+        Returns:
+            ProvisionResult with verified working SSH
+        """
+        strategy = RaceStrategy()
+        result = strategy.provision_with_failover(
+            config=config,
+            vast_service=self.vast_service,
+            progress_callback=progress_callback,
+        )
+
+        if result.success:
+            logger.info(
+                f"[MachineProvisioner] Failover success: {result.gpu_name} "
+                f"({result.ssh_host}:{result.ssh_port}) in {result.total_time_seconds:.1f}s"
+            )
+        else:
+            logger.warning(f"[MachineProvisioner] Failover failed: {result.error}")
+
+        return result
+
+    def resume_with_failover(
+        self,
+        instance_id: int,
+        backup_config: Optional[ProvisionConfig] = None,
+        parallel_backup: bool = True,
+        resume_timeout: int = 60,
+        total_timeout: int = 180,
+        progress_callback: Optional[callable] = None,
+    ) -> ProvisionResult:
+        """
+        Resume a paused instance with automatic failover.
+
+        If the resumed instance doesn't have working SSH, automatically
+        launch a backup machine and race between them.
+
+        Use this for:
+        - Resuming from serverless/economic mode
+        - Cold start from hibernation
+        - Any pause/resume operation that needs reliability
+
+        Args:
+            instance_id: Instance to resume
+            backup_config: Config for backup machine (optional, creates similar GPU)
+            parallel_backup: If True, launch backup immediately in parallel
+            resume_timeout: Seconds to wait before launching backup (if not parallel)
+            total_timeout: Max time to wait for either machine
+            progress_callback: Optional callback for progress updates
+
+        Returns:
+            ProvisionResult with the winning machine (resume or backup)
+
+        Example:
+            result = provisioner.resume_with_failover(
+                instance_id=12345,
+                backup_config=ProvisionConfig(max_price=1.0),
+                parallel_backup=True,
+            )
+
+            if result.success:
+                print(f"Ready at {result.ssh_host}:{result.ssh_port}")
+        """
+        from .coldstart import ColdStartStrategy, ColdStartConfig
+
+        coldstart_config = ColdStartConfig(
+            instance_id=instance_id,
+            backup_config=backup_config,
+            parallel_backup=parallel_backup,
+            resume_timeout=resume_timeout,
+            total_timeout=total_timeout,
+        )
+
+        strategy = ColdStartStrategy()
+        result = strategy.resume_with_failover(
+            coldstart_config=coldstart_config,
+            vast_service=self.vast_service,
+            progress_callback=progress_callback,
+        )
+
+        if result.success:
+            logger.info(
+                f"[MachineProvisioner] Resume success: {result.gpu_name} "
+                f"({result.ssh_host}:{result.ssh_port}) in {result.total_time_seconds:.1f}s"
+            )
+        else:
+            logger.warning(f"[MachineProvisioner] Resume failed: {result.error}")
+
+        return result
+
 
 # Convenience function for quick usage
 def provision_machine(

@@ -1,0 +1,3 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestMarketSnapshots
+INFO     tests.backend.conftest:conftest.py:255 PASS: Market snapshots básico
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots: 100 registros, GPU: RTX 5090, Avg: $0.373/h

@@ -21,11 +21,19 @@ from ..schemas.response import (
     SyncStatusResponse,
 )
 from ....domain.services import InstanceService, MigrationService, SyncService
-from ....core.exceptions import NotFoundException, VastAPIException, MigrationException
+from ....core.exceptions import (
+    NotFoundException,
+    VastAPIException,
+    MigrationException,
+    InsufficientBalanceException,
+    OfferUnavailableException,
+    ServiceUnavailableException,
+)
 from ..dependencies import get_instance_service, get_migration_service, get_sync_service, require_auth, get_current_user_email
 from ..dependencies_usage import get_usage_service
 from ....services.usage_service import UsageService
 from ....services.standby.manager import get_standby_manager
+from ....services.machine_history_service import get_machine_history_service
 
 router = APIRouter(prefix="/instances", tags=["Instances"], dependencies=[Depends(require_auth)])
 
@@ -46,8 +54,10 @@ async def search_offers(
     verified_only: bool = Query(False, description="Only verified hosts"),
     static_ip: bool = Query(False, description="Require static IP"),
     cuda_version: Optional[str] = Query(None, description="Minimum CUDA version"),
+    machine_type: Optional[str] = Query(None, description="Machine type: on-demand, interruptible, or None for all"),
     order_by: str = Query("dph_total", description="Order by field: dph_total, gpu_ram, reliability"),
     limit: int = Query(50, le=100, description="Maximum results"),
+    include_blacklisted: bool = Query(False, description="Include blacklisted machines (marked but not filtered)"),
     instance_service: InstanceService = Depends(get_instance_service),
 ):
     """
@@ -55,42 +65,99 @@ async def search_offers(
 
     Returns list of available GPU instances matching filters.
     Supports filtering by GPU specs, network, price, reliability and more.
+
+    Machine history information is included for each offer:
+    - is_blacklisted: If machine has been blocked due to failures
+    - success_rate: Historical success rate (0-1)
+    - reliability_status: excellent, good, fair, poor, unknown
     """
-    offers = instance_service.search_offers(
-        gpu_name=gpu_name,
-        num_gpus=num_gpus,
-        min_gpu_ram=min_gpu_ram,
-        min_cpu_cores=min_cpu_cores,
-        min_cpu_ram=min_cpu_ram,
-        max_price=max_price,
-        region=region,
-        min_disk=min_disk,
-        min_inet_down=min_inet_down,
-        min_reliability=min_reliability,
-        verified_only=verified_only,
-        static_ip=static_ip,
-        limit=limit,
-    )
+    # Use search_offers_by_type if machine_type is specified
+    if machine_type:
+        offers = instance_service.search_offers_by_type(
+            machine_type=machine_type,
+            gpu_name=gpu_name,
+            num_gpus=num_gpus,
+            min_gpu_ram=min_gpu_ram,
+            max_price=max_price,
+            region=region,
+            min_reliability=min_reliability,
+            verified_only=verified_only,
+            limit=limit,
+        )
+    else:
+        offers = instance_service.search_offers(
+            gpu_name=gpu_name,
+            num_gpus=num_gpus,
+            min_gpu_ram=min_gpu_ram,
+            min_cpu_cores=min_cpu_cores,
+            min_cpu_ram=min_cpu_ram,
+            max_price=max_price,
+            region=region,
+            min_disk=min_disk,
+            min_inet_down=min_inet_down,
+            min_reliability=min_reliability,
+            verified_only=verified_only,
+            static_ip=static_ip,
+            limit=limit,
+        )
+
+    # Annotate offers with machine history data
+    history_service = get_machine_history_service()
+    offer_dicts = [
+        {
+            "id": offer.id,
+            "machine_id": str(offer.machine_id) if hasattr(offer, 'machine_id') else str(offer.id),
+            "gpu_name": offer.gpu_name,
+            "num_gpus": offer.num_gpus,
+            "gpu_ram": offer.gpu_ram,
+            "cpu_cores": offer.cpu_cores,
+            "cpu_ram": offer.cpu_ram,
+            "disk_space": offer.disk_space,
+            "inet_down": offer.inet_down,
+            "inet_up": offer.inet_up,
+            "dph_total": offer.dph_total,
+            "geolocation": offer.geolocation,
+            "reliability": offer.reliability,
+            "cuda_version": offer.cuda_version,
+            "verified": offer.verified,
+            "static_ip": offer.static_ip,
+        }
+        for offer in offers
+    ]
+
+    # Annotate with machine history (blacklist, success rate, etc)
+    annotated_offers = history_service.annotate_offers(offer_dicts, provider="vast")
+
+    # Filter out blacklisted if not including them
+    if not include_blacklisted:
+        annotated_offers = [o for o in annotated_offers if not o.get("_is_blacklisted", False)]
 
     offer_responses = [
         GpuOfferResponse(
-            id=offer.id,
-            gpu_name=offer.gpu_name,
-            num_gpus=offer.num_gpus,
-            gpu_ram=offer.gpu_ram,
-            cpu_cores=offer.cpu_cores,
-            cpu_ram=offer.cpu_ram,
-            disk_space=offer.disk_space,
-            inet_down=offer.inet_down,
-            inet_up=offer.inet_up,
-            dph_total=offer.dph_total,
-            geolocation=offer.geolocation,
-            reliability=offer.reliability,
-            cuda_version=offer.cuda_version,
-            verified=offer.verified,
-            static_ip=offer.static_ip,
+            id=offer["id"],
+            gpu_name=offer["gpu_name"],
+            num_gpus=offer["num_gpus"],
+            gpu_ram=offer["gpu_ram"],
+            cpu_cores=offer["cpu_cores"],
+            cpu_ram=offer["cpu_ram"],
+            disk_space=offer["disk_space"],
+            inet_down=offer["inet_down"],
+            inet_up=offer["inet_up"],
+            dph_total=offer["dph_total"],
+            geolocation=offer.get("geolocation"),
+            reliability=offer["reliability"],
+            cuda_version=offer.get("cuda_version"),
+            verified=offer["verified"],
+            static_ip=offer["static_ip"],
+            # Machine history fields
+            machine_id=offer.get("machine_id"),
+            is_blacklisted=offer.get("_is_blacklisted", False),
+            blacklist_reason=offer.get("_blacklist_reason"),
+            success_rate=offer.get("_success_rate"),
+            total_attempts=offer.get("_total_attempts", 0),
+            reliability_status=offer.get("_reliability_status"),
         )
-        for offer in offers
+        for offer in annotated_offers
     ]
 
     return SearchOffersResponse(offers=offer_responses, count=len(offer_responses))
@@ -99,6 +166,7 @@ async def search_offers(
 @router.get("", response_model=ListInstancesResponse)
 async def list_instances(
     request: Request,
+    status: Optional[str] = Query(None, description="Filter by status: running, stopped, paused"),
     instance_service: InstanceService = Depends(get_instance_service),
 ):
     """
@@ -106,6 +174,9 @@ async def list_instances(
 
     Returns all GPU instances owned by the user, including CPU standby info if enabled.
     In demo mode, returns sample machines for demonstration.
+
+    Optional filters:
+    - status: Filter by instance status (running, stopped, paused)
     """
     from ..schemas.response import CPUStandbyInfo
     from datetime import datetime, timedelta
@@ -210,6 +281,13 @@ async def list_instances(
                 total_dph=0.69,
             ),
         ]
+        # Apply status filter to demo instances too
+        if status:
+            status_lower = status.lower()
+            demo_instances = [
+                inst for inst in demo_instances
+                if inst.status.lower() == status_lower
+            ]
         return ListInstancesResponse(instances=demo_instances, count=len(demo_instances))
 
     instances = instance_service.list_instances()
@@ -269,6 +347,14 @@ async def list_instances(
             total_dph=total_dph,
         ))
 
+    # Apply status filter if provided
+    if status:
+        status_lower = status.lower()
+        instance_responses = [
+            inst for inst in instance_responses
+            if inst.status.lower() == status_lower or inst.actual_status.lower() == status_lower
+        ]
+
     return ListInstancesResponse(instances=instance_responses, count=len(instance_responses))
 
 
@@ -285,7 +371,50 @@ async def create_instance(
 
     Creates instance from a GPU offer.
     If auto-standby is enabled, also creates a CPU standby for failover.
+
+    Pré-validações executadas:
+    - Verificar conectividade com VAST.ai
+    - Verificar saldo suficiente
+    - Verificar se oferta ainda está disponível
     """
+    # =========================================================================
+    # PRÉ-VALIDAÇÕES - Verificar antes de executar (pode ser pulada para testes)
+    # =========================================================================
+    if not request.skip_validation:
+        try:
+            validation = instance_service.validate_before_create(request.offer_id)
+            if not validation["valid"]:
+                errors = "; ".join(validation["errors"])
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Pré-validação falhou: {errors}"
+                )
+
+            # Log warnings
+            for warning in validation.get("warnings", []):
+                logger.warning(f"Create instance warning: {warning}")
+
+        except InsufficientBalanceException as e:
+            raise HTTPException(
+                status_code=status.HTTP_402_PAYMENT_REQUIRED,
+                detail=str(e)
+            )
+        except OfferUnavailableException as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=str(e)
+            )
+        except ServiceUnavailableException as e:
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=str(e)
+            )
+    else:
+        logger.info(f"Skipping pre-validation for offer {request.offer_id} (skip_validation=True)")
+
+    # =========================================================================
+    # CRIAR INSTÂNCIA
+    # =========================================================================
     try:
         instance = instance_service.create_instance(
             offer_id=request.offer_id,
@@ -294,16 +423,19 @@ async def create_instance(
             label=request.label,
             ports=request.ports,
         )
+        logger.info(f"Instance {instance.id} created successfully")
 
-        # Iniciar tracking de uso
-        usage_service.start_usage(
-            user_id=user_id,
-            instance_id=str(instance.id),
-            gpu_type=instance.gpu_name
-        )
+        # Track usage (non-critical, don't fail if this errors)
+        try:
+            usage_service.start_usage(
+                user_id=user_id,
+                instance_id=str(instance.id),
+                gpu_type=instance.gpu_name
+            )
+        except Exception as e:
+            logger.warning(f"Failed to start usage tracking for {instance.id}: {e}")
 
-        # Auto-criar CPU standby em background (comportamento padrão)
-        # CPU Standby é criado junto com GPU por padrão, a menos que skip_standby=True
+        # Auto-create CPU standby in background
         if not request.skip_standby:
             standby_manager = get_standby_manager()
             if standby_manager.is_configured():
@@ -313,13 +445,11 @@ async def create_instance(
                     gpu_instance_id=instance.id,
                     label=request.label
                 )
-            else:
-                logger.warning(f"CPU Standby not created for GPU {instance.id} - StandbyManager not configured (missing GCP credentials)")
 
         return InstanceResponse(
             id=instance.id,
-            status=instance.status,
-            actual_status=instance.actual_status,
+            status=instance.status or "loading",
+            actual_status=instance.actual_status or instance.status or "loading",
             gpu_name=instance.gpu_name,
             num_gpus=instance.num_gpus,
             gpu_ram=instance.gpu_ram,
@@ -331,13 +461,15 @@ async def create_instance(
             ssh_host=instance.ssh_host,
             ssh_port=instance.ssh_port,
             label=instance.label,
-            ports=instance.ports,
+            ports=instance.ports or {},
         )
     except VastAPIException as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e),
-        )
+        logger.error(f"VastAPI error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        import traceback
+        logger.error(f"Unexpected error creating instance: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Failed to create instance: {e}")
 
 
 @router.get("/{instance_id}", response_model=InstanceResponse)

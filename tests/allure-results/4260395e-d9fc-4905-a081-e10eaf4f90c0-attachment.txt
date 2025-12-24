@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,095 - tests.backend.conftest - INFO - PASS: Status com associations
+2025-12-21 06:32:13,095 - tests.backend.conftest - INFO - PASS: Associations: 2 encontradas

@@ -1,0 +1,2 @@
+[92m✓[0m Snapshots filtrados por GPU: RTX 3090
+[92m✓[0m Filtro GPU 'RTX 3090': 100 snapshots

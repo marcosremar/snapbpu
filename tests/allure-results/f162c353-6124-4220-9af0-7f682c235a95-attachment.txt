@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Cost Optimizer: Analisando savings
+INFO     tests.backend.conftest:conftest.py:255 PASS: Savings summary OK
+INFO     tests.backend.conftest:conftest.py:265 INFO: Cost Optimizer: Hibernation stats
+INFO     tests.backend.conftest:conftest.py:255 PASS: Hibernation stats OK

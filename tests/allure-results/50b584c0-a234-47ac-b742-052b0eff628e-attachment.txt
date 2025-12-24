@@ -1,0 +1,6 @@
+[94mℹ[0m DevOps: Health check
+[92m✓[0m Health OK
+[94mℹ[0m DevOps: Standby status
+[92m✓[0m Standby status OK
+[94mℹ[0m DevOps: Listar instâncias
+[92m✓[0m Instâncias listadas

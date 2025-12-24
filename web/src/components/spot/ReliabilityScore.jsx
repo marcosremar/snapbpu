@@ -52,21 +52,21 @@ export default function ReliabilityScore({ getAuthHeaders, selectedGPU = 'all' }
   const formatPercent = (value) => `${(value * 100)?.toFixed(0) || '0'}%`
 
   const getScoreColor = (score) => {
-    if (score >= 0.9) return 'text-emerald-400'
+    if (score >= 0.9) return 'text-brand-400'
     if (score >= 0.7) return 'text-lime-400'
     if (score >= 0.5) return 'text-yellow-400'
     return 'text-red-400'
   }
 
   const getScoreBgColor = (score) => {
-    if (score >= 0.9) return 'bg-emerald-500'
+    if (score >= 0.9) return 'bg-brand-500'
     if (score >= 0.7) return 'bg-lime-500'
     if (score >= 0.5) return 'bg-yellow-500'
     return 'bg-red-500'
   }
 
   const getTierColor = (tier) => {
-    if (tier === 'Excelente') return 'bg-emerald-500'
+    if (tier === 'Excelente') return 'bg-brand-500'
     if (tier === 'Bom') return 'bg-lime-500'
     if (tier === 'Regular') return 'bg-yellow-500'
     return 'bg-red-500'
@@ -110,7 +110,7 @@ export default function ReliabilityScore({ getAuthHeaders, selectedGPU = 'all' }
           <div className="spot-highlight mb-5">
             <div className="flex items-center justify-center gap-4 relative z-10">
               <div>
-                <span className="block text-xs text-emerald-300/70 uppercase font-semibold mb-1">Média do Mercado</span>
+                <span className="block text-xs text-brand-300/70 uppercase font-semibold mb-1">Média do Mercado</span>
                 <span className={`text-4xl font-extrabold ${getScoreColor(data.market_average)}`}>
                   {formatPercent(data.market_average)}
                 </span>
@@ -145,8 +145,8 @@ export default function ReliabilityScore({ getAuthHeaders, selectedGPU = 'all' }
               <div key={idx} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 bg-white/[0.03] hover:bg-white/[0.06] rounded-lg transition-colors animate-fade-in" style={{ animationDelay: `${idx * 50}ms` }}>
                 <div className={`text-lg font-bold ${idx === 0 ? 'text-yellow-400' : idx === 1 ? 'text-gray-300' : idx === 2 ? 'text-orange-400' : 'text-blue-400'}`}>#{idx + 1}</div>
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-blue-500/20 flex items-center justify-center">
-                    <Server size={14} className="text-emerald-400" />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500/20 to-blue-500/20 flex items-center justify-center">
+                    <Server size={14} className="text-brand-400" />
                   </div>
                   <span className="text-white font-medium">{provider.hostname || `Host ${provider.machine_id}`}</span>
                 </div>
@@ -158,7 +158,7 @@ export default function ReliabilityScore({ getAuthHeaders, selectedGPU = 'all' }
                 <div className="flex gap-0.5">{getStars(provider.reliability_score)}</div>
                 <div className="flex items-center gap-2 text-xs text-gray-500">
                   <span>{provider.total_observations} obs</span>
-                  {provider.verified && <Shield size={12} className="text-emerald-400" />}
+                  {provider.verified && <Shield size={12} className="text-brand-400" />}
                 </div>
               </div>
             ))}

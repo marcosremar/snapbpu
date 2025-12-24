@@ -1,0 +1,2 @@
+[92m✓[0m Precisão numérica
+[92m✓[0m Precisão numérica validada (máx 2 casas decimais)

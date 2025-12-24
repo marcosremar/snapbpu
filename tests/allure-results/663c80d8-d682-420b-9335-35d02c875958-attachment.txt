@@ -1,0 +1,2 @@
+[92m✓[0m Tempo de resposta
+[92m✓[0m Tempo de resposta: 0.001s

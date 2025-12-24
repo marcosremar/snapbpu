@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Status com associations
+INFO     tests.backend.conftest:conftest.py:255 PASS: Associations: 2 encontradas

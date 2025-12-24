@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestInstanceOffers
+INFO     tests.backend.conftest:conftest.py:255 PASS: Busca básica de ofertas
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON keys OK: ['offers', 'count']
+INFO     tests.backend.conftest:conftest.py:255 PASS: Ofertas encontradas: 64

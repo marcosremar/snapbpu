@@ -1,0 +1,3 @@
+[92m✓[0m Caching headers
+[94mℹ[0m Cache headers: {'Cache-Control': None, 'ETag': None, 'Last-Modified': None}
+[92m✓[0m Headers de resposta validados

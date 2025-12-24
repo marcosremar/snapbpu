@@ -1,0 +1,1 @@
+[92m✓[0m Snapshot não criado (Restic não configurado ou instância inválida - OK)

@@ -1,0 +1,2 @@
+[92m✓[0m Consistência de cálculos
+[94mℹ[0m Sem máquinas para validar consistência

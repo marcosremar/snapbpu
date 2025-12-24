@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,014 - tests.backend.conftest - INFO - PASS: Acesso não autorizado rejeitado para deletar snapshot

@@ -1,0 +1,3 @@
+[92m✓[0m Preços do standby
+[94mℹ[0m Estrutura de preços: ['machine_type', 'disk_gb', 'spot', 'estimated_hourly_usd', 'estimated_monthly_usd', 'breakdown', 'note']
+[92m✓[0m Preços do standby obtidos

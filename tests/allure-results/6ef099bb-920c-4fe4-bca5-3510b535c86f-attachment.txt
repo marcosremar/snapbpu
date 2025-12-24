@@ -1,0 +1,9 @@
+2025-12-21 06:31:46,341 - tests.backend.conftest - INFO - Usando cache para TestCompleteSystemFlow
+2025-12-21 06:31:46,342 - tests.backend.conftest - INFO - INFO: Passo 1: Registro de novo usuário
+2025-12-21 06:31:46,343 - tests.backend.conftest - INFO - PASS: Usuário registrado: e2e_test_1766295106@example.com
+2025-12-21 06:31:46,343 - tests.backend.conftest - INFO - INFO: Passo 2: Login
+2025-12-21 06:31:46,344 - tests.backend.conftest - INFO - PASS: Login bem-sucedido
+2025-12-21 06:31:46,344 - tests.backend.conftest - INFO - INFO: Passo 3: Verificar /me
+2025-12-21 06:31:46,345 - tests.backend.conftest - INFO - PASS: Autenticação verificada
+2025-12-21 06:31:46,345 - tests.backend.conftest - INFO - INFO: Passo 4: Acessar dashboard
+2025-12-21 06:31:46,346 - tests.backend.conftest - INFO - PASS: Dashboard acessível

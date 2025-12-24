@@ -1,0 +1,1 @@
+[92m✓[0m Endpoint protegido contra acesso não autenticado

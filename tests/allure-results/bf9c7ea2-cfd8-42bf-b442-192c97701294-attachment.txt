@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro de preço: $2.0/h
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preço max $2.0: 64 ofertas (64 dentro do limite)
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro de preço: $5.0/h
+INFO     tests.backend.conftest:conftest.py:255 PASS: Preço max $5.0: 64 ofertas (64 dentro do limite)

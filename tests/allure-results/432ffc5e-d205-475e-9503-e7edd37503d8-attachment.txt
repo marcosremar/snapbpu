@@ -1,0 +1,4 @@
+2025-12-21 06:32:13,092 - tests.backend.conftest - INFO - Usando cache para TestStandbyStatus
+2025-12-21 06:32:13,093 - tests.backend.conftest - INFO - PASS: Status do standby
+2025-12-21 06:32:13,093 - tests.backend.conftest - INFO - PASS: JSON keys OK: ['configured', 'auto_standby_enabled', 'active_associations']
+2025-12-21 06:32:13,093 - tests.backend.conftest - INFO - PASS: Status: configured=False, auto_standby=False, active=2

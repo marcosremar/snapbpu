@@ -1,0 +1,1 @@
+[94mℹ[0m Sync trigger para instância inexistente: 500

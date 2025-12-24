@@ -1,0 +1,1 @@
+[92m✓[0m Acesso não autorizado rejeitado para listar snapshots

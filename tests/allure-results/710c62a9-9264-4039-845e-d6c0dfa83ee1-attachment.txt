@@ -1,0 +1,12 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency com filtro: {'gpu_name': 'RTX 3090'}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'gpu_name': 'RTX 3090'}: 50 resultados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency com filtro: {'machine_type': 'on-demand'}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'machine_type': 'on-demand'}: 50 resultados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency com filtro: {'verified_only': True}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'verified_only': True}: 0 resultados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency com filtro: {'max_price': 5.0}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'max_price': 5.0}: 50 resultados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency com filtro: {'min_reliability': 0.5}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'min_reliability': 0.5}: 50 resultados
+INFO     tests.backend.conftest:conftest.py:255 PASS: Efficiency com filtro: {'limit': 20}
+INFO     tests.backend.conftest:conftest.py:255 PASS: Filtro {'limit': 20}: 20 resultados

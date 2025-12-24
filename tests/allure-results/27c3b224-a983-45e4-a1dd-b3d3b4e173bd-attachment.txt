@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,048 - tests.backend.conftest - INFO - Usando cache para TestSnapshotDeletion
+2025-12-21 06:32:13,049 - tests.backend.conftest - INFO - PASS: Erro de configuração detectado

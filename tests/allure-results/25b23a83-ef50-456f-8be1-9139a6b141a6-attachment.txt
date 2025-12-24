@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,143 - tests.backend.conftest - INFO - PASS: Requisições concorrentes: 10/10 sucesso em 0.00s

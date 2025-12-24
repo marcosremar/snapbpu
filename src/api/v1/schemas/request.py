@@ -9,8 +9,11 @@ from pydantic import BaseModel, Field, EmailStr
 
 class LoginRequest(BaseModel):
     """Login request"""
-    username: EmailStr = Field(..., description="User email")
+    username: EmailStr = Field(..., alias="email", description="User email")
     password: str = Field(..., min_length=1, description="User password")
+
+    class Config:
+        populate_by_name = True  # Accept both username and email
 
 
 class RegisterRequest(BaseModel):
@@ -47,6 +50,7 @@ class CreateInstanceRequest(BaseModel):
     label: Optional[str] = Field(None, description="Instance label")
     ports: Optional[List[int]] = Field(None, description="Ports to expose")
     skip_standby: bool = Field(False, alias="skip-standby", description="Skip CPU standby creation (default: create standby)")
+    skip_validation: bool = Field(False, description="Skip pre-validation (faster but may fail at creation time)")
 
     class Config:
         populate_by_name = True  # Accept both skip_standby and skip-standby

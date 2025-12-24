@@ -11,6 +11,8 @@ from . import finetune
 from . import warmpool
 from . import failover_settings
 from . import failover
+from . import serverless
+from . import machine_history
 
 __all__ = [
     'auth',
@@ -23,5 +25,7 @@ __all__ = [
     'warmpool',
     'failover_settings',
     'failover',
+    'serverless',
+    'machine_history',
 ]
 

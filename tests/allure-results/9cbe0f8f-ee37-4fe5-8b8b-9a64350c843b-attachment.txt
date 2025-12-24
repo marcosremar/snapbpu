@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Consistência de cálculos
+INFO     tests.backend.conftest:conftest.py:265 INFO: Sem máquinas para validar consistência

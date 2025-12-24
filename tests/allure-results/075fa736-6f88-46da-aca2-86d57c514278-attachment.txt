@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Start sync retornou: 422 (associação pode não existir)

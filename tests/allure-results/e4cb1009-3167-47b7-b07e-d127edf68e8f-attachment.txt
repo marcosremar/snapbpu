@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON válido
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON válido e serializável

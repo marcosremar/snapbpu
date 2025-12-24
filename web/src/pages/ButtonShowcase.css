@@ -1,0 +1,548 @@
+/* ButtonShowcase.css - 50 Button Styles - ALL GREEN */
+
+.button-showcase {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0f0a 0%, #111a11 50%, #0d120d 100%);
+  padding: 2rem;
+  position: relative;
+}
+
+.button-showcase::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(16, 185, 129, 0.08), transparent),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(16, 185, 129, 0.05), transparent);
+  pointer-events: none;
+}
+
+.showcase-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.showcase-header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.showcase-header p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+}
+
+.buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.button-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.3s ease;
+}
+
+.button-card:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(16, 185, 129, 0.2);
+}
+
+.button-number {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+}
+
+.button-name {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* Base button style */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: #fff;
+  white-space: nowrap;
+}
+
+/* ============================================
+   1-5: TONS DE VERDE SÓLIDO
+   ============================================ */
+
+.btn-glass-1 {
+  background: #10b981;
+}
+.btn-glass-1:hover {
+  background: #0ea472;
+}
+
+.btn-glass-2 {
+  background: #059669;
+}
+.btn-glass-2:hover {
+  background: #048a5e;
+}
+
+.btn-glass-3 {
+  background: #047857;
+}
+.btn-glass-3:hover {
+  background: #036b4d;
+}
+
+.btn-glass-4 {
+  background: #34d399;
+}
+.btn-glass-4:hover {
+  background: #2bc48a;
+}
+
+.btn-glass-5 {
+  background: #065f46;
+}
+.btn-glass-5:hover {
+  background: #05533d;
+}
+
+/* ============================================
+   6-10: GRADIENTES VERDES
+   ============================================ */
+
+.btn-gradient-1 {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+.btn-gradient-1:hover {
+  background: linear-gradient(135deg, #0ea472, #048a5e);
+}
+
+.btn-gradient-2 {
+  background: linear-gradient(180deg, #34d399, #10b981);
+}
+.btn-gradient-2:hover {
+  background: linear-gradient(180deg, #2bc48a, #0ea472);
+}
+
+.btn-gradient-3 {
+  background: linear-gradient(90deg, #059669, #10b981, #059669);
+}
+.btn-gradient-3:hover {
+  background: linear-gradient(90deg, #048a5e, #0ea472, #048a5e);
+}
+
+.btn-gradient-4 {
+  background: linear-gradient(135deg, #047857, #10b981);
+}
+.btn-gradient-4:hover {
+  background: linear-gradient(135deg, #036b4d, #0ea472);
+}
+
+.btn-gradient-5 {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 50%, #059669 100%);
+}
+.btn-gradient-5:hover {
+  background: linear-gradient(180deg, #2bc48a 0%, #0ea472 50%, #048a5e 100%);
+}
+
+/* ============================================
+   11-15: VERDE COM SOMBRA
+   ============================================ */
+
+.btn-neon-1 {
+  background: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+.btn-neon-1:hover {
+  background: #0ea472;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-neon-2 {
+  background: #059669;
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.25);
+}
+.btn-neon-2:hover {
+  background: #048a5e;
+  box-shadow: 0 5px 14px rgba(5, 150, 105, 0.35);
+}
+
+.btn-neon-3 {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+.btn-neon-3:hover {
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+}
+
+.btn-neon-4 {
+  background: #34d399;
+  box-shadow: 0 3px 10px rgba(52, 211, 153, 0.3);
+}
+.btn-neon-4:hover {
+  background: #2bc48a;
+  box-shadow: 0 5px 14px rgba(52, 211, 153, 0.4);
+}
+
+.btn-neon-5 {
+  background: #047857;
+  box-shadow: 0 4px 12px rgba(4, 120, 87, 0.3);
+}
+.btn-neon-5:hover {
+  background: #036b4d;
+  box-shadow: 0 6px 16px rgba(4, 120, 87, 0.4);
+}
+
+/* ============================================
+   16-20: VERDE COM BORDA
+   ============================================ */
+
+.btn-outline-1 {
+  background: #10b981;
+  border: 2px solid #34d399;
+}
+.btn-outline-1:hover {
+  background: #0ea472;
+}
+
+.btn-outline-2 {
+  background: #059669;
+  border: 2px solid #10b981;
+}
+.btn-outline-2:hover {
+  background: #048a5e;
+}
+
+.btn-outline-3 {
+  background: #047857;
+  border: 1px solid #10b981;
+}
+.btn-outline-3:hover {
+  background: #036b4d;
+}
+
+.btn-outline-4 {
+  background: #10b981;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+.btn-outline-4:hover {
+  background: #0ea472;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.btn-outline-5 {
+  background: #059669;
+  border: 2px solid #047857;
+}
+.btn-outline-5:hover {
+  background: #048a5e;
+}
+
+/* ============================================
+   21-25: FORMAS DIFERENTES (VERDE)
+   ============================================ */
+
+.btn-solid-1 {
+  background: #10b981;
+  border-radius: 50px;
+}
+.btn-solid-1:hover {
+  background: #0ea472;
+}
+
+.btn-solid-2 {
+  background: #059669;
+  border-radius: 4px;
+}
+.btn-solid-2:hover {
+  background: #048a5e;
+}
+
+.btn-solid-3 {
+  background: #10b981;
+  border-radius: 0;
+}
+.btn-solid-3:hover {
+  background: #0ea472;
+}
+
+.btn-solid-4 {
+  background: #047857;
+  border-radius: 16px;
+}
+.btn-solid-4:hover {
+  background: #036b4d;
+}
+
+.btn-solid-5 {
+  background: #34d399;
+  border-radius: 10px 0 10px 0;
+}
+.btn-solid-5:hover {
+  background: #2bc48a;
+}
+
+/* ============================================
+   26-30: EFEITOS HOVER (VERDE)
+   ============================================ */
+
+.btn-special-1 {
+  background: #10b981;
+  position: relative;
+  overflow: hidden;
+}
+.btn-special-1::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s ease;
+}
+.btn-special-1:hover::before {
+  left: 100%;
+}
+
+.btn-special-2 {
+  background: #059669;
+}
+.btn-special-2:hover {
+  background: #048a5e;
+  transform: scale(1.05);
+}
+
+.btn-special-3 {
+  background: #10b981;
+}
+.btn-special-3:hover {
+  background: #34d399;
+}
+
+.btn-special-4 {
+  background: #047857;
+}
+.btn-special-4:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.btn-special-5 {
+  background: #10b981;
+}
+.btn-special-5:hover {
+  background: #0ea472;
+  letter-spacing: 0.03em;
+}
+
+/* ============================================
+   31-40: ESTILOS MODERNOS (VERDE)
+   ============================================ */
+
+.btn-modern-1 {
+  background: #10b981;
+  font-weight: 500;
+}
+.btn-modern-1:hover {
+  background: #0ea472;
+}
+
+.btn-modern-2 {
+  background: #059669;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+}
+.btn-modern-2:hover {
+  background: #048a5e;
+}
+
+.btn-modern-3 {
+  background: #10b981;
+  font-weight: 700;
+}
+.btn-modern-3:hover {
+  background: #0ea472;
+}
+
+.btn-modern-4 {
+  background: linear-gradient(135deg, #059669, #10b981);
+  border-radius: 8px;
+}
+.btn-modern-4:hover {
+  background: linear-gradient(135deg, #048a5e, #0ea472);
+}
+
+.btn-modern-5 {
+  background: #34d399;
+  border-radius: 50px;
+}
+.btn-modern-5:hover {
+  background: #2bc48a;
+}
+
+.btn-modern-6 {
+  background: #10b981;
+  box-shadow: 0 4px 0 #047857;
+}
+.btn-modern-6:hover {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #047857;
+}
+
+.btn-modern-7 {
+  background: #059669;
+  box-shadow: inset 0 -3px 0 rgba(0,0,0,0.2);
+}
+.btn-modern-7:hover {
+  background: #048a5e;
+}
+
+.btn-modern-8 {
+  background: #10b981;
+  border-left: 4px solid #047857;
+  border-radius: 0 8px 8px 0;
+}
+.btn-modern-8:hover {
+  background: #0ea472;
+}
+
+.btn-modern-9 {
+  background: #047857;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+}
+.btn-modern-9:hover {
+  background: #036b4d;
+}
+
+.btn-modern-10 {
+  background: #10b981;
+  border: 1px solid rgba(255,255,255,0.15);
+}
+.btn-modern-10:hover {
+  background: #0ea472;
+  border-color: rgba(255,255,255,0.25);
+}
+
+/* ============================================
+   41-50: PREMIUM VERDE
+   ============================================ */
+
+.btn-premium-1 {
+  background: linear-gradient(180deg, #34d399, #10b981);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+}
+.btn-premium-1:hover {
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);
+}
+
+.btn-premium-2 {
+  background: #10b981;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.1);
+}
+.btn-premium-2:hover {
+  background: #0ea472;
+}
+
+.btn-premium-3 {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.btn-premium-3:hover {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.btn-premium-4 {
+  background: #047857;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-premium-4:hover {
+  background: #036b4d;
+}
+
+.btn-premium-5 {
+  background: linear-gradient(180deg, #10b981, #047857);
+}
+.btn-premium-5:hover {
+  background: linear-gradient(180deg, #0ea472, #036b4d);
+}
+
+.btn-premium-6 {
+  background: #10b981;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.btn-premium-6:hover {
+  background: #0ea472;
+}
+
+.btn-premium-7 {
+  background: #059669;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.btn-premium-7:hover {
+  background: #048a5e;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.btn-premium-8 {
+  background: #10b981;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+.btn-premium-8:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.btn-premium-9 {
+  background: linear-gradient(135deg, #047857, #10b981, #047857);
+  background-size: 200% 100%;
+}
+.btn-premium-9:hover {
+  background-position: 100% 0;
+}
+
+.btn-premium-10 {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 40%, #059669 100%);
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-premium-10:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 14px rgba(16, 185, 129, 0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .buttons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .showcase-header h1 {
+    font-size: 1.8rem;
+  }
+}

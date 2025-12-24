@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Token válido
+INFO     tests.backend.conftest:conftest.py:255 PASS: Usuário validado: test@test.com

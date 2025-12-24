@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,025 - tests.backend.conftest - INFO - Usando cache para TestSnapshotCreation
+2025-12-21 06:32:13,027 - tests.backend.conftest - INFO - PASS: instance_id obrigatório validado

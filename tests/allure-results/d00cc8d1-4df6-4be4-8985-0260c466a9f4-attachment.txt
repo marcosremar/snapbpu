@@ -1,0 +1,2 @@
+2025-12-21 06:31:51,450 - tests.backend.conftest - INFO - PASS: Isolamento de usuários
+2025-12-21 06:31:51,450 - tests.backend.conftest - INFO - PASS: Resposta contém apenas dados do usuário autenticado

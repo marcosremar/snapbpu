@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Status com config
+INFO     tests.backend.conftest:conftest.py:255 PASS: Campo 'config' presente no status

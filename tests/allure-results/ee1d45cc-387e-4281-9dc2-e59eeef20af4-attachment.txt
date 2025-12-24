@@ -1,0 +1,2 @@
+2025-12-21 06:32:11,850 - tests.backend.conftest - INFO - INFO: Previsão não disponível para 'RTX 4090' tipo 'on-demand'
+2025-12-21 06:32:11,851 - tests.backend.conftest - INFO - INFO: Previsão não disponível para 'RTX 4090' tipo 'interruptible'

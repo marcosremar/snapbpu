@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestInstanceList
+INFO     tests.backend.conftest:conftest.py:255 PASS: Listagem de instâncias
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON keys OK: ['instances', 'count']
+INFO     tests.backend.conftest:conftest.py:255 PASS: Instâncias listadas: 1

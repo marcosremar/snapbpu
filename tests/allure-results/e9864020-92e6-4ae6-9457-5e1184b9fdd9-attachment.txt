@@ -1,0 +1,1 @@
+[94mℹ[0m Migrate estimate para instância inexistente: 500

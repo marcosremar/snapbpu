@@ -124,7 +124,7 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
               </div>
               <div>
                 <span className="block text-[11px] text-gray-400 uppercase tracking-wide">Preço Mínimo</span>
-                <span className="text-lg font-bold text-emerald-400">{formatPrice(data.prediction_summary.predicted_min)}</span>
+                <span className="text-lg font-bold text-brand-400">{formatPrice(data.prediction_summary.predicted_min)}</span>
               </div>
             </div>
             <div className="stat-card flex items-center gap-2.5 p-3 animate-fade-in" style={{ animationDelay: '50ms' }}>
@@ -156,9 +156,9 @@ export default function SpotPrediction({ getAuthHeaders, selectedGPU = 'RTX 4090
 
         <div className="flex justify-between pt-3 border-t border-white/10 text-xs">
           <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="w-2 h-2 rounded-full bg-brand-500"></span>
             <span className="text-gray-400">Confiança:</span>
-            <span className="text-emerald-400 font-semibold">{formatPercent(data?.model_confidence)}</span>
+            <span className="text-brand-400 font-semibold">{formatPercent(data?.model_confidence)}</span>
           </span>
           <span className="text-gray-500">Modelo: {data?.model_version}</span>
         </div>

@@ -1,0 +1,345 @@
+{
+  "timestamp": "2025-12-21T21:11:18.657823",
+  "total_commands": 65,
+  "tested": 48,
+  "success": 36,
+  "failed": 12,
+  "results": [
+    {
+      "command": "admin doc",
+      "description": "Admin Doc Live",
+      "success": true,
+      "duration": 0.06897664070129395,
+      "output_preview": "🔄 GET /admin/doc/live\n✅ Success (200)\n<!DOCTYPE html>\n<html lang=\"pt-BR\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>Dumont Cloud - Live Docs</title>\n\n    <!-- GitHub Markdown CSS (Light) -->\n    <link rel=\"stylesheet\"\n        href=\"https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown-light.min.css\">\n\n    <!-- Tailwind CSS -->\n    <script src=\"https://cdn.tailwindcss.com\"></script>\n\n    <!--"
+    },
+    {
+      "command": "advisor recommend",
+      "description": "Get Recommendation",
+      "success": true,
+      "duration": 0.11781764030456543,
+      "output_preview": "🔄 POST /api/v1/advisor/recommend\n❌ Error (422)\n{\n  \"error\": \"Validation error\",\n  \"details\": [\n    {\n      \"type\": \"missing\",\n      \"loc\": [\n        \"body\"\n      ],\n      \"msg\": \"Field required\",\n      \"input\": null\n    }\n  ]\n}\n"
+    },
+    {
+      "command": "agent instances",
+      "description": "List Agent Instances",
+      "success": true,
+      "duration": 0.08373904228210449,
+      "output_preview": "🔄 GET /api/v1/agent/instances\n✅ Success (200)\n[]\n"
+    },
+    {
+      "command": "agent status",
+      "description": "Receive Agent Status",
+      "success": true,
+      "duration": 0.10291647911071777,
+      "output_preview": "🔄 POST /api/v1/agent/status\n❌ Error (422)\n{\n  \"error\": \"Validation error\",\n  \"details\": [\n    {\n      \"type\": \"missing\",\n      \"loc\": [\n        \"body\"\n      ],\n      \"msg\": \"Field required\",\n      \"input\": null\n    }\n  ]\n}\n"
+    },
+    {
+      "command": "ai-wizard analyze",
+      "description": "Analyze Project",
+      "success": true,
+      "duration": 0.08977127075195312,
+      "output_preview": "🔄 POST /api/v1/ai-wizard/analyze\n❌ Error (422)\n{\n  \"error\": \"Validation error\",\n  \"details\": [\n    {\n      \"type\": \"missing\",\n      \"loc\": [\n        \"body\"\n      ],\n      \"msg\": \"Field required\",\n      \"input\": null\n    }\n  ]\n}\n"
+    },
+    {
+      "command": "auth me",
+      "description": "Get Current User",
+      "success": true,
+      "duration": 0.08049941062927246,
+      "output_preview": "🔄 GET /api/v1/auth/me\n✅ Success (200)\n{\n  \"authenticated\": true,\n  \"user\": {\n    \"email\": \"test@test.com\",\n    \"username\": \"test@test.com\",\n    \"settings\": {\n      \"gcp_credentials\": {\n        \"type\": \"service_account\",\n        \"project_id\": \"avian-computer-477918-j9\",\n        \"private_key_id\": \"6823e045ccbe427b35325c2ce665503d096c0a6f\",\n        \"private_key\": \"-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCN8px9+PMvQMU4\\n3CxmYDhKrIRxWOWDeIMlPoEYH2JoMgUlPicbGVNzq"
+    },
+    {
+      "command": "balance list",
+      "description": "Get Balance",
+      "success": true,
+      "duration": 0.6991322040557861,
+      "output_preview": "🔄 GET /api/v1/balance\n✅ Success (200)\n{\n  \"credit\": 2.03937836329402,\n  \"balance\": 0.0,\n  \"balance_threshold\": -0.01,\n  \"email\": \"test@test.com\"\n}\n"
+    },
+    {
+      "command": "content get",
+      "description": "Get Content",
+      "success": false,
+      "duration": 0.10326051712036133,
+      "output_preview": "❌ Missing required parameter: path\n"
+    },
+    {
+      "command": "failover readiness",
+      "description": "Check Readiness",
+      "success": false,
+      "duration": 0.09997010231018066,
+      "output_preview": "❌ Missing required parameter: machine_id\n"
+    },
+    {
+      "command": "failover settings",
+      "description": "Get Global Settings",
+      "success": true,
+      "duration": 0.11085653305053711,
+      "output_preview": "🔄 GET /api/v1/failover/settings/global\n✅ Success (200)\n{\n  \"default_strategy\": \"warm_pool\",\n  \"warm_pool\": {\n    \"enabled\": true,\n    \"min_gpus_per_host\": 2,\n    \"volume_size_gb\": 100,\n    \"auto_provision_standby\": true,\n    \"fallback_to_cpu_standby\": true,\n    \"preferred_gpu_names\": [\n      \"RTX_4090\",\n      \"RTX_3090\",\n      \"A100\"\n    ],\n    \"health_check_interval_seconds\": 10,\n    \"failover_timeout_seconds\": 120,\n    \"auto_reprovision_standby\": true\n  },\n  \"cpu_standby\": {\n    \"enabled\": tru"
+    },
+    {
+      "command": "failover status",
+      "description": "Get Failover Status",
+      "success": false,
+      "duration": 0.11682748794555664,
+      "output_preview": "❌ Missing required parameter: machine_id\n"
+    },
+    {
+      "command": "failover strategies",
+      "description": "List Strategies",
+      "success": true,
+      "duration": 0.09985613822937012,
+      "output_preview": "🔄 GET /api/v1/failover/strategies\n✅ Success (200)\n{\n  \"strategies\": [\n    {\n      \"id\": \"warm_pool\",\n      \"name\": \"GPU Warm Pool\",\n      \"description\": \"Failover rápido (~30-60s) usando GPU standby no mesmo host\",\n      \"recovery_time\": \"30-60 segundos\",\n      \"cost\": \"Apenas armazenamento quando standby está parado\",\n      \"requirements\": [\n        \"Host com múltiplas GPUs\",\n        \"Volume compartilhado VAST.ai\"\n      ]\n    },\n    {\n      \"id\": \"cpu_standby\",\n      \"name\": \"CPU Standby + Snap"
+    },
+    {
+      "command": "failover test",
+      "description": "Test Failover",
+      "success": false,
+      "duration": 0.3490419387817383,
+      "output_preview": "❌ Missing required parameter: machine_id\n"
+    },
+    {
+      "command": "finetune jobs",
+      "description": "List Jobs",
+      "success": true,
+      "duration": 0.10827136039733887,
+      "output_preview": "🔄 GET /api/v1/finetune/jobs\n✅ Success (200)\n{\n  \"jobs\": [],\n  \"count\": 0\n}\n"
+    },
+    {
+      "command": "finetune models",
+      "description": "List Supported Models",
+      "success": true,
+      "duration": 0.09947848320007324,
+      "output_preview": "🔄 GET /api/v1/finetune/models\n✅ Success (200)\n{\n  \"models\": [\n    {\n      \"id\": \"unsloth/llama-3-8b-bnb-4bit\",\n      \"name\": \"Llama 3 8B\",\n      \"parameters\": \"8B\",\n      \"min_vram\": \"16GB\",\n      \"recommended_gpu\": \"RTX 4090, A100\"\n    },\n    {\n      \"id\": \"unsloth/llama-3-70b-bnb-4bit\",\n      \"name\": \"Llama 3 70B\",\n      \"parameters\": \"70B\",\n      \"min_vram\": \"48GB\",\n      \"recommended_gpu\": \"A100 80GB, H100\"\n    },\n    {\n      \"id\": \"unsloth/mistral-7b-bnb-4bit\",\n      \"name\": \"Mistral 7B\",\n "
+    },
+    {
+      "command": "health list",
+      "description": "Health Check",
+      "success": true,
+      "duration": 0.09050345420837402,
+      "output_preview": "🔄 GET /health\n✅ Success (200)\n{\n  \"status\": \"healthy\",\n  \"version\": \"3.0.0\",\n  \"service\": \"dumont-cloud\"\n}\n"
+    },
+    {
+      "command": "hibernation stats",
+      "description": "Get Hibernation Stats",
+      "success": true,
+      "duration": 0.12598633766174316,
+      "output_preview": "🔄 GET /api/v1/hibernation/stats\n✅ Success (200)\n{\n  \"total_hibernations\": 0,\n  \"total_hours_saved\": 0,\n  \"total_savings\": 0,\n  \"machines\": []\n}\n"
+    },
+    {
+      "command": "instance get",
+      "description": "Get Instance",
+      "success": false,
+      "duration": 0.06981492042541504,
+      "output_preview": "❌ Missing required parameter: instance_id\n"
+    },
+    {
+      "command": "instance list",
+      "description": "List Instances",
+      "success": true,
+      "duration": 0.957892894744873,
+      "output_preview": "🔄 GET /api/v1/instances\n✅ Success (200)\n{\n  \"instances\": [\n    {\n      \"id\": 29056534,\n      \"status\": \"stopped\",\n      \"actual_status\": \"exited\",\n      \"gpu_name\": \"RTX 4070S Ti\",\n      \"num_gpus\": 1,\n      \"gpu_ram\": 16376.0,\n      \"cpu_cores\": 88,\n      \"cpu_ram\": 128752.0,\n      \"disk_space\": 20.0,\n      \"dph_total\": 0.05111111111111111,\n      \"public_ipaddr\": \"142.171.48.138\",\n      \"ssh_host\": \"ssh2.vast.ai\",\n      \"ssh_port\": null,\n      \"start_date\": \"2025-12-20T18:47:13.552490\",\n      \""
+    },
+    {
+      "command": "instance offers",
+      "description": "Search Offers",
+      "success": true,
+      "duration": 1.2276628017425537,
+      "output_preview": "🔄 GET /api/v1/instances/offers\n✅ Success (200)\n{\n  \"offers\": [\n    {\n      \"id\": 28429636,\n      \"gpu_name\": \"RTX 5090\",\n      \"num_gpus\": 1,\n      \"gpu_ram\": 32607.0,\n      \"cpu_cores\": 24,\n      \"cpu_ram\": 64220.0,\n      \"disk_space\": 567.0,\n      \"inet_down\": 920.1,\n      \"inet_up\": 36.0,\n      \"dph_total\": 0.15600000000000003,\n      \"geolocation\": \"Utah, US\",\n      \"reliability\": 0.998289,\n      \"cuda_version\": \"13.0\",\n      \"verified\": false,\n      \"static_ip\": true\n    },\n    {\n      \"id\":"
+    },
+    {
+      "command": "instance pause",
+      "description": "Pause Instance",
+      "success": false,
+      "duration": 0.12179780006408691,
+      "output_preview": "❌ Missing required parameter: instance_id\n"
+    },
+    {
+      "command": "instance resume",
+      "description": "Resume Instance",
+      "success": false,
+      "duration": 0.1050410270690918,
+      "output_preview": "❌ Missing required parameter: instance_id\n"
+    },
+    {
+      "command": "menu list",
+      "description": "Get Menu",
+      "success": true,
+      "duration": 0.11092209815979004,
+      "output_preview": "🔄 GET /api/menu\n✅ Success (200)\n{\n  \"menu\": [\n    {\n      \"name\": \"01_Getting_Started\",\n      \"type\": \"dir\",\n      \"path\": \"01_Getting_Started\",\n      \"children\": [\n        {\n          \"name\": \"01 Welcome\",\n          \"type\": \"file\",\n          \"path\": \"01_Getting_Started/01_Welcome.md\",\n          \"id\": \"01_Getting_Started/01_Welcome.md\"\n        },\n        {\n          \"name\": \"02 Quick Start\",\n          \"type\": \"file\",\n          \"path\": \"01_Getting_Started/02_Quick_Start.md\",\n          \"id\": \"01_G"
+    },
+    {
+      "command": "metrics compare",
+      "description": "Compare Gpus",
+      "success": true,
+      "duration": 0.09254145622253418,
+      "output_preview": "🔄 GET /api/v1/metrics/compare\n❌ Error (422)\n{\n  \"error\": \"Validation error\",\n  \"details\": [\n    {\n      \"type\": \"missing\",\n      \"loc\": [\n        \"query\",\n        \"gpus\"\n      ],\n      \"msg\": \"Field required\",\n      \"input\": null\n    }\n  ]\n}\n"
+    },
+    {
+      "command": "metrics efficiency",
+      "description": "Get Efficiency Rankings",
+      "success": true,
+      "duration": 0.09189891815185547,
+      "output_preview": "🔄 GET /api/v1/metrics/efficiency\n✅ Success (200)\n[\n  {\n    \"rank\": 1,\n    \"rank_in_class\": 1,\n    \"offer_id\": 28699233,\n    \"gpu_name\": \"RTX 4090\",\n    \"machine_type\": \"on-demand\",\n    \"dph_total\": 0.1088888888888889,\n    \"total_flops\": 82.182144,\n    \"gpu_ram\": 23.98828125,\n    \"dlperf\": 97.09576789509502,\n    \"cost_per_tflops\": 0.0013249701649167111,\n    \"cost_per_gb_vram\": 0.004539253469395141,\n    \"efficiency_score\": 86.88772718816642,\n    \"reliability\": 0.9941925,\n    \"verified\": false,\n   "
+    },
+    {
+      "command": "metrics gpus",
+      "description": "List Available Gpus",
+      "success": true,
+      "duration": 0.12373518943786621,
+      "output_preview": "🔄 GET /api/v1/metrics/gpus\n✅ Success (200)\n[\n  \"RTX 3090\",\n  \"RTX 4090\",\n  \"RTX 5090\"\n]\n"
+    },
+    {
+      "command": "metrics hibernation",
+      "description": "Get Hibernation Events",
+      "success": true,
+      "duration": 0.08892965316772461,
+      "output_preview": "🔄 GET /api/v1/metrics/hibernation/events\n✅ Success (200)\n{\n  \"events\": [],\n  \"count\": 0\n}\n"
+    },
+    {
+      "command": "metrics market",
+      "description": "Get Market Snapshots",
+      "success": true,
+      "duration": 0.09310293197631836,
+      "output_preview": "🔄 GET /api/v1/metrics/market\n✅ Success (200)\n[\n  {\n    \"timestamp\": \"2025-12-21T20:07:38.345654\",\n    \"gpu_name\": \"RTX 5090\",\n    \"machine_type\": \"bid\",\n    \"min_price\": 0.15600000000000003,\n    \"max_price\": 0.6934814814814817,\n    \"avg_price\": 0.38514996693121695,\n    \"median_price\": 0.37677777777777777,\n    \"total_offers\": 64,\n    \"available_gpus\": 64,\n    \"verified_offers\": 0,\n    \"avg_reliability\": 0.988775821875,\n    \"avg_total_flops\": 108.07104,\n    \"avg_dlperf\": 197.88054820192716,\n    \"m"
+    },
+    {
+      "command": "metrics predictions",
+      "description": "Get Price Prediction",
+      "success": false,
+      "duration": 0.08530664443969727,
+      "output_preview": "❌ Missing required parameter: gpu_name\n"
+    },
+    {
+      "command": "metrics providers",
+      "description": "Get Provider Rankings",
+      "success": true,
+      "duration": 0.09149312973022461,
+      "output_preview": "🔄 GET /api/v1/metrics/providers\n✅ Success (200)\n[\n  {\n    \"machine_id\": 35231,\n    \"hostname\": null,\n    \"geolocation\": \"Czechia, CZ\",\n    \"gpu_name\": \"RTX 5090\",\n    \"verified\": false,\n    \"reliability_score\": 0.9563599384402187,\n    \"availability_score\": 0.9973926,\n    \"price_stability_score\": 1.0,\n    \"total_observations\": 404,\n    \"avg_price\": 0.5681481481481483,\n    \"min_price_seen\": 0.5681481481481482,\n    \"max_price_seen\": 0.5681481481481482,\n    \"avg_total_flops\": 108.10368,\n    \"avg_dlp"
+    },
+    {
+      "command": "metrics savings",
+      "description": "Get Real Savings",
+      "success": true,
+      "duration": 0.09991145133972168,
+      "output_preview": "🔄 GET /api/v1/metrics/savings/real\n✅ Success (200)\n{\n  \"period_days\": 30,\n  \"summary\": {\n    \"total_savings_usd\": 0.0,\n    \"total_hours_saved\": 0.0,\n    \"hibernation_count\": 0,\n    \"avg_daily_savings_usd\": 0.0,\n    \"avg_daily_hours_saved\": 0.0,\n    \"projected_monthly_savings_usd\": 0.0\n  },\n  \"gpu_breakdown\": {},\n  \"generated_at\": \"2025-12-21T20:10:07.239698\"\n}\n"
+    },
+    {
+      "command": "metrics spot",
+      "description": "Get Spot Price Monitor",
+      "success": true,
+      "duration": 0.1063542366027832,
+      "output_preview": "🔄 GET /api/v1/metrics/spot/monitor\n✅ Success (200)\n{\n  \"items\": [\n    {\n      \"gpu_name\": \"RTX 5090\",\n      \"spot_price\": 0.379,\n      \"ondemand_price\": 0.3767,\n      \"savings_percent\": -0.6,\n      \"available_gpus\": 64,\n      \"total_offers\": 64,\n      \"price_trend\": \"stable\",\n      \"min_price\": 0.156,\n      \"last_update\": \"2025-12-21T20:07:38.345654\"\n    },\n    {\n      \"gpu_name\": \"RTX 3090\",\n      \"spot_price\": 0.1398,\n      \"ondemand_price\": 0.139,\n      \"savings_percent\": -0.6,\n      \"availab"
+    },
+    {
+      "command": "metrics types",
+      "description": "List Machine Types",
+      "success": true,
+      "duration": 0.08632564544677734,
+      "output_preview": "🔄 GET /api/v1/metrics/types\n✅ Success (200)\n[\n  \"on-demand\",\n  \"interruptible\",\n  \"bid\"\n]\n"
+    },
+    {
+      "command": "model install",
+      "description": "Install Ollama + model on instance",
+      "success": false,
+      "duration": 0.08425664901733398,
+      "output_preview": "❌ Usage: dumont model install <instance_id> <model_id>\n\nExamples:\n  dumont model install 12345 llama3.2\n  dumont model install 12345 qwen3:0.6b\n  dumont model install 12345 codellama:7b\n"
+    },
+    {
+      "command": "saving breakdown",
+      "description": "Get Savings Breakdown",
+      "success": true,
+      "duration": 0.09204864501953125,
+      "output_preview": "🔄 GET /api/v1/savings/breakdown\n✅ Success (200)\n{\n  \"breakdown\": [\n    {\n      \"gpu\": \"RTX 4070S\",\n      \"hours\": 0.0,\n      \"cost\": 0.01,\n      \"aws\": 0.13,\n      \"savings\": 0.12\n    },\n    {\n      \"gpu\": \"RTX 5090\",\n      \"hours\": 0.4,\n      \"cost\": 0.16,\n      \"aws\": 1.6,\n      \"savings\": 1.44\n    },\n    {\n      \"gpu\": \"RTX 3090\",\n      \"hours\": 0.0,\n      \"cost\": 0.0,\n      \"aws\": 0.0,\n      \"savings\": 0.0\n    },\n    {\n      \"gpu\": \"RTX A4000\",\n      \"hours\": 0.5,\n      \"cost\": 0.21,\n      \""
+    },
+    {
+      "command": "saving comparison",
+      "description": "Get Gpu Price Comparison",
+      "success": false,
+      "duration": 0.09521842002868652,
+      "output_preview": "❌ Missing required parameter: gpu_type\n"
+    },
+    {
+      "command": "saving history",
+      "description": "Get Savings History",
+      "success": true,
+      "duration": 0.07223057746887207,
+      "output_preview": "🔄 GET /api/v1/savings/history\n✅ Success (200)\n{\n  \"history\": [\n    {\n      \"month\": \"Jul\",\n      \"dumont\": 0.0,\n      \"aws\": 0.0,\n      \"savings\": 0.0\n    },\n    {\n      \"month\": \"Aug\",\n      \"dumont\": 0.0,\n      \"aws\": 0.0,\n      \"savings\": 0.0\n    },\n    {\n      \"month\": \"Sep\",\n      \"dumont\": 0.0,\n      \"aws\": 0.0,\n      \"savings\": 0.0\n    },\n    {\n      \"month\": \"Oct\",\n      \"dumont\": 0.0,\n      \"aws\": 0.0,\n      \"savings\": 0.0\n    },\n    {\n      \"month\": \"Nov\",\n      \"dumont\": 0.0,\n      \"a"
+    },
+    {
+      "command": "saving summary",
+      "description": "Get Savings Summary",
+      "success": true,
+      "duration": 0.07921791076660156,
+      "output_preview": "🔄 GET /api/v1/savings/summary\n✅ Success (200)\n{\n  \"period\": \"month\",\n  \"total_hours\": 2.2,\n  \"total_cost_dumont\": 0.88,\n  \"total_cost_aws\": 8.8,\n  \"total_cost_gcp\": 0.0,\n  \"total_cost_azure\": 0.0,\n  \"savings_vs_aws\": 7.92,\n  \"savings_vs_gcp\": -0.88,\n  \"savings_vs_azure\": -0.88,\n  \"savings_percentage_avg\": 90.0,\n  \"auto_hibernate_savings\": 0.0\n}\n"
+    },
+    {
+      "command": "settings list",
+      "description": "Get Settings",
+      "success": true,
+      "duration": 0.09908223152160645,
+      "output_preview": "🔄 GET /api/v1/settings\n✅ Success (200)\n{\n  \"vast_api_key\": \"a9df8f732d9b1b8a6bb54fd43c477824254552b0d964c58bd92b16c6f25ca3dd\",\n  \"settings\": {\n    \"gcp_credentials\": {\n      \"type\": \"service_account\",\n      \"project_id\": \"avian-computer-477918-j9\",\n      \"private_key_id\": \"6823e045ccbe427b35325c2ce665503d096c0a6f\",\n      \"private_key\": \"-----BEGIN PRIVATE KEY-----\\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCN8px9+PMvQMU4\\n3CxmYDhKrIRxWOWDeIMlPoEYH2JoMgUlPicbGVNzqHrX9nm9XnfRtujZIbCMJ8cw\\n"
+    },
+    {
+      "command": "snapshot list",
+      "description": "List Snapshots",
+      "success": true,
+      "duration": 0.07736587524414062,
+      "output_preview": "🔄 GET /api/v1/snapshots\n❌ Error (400)\n{\n  \"error\": \"Restic repository not configured. Please update settings.\"\n}\n"
+    },
+    {
+      "command": "snapshot restore",
+      "description": "Restore Snapshot",
+      "success": true,
+      "duration": 0.09641551971435547,
+      "output_preview": "🔄 POST /api/v1/snapshots/restore\n❌ Error (400)\n{\n  \"error\": \"Restic repository not configured. Please update settings.\"\n}\n"
+    },
+    {
+      "command": "standby associations",
+      "description": "List Associations",
+      "success": true,
+      "duration": 0.07802081108093262,
+      "output_preview": "🔄 GET /api/v1/standby/associations\n✅ Success (200)\n{\n  \"associations\": {\n    \"12345\": {\n      \"gpu_instance_id\": 12345,\n      \"cpu_standby\": {\n        \"name\": \"mock-cpu-standby-12345\",\n        \"zone\": \"europe-west1-b\",\n        \"ip\": \"10.0.0.100\"\n      },\n      \"sync_enabled\": true,\n      \"gpu_failed\": false,\n      \"failure_reason\": null,\n      \"failed_at\": null\n    },\n    \"29039341\": {\n      \"gpu_instance_id\": 29039341,\n      \"cpu_standby\": {\n        \"name\": \"mock-cpu-standby-29039341\",\n        "
+    },
+    {
+      "command": "standby pricing",
+      "description": "Get Pricing",
+      "success": true,
+      "duration": 0.0912790298461914,
+      "output_preview": "🔄 GET /api/v1/standby/pricing\n✅ Success (200)\n{\n  \"machine_type\": \"e2-medium\",\n  \"disk_gb\": 100,\n  \"spot\": true,\n  \"estimated_hourly_usd\": 0.01,\n  \"estimated_monthly_usd\": 11.2,\n  \"breakdown\": {\n    \"vm_monthly\": 7.2,\n    \"disk_monthly\": 4.0\n  },\n  \"note\": \"Prices are estimates and may vary by region.\"\n}\n"
+    },
+    {
+      "command": "standby status",
+      "description": "Get Standby Status",
+      "success": true,
+      "duration": 0.07459115982055664,
+      "output_preview": "🔄 GET /api/v1/standby/status\n✅ Success (200)\n{\n  \"configured\": false,\n  \"auto_standby_enabled\": false,\n  \"active_associations\": 5,\n  \"associations\": {\n    \"12345\": {\n      \"gpu_instance_id\": 12345,\n      \"cpu_standby\": {\n        \"name\": \"mock-cpu-standby-12345\",\n        \"zone\": \"europe-west1-b\",\n        \"ip\": \"10.0.0.100\"\n      },\n      \"sync_enabled\": true,\n      \"gpu_failed\": false,\n      \"failure_reason\": null,\n      \"failed_at\": null\n    },\n    \"29039341\": {\n      \"gpu_instance_id\": 29039341"
+    },
+    {
+      "command": "standby test",
+      "description": "Create Mock Association",
+      "success": true,
+      "duration": 0.07858824729919434,
+      "output_preview": "🔄 POST /api/v1/standby/test/create-mock-association\n✅ Success (200)\n{\n  \"success\": true,\n  \"message\": \"Mock association created for GPU 12345\",\n  \"association\": {\n    \"gpu_instance_id\": 12345,\n    \"cpu_standby\": {\n      \"name\": \"mock-cpu-standby-12345\",\n      \"zone\": \"europe-west1-b\",\n      \"ip\": \"10.0.0.100\"\n    },\n    \"sync_enabled\": true\n  },\n  \"next_step\": \"Run: dumont failover simulate 12345\"\n}\n"
+    },
+    {
+      "command": "warmpool hosts",
+      "description": "List Multi Gpu Hosts",
+      "success": true,
+      "duration": 1.0573654174804688,
+      "output_preview": "🔄 GET /api/v1/warmpool/hosts\n✅ Success (200)\n{\n  \"hosts\": [\n    {\n      \"machine_id\": 51579,\n      \"total_gpus\": 7,\n      \"available_gpus\": 3,\n      \"gpu_name\": \"RTX A6000\",\n      \"avg_price_per_hour\": 0.03333333333333333,\n      \"reliability\": 0.946409,\n      \"verified\": false,\n      \"geolocation\": \"Virginia, US\",\n      \"can_create_warm_pool\": true,\n      \"offers\": [\n        {\n          \"offer_id\": 29069516,\n          \"machine_id\": 51579,\n          \"gpu_name\": \"RTX A6000\",\n          \"num_gpus\": "
+    },
+    {
+      "command": "warmpool status",
+      "description": "Get Status",
+      "success": false,
+      "duration": 0.0782163143157959,
+      "output_preview": "❌ Missing required parameter: machine_id\n"
+    },
+    {
+      "command": "wizard deploy",
+      "description": "Deploy GPU with multi-start wizard",
+      "success": false,
+      "duration": 60,
+      "output_preview": "Timeout after 60s"
+    }
+  ]
+}

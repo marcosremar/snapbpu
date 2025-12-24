@@ -1,0 +1,1 @@
+[92m✓[0m Todos os endpoints de standby protegidos por autenticação

@@ -1,0 +1,2 @@
+2025-12-21 06:32:13,109 - tests.backend.conftest - INFO - Usando cache para TestStandbySync
+2025-12-21 06:32:13,110 - tests.backend.conftest - WARNING - WARN: Status inesperado ao iniciar sync: 422

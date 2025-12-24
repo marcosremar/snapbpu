@@ -4,8 +4,8 @@ Loads from environment variables with sensible defaults
 """
 import os
 from typing import Optional
-from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic import Field, AliasChoices
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,104 +13,97 @@ load_dotenv()
 
 class R2Settings(BaseSettings):
     """Cloudflare R2 Configuration"""
-    access_key: str = Field(default="", env="R2_ACCESS_KEY")
-    secret_key: str = Field(default="", env="R2_SECRET_KEY")
-    endpoint: str = Field(default="", env="R2_ENDPOINT")
-    bucket: str = Field(default="musetalk", env="R2_BUCKET")
+    model_config = SettingsConfigDict(env_prefix="R2_", extra="ignore")
+
+    access_key: str = Field(default="", validation_alias=AliasChoices("access_key", "R2_ACCESS_KEY"))
+    secret_key: str = Field(default="", validation_alias=AliasChoices("secret_key", "R2_SECRET_KEY"))
+    endpoint: str = Field(default="", validation_alias=AliasChoices("endpoint", "R2_ENDPOINT"))
+    bucket: str = Field(default="musetalk", validation_alias=AliasChoices("bucket", "R2_BUCKET"))
 
     @property
     def restic_repo(self) -> str:
         """Constructs restic repository URL"""
         return f"s3:{self.endpoint}/{self.bucket}/restic"
 
-    class Config:
-        env_prefix = ""
-
 
 class ResticSettings(BaseSettings):
     """Restic backup configuration"""
-    password: str = Field(default="", env="RESTIC_PASSWORD")
-    connections: int = Field(default=32, env="RESTIC_CONNECTIONS")
+    model_config = SettingsConfigDict(env_prefix="RESTIC_", extra="ignore")
 
-    class Config:
-        env_prefix = ""
+    password: str = Field(default="", validation_alias=AliasChoices("password", "RESTIC_PASSWORD"))
+    connections: int = Field(default=32, validation_alias=AliasChoices("connections", "RESTIC_CONNECTIONS"))
 
 
 class VastSettings(BaseSettings):
     """Vast.ai API configuration"""
-    api_url: str = Field(default="https://console.vast.ai/api/v0", env="VAST_API_URL")
-    stage_timeout: int = Field(default=30, env="VAST_STAGE_TIMEOUT")
-    ssh_ready_timeout: int = Field(default=60, env="VAST_SSH_TIMEOUT")
-    default_region: str = Field(default="EU", env="VAST_DEFAULT_REGION")
-    min_reliability: float = Field(default=0.95, env="VAST_MIN_RELIABILITY")
-    min_cuda: str = Field(default="12.0", env="VAST_MIN_CUDA")
+    model_config = SettingsConfigDict(env_prefix="VAST_", extra="ignore")
 
-    class Config:
-        env_prefix = ""
+    api_key: str = Field(default="", validation_alias=AliasChoices("api_key", "VAST_API_KEY"))
+    api_url: str = Field(default="https://console.vast.ai/api/v0", validation_alias=AliasChoices("api_url", "VAST_API_URL"))
+    stage_timeout: int = Field(default=30, validation_alias=AliasChoices("stage_timeout", "VAST_STAGE_TIMEOUT"))
+    ssh_ready_timeout: int = Field(default=60, validation_alias=AliasChoices("ssh_ready_timeout", "VAST_SSH_TIMEOUT"))
+    default_region: str = Field(default="EU", validation_alias=AliasChoices("default_region", "VAST_DEFAULT_REGION"))
+    min_reliability: float = Field(default=0.95, validation_alias=AliasChoices("min_reliability", "VAST_MIN_RELIABILITY"))
+    min_cuda: str = Field(default="12.0", validation_alias=AliasChoices("min_cuda", "VAST_MIN_CUDA"))
 
 
 class AppSettings(BaseSettings):
     """Application configuration"""
+    model_config = SettingsConfigDict(extra="ignore")
+
     # Server
-    host: str = Field(default="0.0.0.0", env="APP_HOST")
-    port: int = Field(default=8766, env="APP_PORT")
-    debug: bool = Field(default=False, env="DEBUG")
+    host: str = Field(default="0.0.0.0", validation_alias=AliasChoices("host", "APP_HOST"))
+    port: int = Field(default=8766, validation_alias=AliasChoices("port", "APP_PORT"))
+    debug: bool = Field(default=False, validation_alias=AliasChoices("debug", "DEBUG"))
 
     # Security
-    secret_key: str = Field(default="dumont-cloud-secret-key-2024", env="SECRET_KEY")
-    demo_mode: bool = Field(default=False, env="DEMO_MODE")
+    secret_key: str = Field(default="dumont-cloud-secret-key-2024", validation_alias=AliasChoices("secret_key", "SECRET_KEY"))
+    demo_mode: bool = Field(default=False, validation_alias=AliasChoices("demo_mode", "DEMO_MODE"))
 
     # CORS
     cors_origins: list[str] = Field(
         default=["http://localhost:3000", "http://localhost:5173"],
-        env="CORS_ORIGINS"
+        validation_alias=AliasChoices("cors_origins", "CORS_ORIGINS")
     )
 
     # Session
-    session_cookie_domain: Optional[str] = Field(default=None, env="SESSION_COOKIE_DOMAIN")
-    session_cookie_secure: bool = Field(default=True, env="SESSION_COOKIE_SECURE")
+    session_cookie_domain: Optional[str] = Field(default=None, validation_alias=AliasChoices("session_cookie_domain", "SESSION_COOKIE_DOMAIN"))
+    session_cookie_secure: bool = Field(default=True, validation_alias=AliasChoices("session_cookie_secure", "SESSION_COOKIE_SECURE"))
 
     # Storage
-    config_file: str = Field(default="config.json", env="CONFIG_FILE")
-
-    class Config:
-        env_prefix = ""
-        case_sensitive = False
+    config_file: str = Field(default="config.json", validation_alias=AliasChoices("config_file", "CONFIG_FILE"))
 
 
 class DumontAgentSettings(BaseSettings):
     """DumontAgent configuration (agent running on GPU instances)"""
-    server_url: str = Field(default="https://dumontcloud.com", env="DUMONT_SERVER")
-    sync_interval: int = Field(default=30, env="DUMONT_SYNC_INTERVAL")
-    sync_dirs: str = Field(default="/workspace", env="DUMONT_SYNC_DIRS")
-    keep_last: int = Field(default=10, env="DUMONT_KEEP_LAST")
+    model_config = SettingsConfigDict(env_prefix="DUMONT_", extra="ignore")
 
-    class Config:
-        env_prefix = ""
+    server_url: str = Field(default="https://dumontcloud.com", validation_alias=AliasChoices("server_url", "DUMONT_SERVER"))
+    sync_interval: int = Field(default=30, validation_alias=AliasChoices("sync_interval", "DUMONT_SYNC_INTERVAL"))
+    sync_dirs: str = Field(default="/workspace", validation_alias=AliasChoices("sync_dirs", "DUMONT_SYNC_DIRS"))
+    keep_last: int = Field(default=10, validation_alias=AliasChoices("keep_last", "DUMONT_KEEP_LAST"))
 
 
 class LLMSettings(BaseSettings):
     """LLM configuration for AI Advisor"""
-    openai_api_key: str = Field(default="", env="OPENAI_API_KEY")
-    anthropic_api_key: str = Field(default="", env="ANTHROPIC_API_KEY")
-    default_provider: str = Field(default="openai", env="LLM_DEFAULT_PROVIDER")
-    model_name: str = Field(default="gpt-4o", env="LLM_MODEL_NAME")
+    model_config = SettingsConfigDict(extra="ignore")
 
-    class Config:
-        env_prefix = ""
+    openai_api_key: str = Field(default="", validation_alias=AliasChoices("openai_api_key", "OPENAI_API_KEY"))
+    anthropic_api_key: str = Field(default="", validation_alias=AliasChoices("anthropic_api_key", "ANTHROPIC_API_KEY"))
+    default_provider: str = Field(default="openai", validation_alias=AliasChoices("default_provider", "LLM_DEFAULT_PROVIDER"))
+    model_name: str = Field(default="gpt-4o", validation_alias=AliasChoices("model_name", "LLM_MODEL_NAME"))
 
 
 class Settings(BaseSettings):
     """Main settings container"""
+    model_config = SettingsConfigDict(extra="ignore")
+
     app: AppSettings = Field(default_factory=AppSettings)
     r2: R2Settings = Field(default_factory=R2Settings)
     restic: ResticSettings = Field(default_factory=ResticSettings)
     vast: VastSettings = Field(default_factory=VastSettings)
     agent: DumontAgentSettings = Field(default_factory=DumontAgentSettings)
     llm: LLMSettings = Field(default_factory=LLMSettings)
-
-    class Config:
-        env_prefix = ""
 
 
 # Singleton instance

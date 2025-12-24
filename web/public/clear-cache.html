@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Limpar Cache - Dumont Cloud</title>
+</head>
+<body>
+    <h1>Limpando cache...</h1>
+    <div id="status"></div>
+    <script>
+        const status = document.getElementById('status');
+
+        async function clearAll() {
+            status.innerHTML += '<p>1. Desregistrando Service Workers...</p>';
+
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let reg of registrations) {
+                    await reg.unregister();
+                    status.innerHTML += `<p>✓ Service Worker desregistrado: ${reg.scope}</p>`;
+                }
+            }
+
+            status.innerHTML += '<p>2. Limpando caches...</p>';
+
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let name of cacheNames) {
+                    await caches.delete(name);
+                    status.innerHTML += `<p>✓ Cache deletado: ${name}</p>`;
+                }
+            }
+
+            status.innerHTML += '<p>3. Limpando localStorage...</p>';
+            localStorage.clear();
+            status.innerHTML += '<p>✓ localStorage limpo</p>';
+
+            status.innerHTML += '<p>4. Limpando sessionStorage...</p>';
+            sessionStorage.clear();
+            status.innerHTML += '<p>✓ sessionStorage limpo</p>';
+
+            status.innerHTML += '<p><strong>✓ Tudo limpo! Redirecionando em 2 segundos...</strong></p>';
+
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }
+
+        clearAll();
+    </script>
+</body>
+</html>

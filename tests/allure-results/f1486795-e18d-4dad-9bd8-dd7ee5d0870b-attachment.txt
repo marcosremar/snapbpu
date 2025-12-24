@@ -1,0 +1,2 @@
+[92m✓[0m Performance da listagem
+[92m✓[0m Performance listagem: 0.546s

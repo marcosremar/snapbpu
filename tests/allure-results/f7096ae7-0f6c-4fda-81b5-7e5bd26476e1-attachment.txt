@@ -1,0 +1,2 @@
+2025-12-21 06:31:46,325 - tests.backend.conftest - INFO - Usando cache para TestDashboardPerformance
+2025-12-21 06:31:46,326 - tests.backend.conftest - INFO - PASS: Tempo de resposta: 0.001s

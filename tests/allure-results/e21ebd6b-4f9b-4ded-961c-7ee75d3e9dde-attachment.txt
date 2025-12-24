@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Market snapshots com limit=1000
+INFO     tests.backend.conftest:conftest.py:255 PASS: Large limit test: 1000 registros em 0.01s

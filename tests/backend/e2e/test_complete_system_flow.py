@@ -13,7 +13,7 @@ Uso:
 
 import pytest
 import time
-from tests.backend.conftest import BaseTestCase, Colors
+from tests.conftest import BaseTestCase, Colors, APIClient, DEFAULT_CONFIG
 
 
 class TestCompleteSystemFlow(BaseTestCase):
@@ -124,7 +124,7 @@ class TestCompleteSystemFlow(BaseTestCase):
 
         def fetch_endpoint(endpoint):
             if endpoint == "/health":
-                from tests.backend.conftest import APIClient, DEFAULT_CONFIG
+                from tests.conftest import APIClient, DEFAULT_CONFIG
                 client = APIClient(DEFAULT_CONFIG["BASE_URL"], DEFAULT_CONFIG["TIMEOUT"])
                 resp = client.get(endpoint)
             else:

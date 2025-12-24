@@ -1,0 +1,3 @@
+[92m✓[0m Busca básica de ofertas
+[92m✓[0m JSON keys OK: ['offers', 'count']
+[92m✓[0m Ofertas encontradas: 64

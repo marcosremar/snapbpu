@@ -1,0 +1,13 @@
+2025-12-21 06:32:11,884 - tests.backend.conftest - INFO - Usando cache para TestPerformance
+2025-12-21 06:32:11,887 - tests.backend.conftest - INFO - PASS: Performance check: /api/v1/metrics/market
+2025-12-21 06:32:11,887 - tests.backend.conftest - INFO - PASS: /api/v1/metrics/market: 0.003s
+2025-12-21 06:32:11,903 - tests.backend.conftest - INFO - PASS: Performance check: /api/v1/metrics/market/summary
+2025-12-21 06:32:11,903 - tests.backend.conftest - INFO - PASS: /api/v1/metrics/market/summary: 0.016s
+2025-12-21 06:32:11,905 - tests.backend.conftest - INFO - PASS: Performance check: /api/v1/metrics/providers
+2025-12-21 06:32:11,905 - tests.backend.conftest - INFO - PASS: /api/v1/metrics/providers: 0.002s
+2025-12-21 06:32:11,908 - tests.backend.conftest - INFO - PASS: Performance check: /api/v1/metrics/efficiency
+2025-12-21 06:32:11,908 - tests.backend.conftest - INFO - PASS: /api/v1/metrics/efficiency: 0.002s
+2025-12-21 06:32:11,909 - tests.backend.conftest - INFO - PASS: Performance check: /api/v1/metrics/gpus
+2025-12-21 06:32:11,909 - tests.backend.conftest - INFO - PASS: /api/v1/metrics/gpus: 0.002s
+2025-12-21 06:32:11,910 - tests.backend.conftest - INFO - PASS: Performance check: /api/v1/metrics/types
+2025-12-21 06:32:11,910 - tests.backend.conftest - INFO - PASS: /api/v1/metrics/types: 0.001s

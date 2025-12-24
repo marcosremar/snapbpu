@@ -1,0 +1,1 @@
+2025-12-21 06:32:13,084 - tests.backend.conftest - INFO - PASS: source_path vazio tratado

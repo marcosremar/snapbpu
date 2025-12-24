@@ -116,6 +116,9 @@ class MarketMonitorAgent(Agent):
         # 4. Calcular e salvar rankings de eficiência
         self._calculate_efficiency_rankings(all_offers)
 
+        # 5. Atualizar estabilidade de ofertas (aparecer/desaparecer)
+        self._update_offer_stability(all_offers)
+
         logger.info("Ciclo de monitoramento concluído")
 
     def _collect_market_data(self) -> Dict[str, List[GpuOffer]]:
@@ -572,6 +575,103 @@ class MarketMonitorAgent(Agent):
 
         # Garantir range 0-100
         return min(100, max(0, score))
+
+    def _update_offer_stability(self, all_offers: Dict[str, List[GpuOffer]]):
+        """
+        Atualiza estabilidade de ofertas (tracking de aparecer/desaparecer).
+
+        Máquinas que aparecem/desaparecem frequentemente são marcadas como instáveis
+        e filtradas do spot pricing por padrão.
+        """
+        from src.models.machine_history import OfferStability
+
+        db = SessionLocal()
+        try:
+            # 1. Coletar todos os machine_ids vistos neste ciclo
+            current_machine_ids = set()
+            machine_data = {}  # machine_id -> (gpu_name, price, geolocation)
+
+            for offers in all_offers.values():
+                for offer in offers:
+                    mid = str(offer.machine_id) if offer.machine_id else None
+                    if mid:
+                        current_machine_ids.add(mid)
+                        machine_data[mid] = (
+                            offer.gpu_name,
+                            offer.dph_total or offer.min_bid,
+                            offer.geolocation
+                        )
+
+            # 2. Buscar máquinas que estavam disponíveis no último ciclo
+            previously_available = db.query(OfferStability).filter(
+                OfferStability.provider == "vast",
+                OfferStability.is_available == True,
+            ).all()
+            previous_ids = {str(m.machine_id) for m in previously_available}
+
+            # 3. Máquinas que desapareceram (estavam, não estão mais)
+            disappeared = previous_ids - current_machine_ids
+            for mid in disappeared:
+                stability = db.query(OfferStability).filter(
+                    OfferStability.provider == "vast",
+                    OfferStability.machine_id == mid,
+                ).first()
+                if stability:
+                    stability.record_disappeared()
+                    logger.debug(f"Machine {mid} disappeared (score={stability.stability_score:.2f})")
+
+            # 4. Máquinas que apareceram (novas ou reapareceram)
+            appeared = current_machine_ids - previous_ids
+            for mid in appeared:
+                stability = db.query(OfferStability).filter(
+                    OfferStability.provider == "vast",
+                    OfferStability.machine_id == mid,
+                ).first()
+
+                gpu_name, price, geo = machine_data.get(mid, (None, None, None))
+
+                if not stability:
+                    # Nova máquina
+                    stability = OfferStability(
+                        provider="vast",
+                        machine_id=mid,
+                        gpu_name=gpu_name,
+                        geolocation=geo,
+                    )
+                    db.add(stability)
+
+                stability.record_appeared(price=price, gpu_name=gpu_name, geolocation=geo)
+                logger.debug(f"Machine {mid} appeared (score={stability.stability_score:.2f})")
+
+            # 5. Atualizar last_seen para máquinas que continuam disponíveis
+            still_available = current_machine_ids & previous_ids
+            for mid in still_available:
+                stability = db.query(OfferStability).filter(
+                    OfferStability.provider == "vast",
+                    OfferStability.machine_id == mid,
+                ).first()
+                if stability:
+                    stability.last_seen_at = datetime.utcnow()
+                    gpu_name, price, geo = machine_data.get(mid, (None, None, None))
+                    if price:
+                        stability.price_per_hour = price
+
+            db.commit()
+
+            # Log summary
+            unstable_count = db.query(OfferStability).filter(
+                OfferStability.provider == "vast",
+                OfferStability.is_unstable == True,
+            ).count()
+
+            logger.info(f"Stability update: {len(appeared)} appeared, {len(disappeared)} disappeared, "
+                        f"{len(still_available)} stable, {unstable_count} marked unstable")
+
+        except Exception as e:
+            logger.error(f"Error updating offer stability: {e}", exc_info=True)
+            db.rollback()
+        finally:
+            db.close()
 
     def get_stats(self) -> Dict:
         """Retorna estatísticas do agente."""

@@ -68,17 +68,17 @@
 
   /* Neon Button - Primary CTA */
   .btn-neon {
-    @apply bg-emerald-400 text-black font-bold hover:bg-emerald-300 rounded-lg transition-all;
+    @apply bg-brand-500 text-white font-bold hover:bg-brand-600 rounded-lg transition-all;
   }
 
   /* Dark Input - Form inputs */
   .input-dark {
-    @apply bg-[#050505] border border-white/10 focus:border-emerald-500 rounded-lg text-gray-200 placeholder:text-gray-600;
+    @apply bg-[#050505] border border-white/10 focus:border-brand-500 rounded-lg text-gray-200 placeholder:text-gray-600;
   }
 
   /* Text Gradient - For headings */
   .text-gradient {
-    @apply bg-gradient-to-r from-emerald-400 to-emerald-600 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent;
   }
 }
 
@@ -167,6 +167,30 @@ a:hover {
   }
 }
 
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
 @keyframes pulse {
 
   0%,
@@ -179,6 +203,17 @@ a:hover {
   }
 }
 
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.3s ease-out;
 }
@@ -187,32 +222,45 @@ a:hover {
   animation: slideIn 0.3s ease-out;
 }
 
+.animate-slideInUp {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-scaleIn {
+  animation: scaleIn 0.2s ease-out;
+}
+
 /* =====================================================
    AI WIZARD - Chat styles (used by Dashboard)
+   Professional, clean design
    ===================================================== */
 .ai-wizard-improved-input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border: none;
   background: transparent;
   color: inherit;
   font-size: 0.875rem;
   outline: none;
   resize: none;
-  min-height: 44px;
-  max-height: 120px;
+  min-height: 40px;
+  max-height: 100px;
 }
 
 .ai-wizard-improved-input::placeholder {
-  color: #9ca3af;
+  color: #6b7280;
 }
 
 .ai-wizard-improved-send-button {
-  @apply px-4 py-2 bg-emerald-500 text-white border-none rounded-lg text-sm font-medium cursor-pointer transition-all flex items-center gap-2;
+  @apply px-3 py-2 bg-brand-700 text-white border-none rounded-md text-sm font-medium cursor-pointer transition-colors flex items-center gap-2;
 }
 
 .ai-wizard-improved-send-button:hover {
-  @apply bg-emerald-600;
+  @apply bg-brand-600;
 }
 
 .ai-wizard-improved-send-button:disabled {
@@ -228,20 +276,20 @@ a:hover {
 }
 
 .ai-wizard-message-user {
-  @apply bg-emerald-500 text-white rounded-xl rounded-br-sm;
+  @apply bg-brand-700 text-white rounded-md;
 }
 
 .ai-wizard-message-assistant {
-  @apply bg-white/10 text-gray-100 rounded-xl rounded-bl-sm;
+  @apply bg-gray-800 text-gray-200 rounded-md;
 }
 
-/* AI Wizard Quick Actions - Using TailAdmin theme classes */
+/* AI Wizard Quick Actions */
 .ai-wizard-quick-actions {
-  @apply flex flex-wrap gap-2 mb-4;
+  @apply flex flex-wrap gap-2 mb-3;
 }
 
 .ai-wizard-quick-action {
-  @apply ta-quick-action;
+  @apply px-3 py-1.5 text-xs font-medium rounded-md transition-colors text-gray-400 bg-gray-800 border border-gray-700 hover:bg-gray-700 hover:text-gray-200;
 }
 
 /* =====================================================
@@ -307,7 +355,7 @@ a:hover {
 .header-divider {
   width: 1px;
   height: 24px;
-  background: #30363d;
+  background: #256029;
 }
 
 /* Navigation */
@@ -335,7 +383,7 @@ a:hover {
 
 .nav-link:hover {
   color: #e6edf3;
-  background: #21262d;
+  background: #2e7d32;
   text-decoration: none;
 }
 
@@ -369,7 +417,7 @@ a:hover {
   left: 0;
   margin-top: 0.5rem;
   background: #161b22;
-  border: 1px solid #30363d;
+  border: none;
   border-radius: 0.5rem;
   padding: 0.5rem;
   min-width: 180px;
@@ -391,7 +439,7 @@ a:hover {
 
 .nav-dropdown-item:hover {
   color: #e6edf3;
-  background: #21262d;
+  background: #2e7d32;
   text-decoration: none;
 }
 
@@ -412,9 +460,9 @@ a:hover {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: #21262d;
+  background: #2e7d32;
   color: #e6edf3;
-  border: 1px solid #30363d;
+  border: none;
   border-radius: 0.5rem;
   font-size: 0.875rem;
   font-weight: 500;
@@ -423,8 +471,8 @@ a:hover {
 }
 
 .btn:hover {
-  background: #30363d;
-  border-color: #484f58;
+  background: #256029;
+  
 }
 
 .btn-sm {
@@ -452,7 +500,7 @@ a:hover {
   width: 40px;
   height: 40px;
   background: transparent;
-  border: 1px solid #30363d;
+  border: none;
   border-radius: 0.5rem;
   color: #e6edf3;
   cursor: pointer;
@@ -460,7 +508,7 @@ a:hover {
 }
 
 .mobile-menu-button:hover {
-  background: #21262d;
+  background: #2e7d32;
 }
 
 /* Mobile Menu Overlay */
@@ -527,7 +575,7 @@ a:hover {
 
 .mobile-menu-link:hover {
   color: #e6edf3;
-  background: #21262d;
+  background: #2e7d32;
 }
 
 .mobile-menu-link.active {

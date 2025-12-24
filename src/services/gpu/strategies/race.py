@@ -7,6 +7,11 @@ Losers are destroyed.
 
 This is the most reliable strategy for fast provisioning,
 as Vast.ai machines can have variable startup times.
+
+Improvements:
+- SSH Retry: If winner fails SSH command after winning, automatically
+  destroy it and continue racing with remaining candidates
+- Failover: Configurable max_ssh_retries to try multiple machines
 """
 import time
 import logging
@@ -22,6 +27,10 @@ from .base import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+# Default max retries when SSH fails on winner
+DEFAULT_MAX_SSH_RETRIES = 3
 
 
 class RaceStrategy(ProvisioningStrategy):
@@ -224,39 +233,54 @@ class RaceStrategy(ProvisioningStrategy):
                 time.sleep(delay)
 
             start_time = time.time()
-            try:
-                instance_id = vast_service.create_instance(
-                    offer_id=offer["id"],
-                    image=config.image or "pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime",
-                    disk=config.disk_space,
-                    ports=config.ports,
-                    onstart_cmd=config.onstart_cmd,
-                    docker_options=config.docker_options,
-                    label=config.label,
-                    use_template=False,
-                )
+            max_retries = 2
+            retry_delay = 1.0
 
-                if instance_id:
-                    candidate = MachineCandidate(
-                        instance_id=instance_id,
+            for attempt in range(max_retries):
+                try:
+                    instance_id = vast_service.create_instance(
                         offer_id=offer["id"],
-                        gpu_name=offer.get("gpu_name", "unknown"),
-                        dph_total=offer.get("dph_total", 0),
-                        provision_start_time=start_time,
-                        offer=offer,
+                        image=config.image or "pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime",
+                        disk=config.disk_space,
+                        ports=config.ports,
+                        onstart_cmd=config.onstart_cmd,
+                        docker_options=config.docker_options,
+                        label=config.label,
+                        use_template=False,
                     )
-                    logger.info(f"[RaceStrategy] Created {offer.get('gpu_name')} (ID: {instance_id})")
-                    return (candidate, start_time)
 
-            except Exception as e:
-                logger.warning(f"[RaceStrategy] Failed to create offer {offer['id']}: {e}")
+                    if instance_id:
+                        candidate = MachineCandidate(
+                            instance_id=instance_id,
+                            offer_id=offer["id"],
+                            gpu_name=offer.get("gpu_name", "unknown"),
+                            dph_total=offer.get("dph_total", 0),
+                            provision_start_time=start_time,
+                            offer=offer,
+                        )
+                        logger.info(f"[RaceStrategy] Created {offer.get('gpu_name')} (ID: {instance_id})")
+                        return (candidate, start_time)
+                    break  # No instance_id but no exception - don't retry
+
+                except Exception as e:
+                    error_str = str(e).lower()
+                    # Retry on rate limit (429)
+                    if "429" in str(e) or "too many" in error_str:
+                        if attempt < max_retries - 1:
+                            logger.info(f"[RaceStrategy] Rate limited, waiting {retry_delay}s...")
+                            time.sleep(retry_delay)
+                            retry_delay *= 2  # Exponential backoff
+                            continue
+                    # Don't retry on 400 Bad Request (offer unavailable)
+                    logger.warning(f"[RaceStrategy] Failed to create offer {offer['id']}: {e}")
+                    break
 
             return None
 
-        # Stagger creation to avoid rate limits (200ms between each)
-        with ThreadPoolExecutor(max_workers=len(offers)) as executor:
+        # Stagger creation to avoid rate limits (500ms between each)
+        with ThreadPoolExecutor(max_workers=min(len(offers), 3)) as executor:  # Max 3 parallel
             futures = {
-                executor.submit(create_one, offer, idx * 0.2): offer
+                executor.submit(create_one, offer, idx * 0.5): offer
                 for idx, offer in enumerate(offers)
             }
 
@@ -397,3 +421,163 @@ class RaceStrategy(ProvisioningStrategy):
                     logger.warning(f"[RaceStrategy] Failed to destroy {candidate.instance_id}: {e}")
 
         return destroyed
+
+    def _verify_ssh_works(
+        self,
+        candidate: MachineCandidate,
+        timeout: int = 30,
+    ) -> bool:
+        """
+        Verify SSH connection actually works with a real command.
+
+        This is more thorough than just testing if port is open.
+        Some machines have SSH port open but fail to accept connections.
+        """
+        import subprocess
+        import os
+
+        ssh_key_path = os.path.expanduser("~/.ssh/id_rsa")
+
+        try:
+            result = subprocess.run(
+                [
+                    "ssh",
+                    "-i", ssh_key_path,
+                    "-o", "StrictHostKeyChecking=no",
+                    "-o", "UserKnownHostsFile=/dev/null",
+                    "-o", f"ConnectTimeout={timeout}",
+                    "-o", "BatchMode=yes",
+                    "-p", str(candidate.ssh_port),
+                    f"root@{candidate.ssh_host}",
+                    "echo SSH_VERIFIED && hostname"
+                ],
+                capture_output=True,
+                text=True,
+                timeout=timeout + 5,
+            )
+
+            if result.returncode == 0 and "SSH_VERIFIED" in result.stdout:
+                logger.info(
+                    f"[RaceStrategy] SSH verified for {candidate.gpu_name} "
+                    f"({candidate.ssh_host}:{candidate.ssh_port}): {result.stdout.strip()}"
+                )
+                return True
+            else:
+                logger.warning(
+                    f"[RaceStrategy] SSH verification failed for {candidate.gpu_name}: "
+                    f"returncode={result.returncode}, stderr={result.stderr[:200]}"
+                )
+                return False
+
+        except subprocess.TimeoutExpired:
+            logger.warning(
+                f"[RaceStrategy] SSH verification timed out for {candidate.gpu_name} "
+                f"({candidate.ssh_host}:{candidate.ssh_port})"
+            )
+            return False
+        except Exception as e:
+            logger.warning(
+                f"[RaceStrategy] SSH verification error for {candidate.gpu_name}: {e}"
+            )
+            return False
+
+    def provision_with_failover(
+        self,
+        config: ProvisionConfig,
+        vast_service: Any,
+        progress_callback: Optional[callable] = None,
+    ) -> ProvisionResult:
+        """
+        Provision with automatic failover if SSH fails.
+
+        This is the recommended method for production use:
+        1. Run standard race strategy
+        2. Verify winner's SSH actually works
+        3. If SSH fails, destroy winner and try next candidate
+        4. Repeat up to max_ssh_retries times
+
+        Args:
+            config: Provisioning configuration
+            vast_service: VastService instance
+            progress_callback: Optional callback for progress updates
+
+        Returns:
+            ProvisionResult with verified working SSH
+        """
+        start_time = time.time()
+        ssh_attempts = 0
+        failed_instances: List[int] = []
+
+        def report_progress(status: str, message: str, progress: int = 0):
+            if progress_callback:
+                progress_callback(status, message, progress)
+            logger.info(f"[RaceStrategy] {status}: {message}")
+
+        # First, run normal provisioning
+        result = self.provision(config, vast_service, progress_callback)
+
+        if not result.success:
+            return result
+
+        # Verify SSH works with a real command
+        while ssh_attempts < config.max_ssh_retries:
+            ssh_attempts += 1
+
+            candidate = MachineCandidate(
+                instance_id=result.instance_id,
+                offer_id=0,
+                gpu_name=result.gpu_name or "unknown",
+                ssh_host=result.ssh_host,
+                ssh_port=result.ssh_port,
+            )
+
+            report_progress(
+                "verifying",
+                f"Verifying SSH works (attempt {ssh_attempts}/{config.max_ssh_retries})...",
+                90 + ssh_attempts,
+            )
+
+            if self._verify_ssh_works(candidate, config.ssh_command_timeout):
+                # SSH works! Return success
+                result.total_time_seconds = time.time() - start_time
+                return result
+
+            # SSH failed - destroy this instance and try another
+            logger.warning(
+                f"[RaceStrategy] SSH failed for {result.instance_id}, "
+                f"destroying and trying next (attempt {ssh_attempts}/{config.max_ssh_retries})"
+            )
+
+            failed_instances.append(result.instance_id)
+
+            try:
+                vast_service.destroy_instance(result.instance_id)
+            except Exception as e:
+                logger.warning(f"[RaceStrategy] Failed to destroy {result.instance_id}: {e}")
+
+            # Try to provision again
+            report_progress(
+                "retrying",
+                f"SSH failed, provisioning new machine (attempt {ssh_attempts + 1}/{config.max_ssh_retries})...",
+                50,
+            )
+
+            result = self.provision(config, vast_service, progress_callback)
+
+            if not result.success:
+                # No more machines available
+                result.error = (
+                    f"SSH verification failed after {ssh_attempts} attempts. "
+                    f"Failed instances: {failed_instances}. Last error: {result.error}"
+                )
+                result.total_time_seconds = time.time() - start_time
+                return result
+
+        # All retries exhausted
+        return ProvisionResult(
+            success=False,
+            error=f"SSH verification failed after {ssh_attempts} attempts. Failed instances: {failed_instances}",
+            machines_tried=result.machines_tried,
+            machines_created=result.machines_created,
+            total_time_seconds=time.time() - start_time,
+        )

@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestSyncEndpoints
+INFO     tests.backend.conftest:conftest.py:265 INFO: Sync status para instância inexistente retornou 500 (esperado)

@@ -1,0 +1,2 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestDashboardPerformance
+INFO     tests.backend.conftest:conftest.py:255 PASS: Tempo de resposta: 0.001s

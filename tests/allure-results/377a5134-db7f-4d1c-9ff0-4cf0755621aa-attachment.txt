@@ -1,0 +1,4 @@
+INFO     tests.backend.conftest:conftest.py:233 Usando cache para TestHibernationStats
+INFO     tests.backend.conftest:conftest.py:255 PASS: Estatísticas de hibernação
+INFO     tests.backend.conftest:conftest.py:255 PASS: JSON keys OK: ['total_hibernations', 'total_hours_saved', 'total_savings', 'machines']
+INFO     tests.backend.conftest:conftest.py:255 PASS: Stats: 0 hibernações, 0h salvos, $0 economia

@@ -1,0 +1,108 @@
+[
+  {
+    "task": "Quero ver meu saldo na conta",
+    "start_time": "2025-12-21T20:44:34.357402",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "help"
+        ],
+        "success": null,
+        "analysis": ""
+      },
+      {
+        "agent": "verifier",
+        "status": "failure",
+        "analysis": ""
+      }
+    ],
+    "final_status": "failure",
+    "end_time": "2025-12-21T20:44:34.357462"
+  },
+  {
+    "task": "Lista todas as minhas maquinas rodando",
+    "start_time": "2025-12-21T20:44:35.362632",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "instance",
+          "list"
+        ],
+        "success": null,
+        "analysis": ""
+      },
+      {
+        "agent": "verifier",
+        "status": "failure",
+        "analysis": ""
+      }
+    ],
+    "final_status": "failure",
+    "end_time": "2025-12-21T20:44:35.362845"
+  },
+  {
+    "task": "Mostra as ofertas de GPU RTX 3060 ate $0.10/hora",
+    "start_time": "2025-12-21T20:44:36.364231",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "help"
+        ],
+        "success": null,
+        "analysis": ""
+      },
+      {
+        "agent": "verifier",
+        "status": "failure",
+        "analysis": ""
+      }
+    ],
+    "final_status": "failure",
+    "end_time": "2025-12-21T20:44:36.364351"
+  },
+  {
+    "task": "Qual o status do sistema de failover?",
+    "start_time": "2025-12-21T20:44:37.368074",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "help"
+        ],
+        "success": null,
+        "analysis": ""
+      },
+      {
+        "agent": "verifier",
+        "status": "failure",
+        "analysis": ""
+      }
+    ],
+    "final_status": "failure",
+    "end_time": "2025-12-21T20:44:37.368145"
+  },
+  {
+    "task": "Quais hosts estao disponiveis para warm pool?",
+    "start_time": "2025-12-21T20:44:38.370182",
+    "actions": [
+      {
+        "agent": "executor",
+        "command": [
+          "help"
+        ],
+        "success": null,
+        "analysis": ""
+      },
+      {
+        "agent": "verifier",
+        "status": "failure",
+        "analysis": ""
+      }
+    ],
+    "final_status": "failure",
+    "end_time": "2025-12-21T20:44:38.370257"
+  }
+]

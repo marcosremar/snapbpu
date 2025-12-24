@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Restic não configurado (esperado em ambiente de teste)

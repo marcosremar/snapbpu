@@ -95,7 +95,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                 {/* Header */}
                 <div className="mb-8">
                     <nav className="flex items-center gap-2 text-sm text-gray-500 mb-3">
-                        <a href="/app" className="hover:text-emerald-400 transition-colors">Home</a>
+                        <a href="/app" className="hover:text-brand-400 transition-colors">Home</a>
                         <span className="text-gray-600">/</span>
                         <span className="text-white font-medium">Economia</span>
                     </nav>
@@ -149,17 +149,17 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                 <div className="spot-highlight mb-8 animate-fade-in">
                     <div className="flex flex-col md:flex-row items-center justify-center gap-6 relative z-10">
                         <div className="flex items-center gap-4">
-                            <Sparkles size={40} className="text-emerald-400" />
+                            <Sparkles size={40} className="text-brand-400" />
                             <div className="text-center md:text-left">
-                                <span className="block text-xs text-emerald-300/70 uppercase font-semibold tracking-wide">Economia Total Este Mês</span>
+                                <span className="block text-xs text-brand-300/70 uppercase font-semibold tracking-wide">Economia Total Este Mês</span>
                                 <span className="block text-4xl md:text-5xl font-extrabold text-white">${summary.savings_vs_aws.toFixed(2)}</span>
                             </div>
                         </div>
                         <div className="flex items-center gap-3 px-6 py-3 bg-white/10 rounded-xl">
-                            <CheckCircle size={24} className="text-emerald-400" />
+                            <CheckCircle size={24} className="text-brand-400" />
                             <div>
-                                <span className="block text-2xl font-bold text-emerald-300">{summary.savings_percentage_avg}%</span>
-                                <span className="block text-xs text-emerald-200/60">mais barato que AWS</span>
+                                <span className="block text-2xl font-bold text-brand-300">{summary.savings_percentage_avg}%</span>
+                                <span className="block text-xs text-brand-200/60">mais barato que AWS</span>
                             </div>
                         </div>
                     </div>
@@ -171,7 +171,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <p className="text-xs text-gray-400 uppercase tracking-wide mb-2">Você Pagou</p>
-                                <p className="text-2xl font-bold text-emerald-400">${summary.total_cost_dumont.toFixed(2)}</p>
+                                <p className="text-2xl font-bold text-brand-400">${summary.total_cost_dumont.toFixed(2)}</p>
                                 <p className="text-xs text-gray-500 mt-1">Este mês na Dumont Cloud</p>
                             </div>
                             <div className="stat-card-icon stat-card-icon-success">
@@ -179,7 +179,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                             </div>
                         </div>
                         <div className="mt-3 pt-3 border-t border-white/5">
-                            <span className="text-xs text-emerald-400 font-medium flex items-center gap-1">
+                            <span className="text-xs text-brand-400 font-medium flex items-center gap-1">
                                 <TrendingDown size={12} />
                                 -{summary.savings_percentage_avg}% vs AWS
                             </span>
@@ -251,15 +251,15 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                                 <div className="animate-fade-in" style={{ animationDelay: '0ms' }}>
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30"></div>
+                                            <div className="w-3 h-3 rounded-full bg-brand-500 shadow-lg shadow-brand-500/30"></div>
                                             <span className="text-sm font-medium text-white">Dumont Cloud</span>
                                             <span className="ta-badge ta-badge-success text-[10px]">Você</span>
                                         </div>
-                                        <span className="text-sm font-bold text-emerald-400">${summary.total_cost_dumont.toFixed(2)}</span>
+                                        <span className="text-sm font-bold text-brand-400">${summary.total_cost_dumont.toFixed(2)}</span>
                                     </div>
                                     <div className="h-10 bg-white/5 rounded-xl overflow-hidden border border-white/5">
                                         <div
-                                            className="h-full bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-xl flex items-center justify-end pr-4 transition-all duration-700"
+                                            className="h-full bg-gradient-to-r from-brand-600 to-brand-400 rounded-xl flex items-center justify-end pr-4 transition-all duration-700"
                                             style={{ width: `${(summary.total_cost_dumont / summary.total_cost_aws) * 100}%` }}
                                         >
                                             <span className="text-xs font-bold text-white drop-shadow-md">{Math.round((summary.total_cost_dumont / summary.total_cost_aws) * 100)}%</span>
@@ -338,11 +338,11 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                             </h3>
                         </div>
                         <div className="ta-card-body">
-                            <div className="text-center py-4 mb-4 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-xl border border-emerald-500/20">
-                                <div className="text-5xl font-extrabold text-emerald-400 mb-1">
+                            <div className="text-center py-4 mb-4 bg-gradient-to-br from-brand-500/10 to-brand-500/5 rounded-xl border border-brand-500/20">
+                                <div className="text-5xl font-extrabold text-brand-400 mb-1">
                                     {summary.savings_percentage_avg}%
                                 </div>
-                                <p className="text-sm text-emerald-300/70">de economia média</p>
+                                <p className="text-sm text-brand-300/70">de economia média</p>
                             </div>
 
                             <div className="space-y-3 mb-4">
@@ -351,7 +351,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                                         <div className="w-2 h-2 rounded-full bg-orange-500"></div>
                                         <span className="text-sm text-gray-400">vs AWS</span>
                                     </div>
-                                    <span className="text-sm font-bold text-emerald-400">
+                                    <span className="text-sm font-bold text-brand-400">
                                         +${summary.savings_vs_aws.toFixed(2)}
                                     </span>
                                 </div>
@@ -360,7 +360,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                                         <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                                         <span className="text-sm text-gray-400">vs GCP</span>
                                     </div>
-                                    <span className="text-sm font-bold text-emerald-400">
+                                    <span className="text-sm font-bold text-brand-400">
                                         +${(summary.savings_vs_gcp || 509.30).toFixed(2)}
                                     </span>
                                 </div>
@@ -369,7 +369,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                                         <div className="w-2 h-2 rounded-full bg-sky-500"></div>
                                         <span className="text-sm text-gray-400">vs Azure</span>
                                     </div>
-                                    <span className="text-sm font-bold text-emerald-400">
+                                    <span className="text-sm font-bold text-brand-400">
                                         +${(summary.savings_vs_azure || 575.90).toFixed(2)}
                                     </span>
                                 </div>
@@ -435,9 +435,9 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                                                     {item.hours}h
                                                 </span>
                                             </td>
-                                            <td className="font-mono text-emerald-400 font-semibold">${item.cost_dumont.toFixed(2)}</td>
+                                            <td className="font-mono text-brand-400 font-semibold">${item.cost_dumont.toFixed(2)}</td>
                                             <td className="font-mono text-gray-400">${item.cost_aws.toFixed(2)}</td>
-                                            <td className="font-mono text-emerald-400 font-bold">${item.savings.toFixed(2)}</td>
+                                            <td className="font-mono text-brand-400 font-bold">${item.savings.toFixed(2)}</td>
                                             <td>
                                                 <span className="ta-badge ta-badge-success">
                                                     {Math.round((item.savings / item.cost_aws) * 100)}%
@@ -453,7 +453,7 @@ export default function SavingsDashboard({ getAuthHeaders }) {
                         <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
                             <div className="flex items-center gap-6">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-3 h-3 rounded-full bg-emerald-500"></div>
+                                    <div className="w-3 h-3 rounded-full bg-brand-500"></div>
                                     <span className="text-xs text-gray-400">Dumont Cloud</span>
                                 </div>
                                 <div className="flex items-center gap-2">

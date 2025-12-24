@@ -1,0 +1,8 @@
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com período de 1h
+INFO     tests.backend.conftest:conftest.py:255 PASS: Período 1h: 70 snapshots
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com período de 24h
+INFO     tests.backend.conftest:conftest.py:255 PASS: Período 24h: 100 snapshots
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com período de 72h
+INFO     tests.backend.conftest:conftest.py:255 PASS: Período 72h: 100 snapshots
+INFO     tests.backend.conftest:conftest.py:255 PASS: Snapshots com período de 168h
+INFO     tests.backend.conftest:conftest.py:255 PASS: Período 168h: 100 snapshots

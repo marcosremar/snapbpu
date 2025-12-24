@@ -1,0 +1,2 @@
+[91m✗[0m Análise com restrição de orçamento falhou: 500
+[91m✗[0m Response: {'error': 'Internal server error', 'details': 'AI Wizard requires OpenRouter API key to function. Please configure OPENROUTER_API_KEY environment variable.'}

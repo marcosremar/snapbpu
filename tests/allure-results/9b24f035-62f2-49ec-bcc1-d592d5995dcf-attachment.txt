@@ -1,0 +1,8 @@
+2025-12-21 06:32:11,751 - tests.backend.conftest - INFO - PASS: Snapshots com período de 1h
+2025-12-21 06:32:11,751 - tests.backend.conftest - INFO - PASS: Período 1h: 70 snapshots
+2025-12-21 06:32:11,754 - tests.backend.conftest - INFO - PASS: Snapshots com período de 24h
+2025-12-21 06:32:11,755 - tests.backend.conftest - INFO - PASS: Período 24h: 100 snapshots
+2025-12-21 06:32:11,757 - tests.backend.conftest - INFO - PASS: Snapshots com período de 72h
+2025-12-21 06:32:11,757 - tests.backend.conftest - INFO - PASS: Período 72h: 100 snapshots
+2025-12-21 06:32:11,760 - tests.backend.conftest - INFO - PASS: Snapshots com período de 168h
+2025-12-21 06:32:11,760 - tests.backend.conftest - INFO - PASS: Período 168h: 100 snapshots

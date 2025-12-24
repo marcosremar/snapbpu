@@ -115,12 +115,12 @@ export default function LLMGpuRanking({ getAuthHeaders }) {
             <tbody>
               {data?.rankings?.slice(0, 8).map((gpu, idx) => (
                 <tr key={idx} className={`animate-fade-in ${idx === 0 ? 'bg-yellow-500/10' : ''}`} style={{ animationDelay: `${idx * 50}ms` }}>
-                  <td className="text-emerald-400 font-bold">{idx + 1}</td>
+                  <td className="text-brand-400 font-bold">{idx + 1}</td>
                   <td>
                     <span className="gpu-badge">{gpu.gpu_name}</span>
                   </td>
                   <td className="text-gray-300">{gpu.vram_gb}GB</td>
-                  <td className="text-emerald-400">{gpu.estimated_tokens_per_sec?.toFixed(0)}</td>
+                  <td className="text-brand-400">{gpu.estimated_tokens_per_sec?.toFixed(0)}</td>
                   <td className="text-orange-400">
                     ${(gpu.cost_per_token * 1000000)?.toFixed(2)}
                   </td>

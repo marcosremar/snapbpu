@@ -1,0 +1,6 @@
+[92m✓[0m Snapshots filtrados por tipo: on-demand
+[92m✓[0m Filtro tipo 'on-demand': 100 snapshots
+[92m✓[0m Snapshots filtrados por tipo: interruptible
+[92m✓[0m Filtro tipo 'interruptible': 100 snapshots
+[92m✓[0m Snapshots filtrados por tipo: bid
+[92m✓[0m Filtro tipo 'bid': 100 snapshots

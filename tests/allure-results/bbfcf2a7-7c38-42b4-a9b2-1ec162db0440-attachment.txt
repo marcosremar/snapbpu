@@ -1,0 +1,3 @@
+2025-12-21 06:32:13,135 - tests.backend.conftest - INFO - Usando cache para TestStandbyPerformance
+2025-12-21 06:32:13,136 - tests.backend.conftest - INFO - PASS: Status do standby
+2025-12-21 06:32:13,136 - tests.backend.conftest - INFO - PASS: Tempo de resposta do status: 0.001s

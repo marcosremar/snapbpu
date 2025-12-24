@@ -136,7 +136,7 @@ export const ConfirmModal = ({
   const variantStyles = {
     danger: "bg-red-500 hover:bg-red-600",
     warning: "bg-yellow-500 hover:bg-yellow-600 text-black",
-    info: "bg-green-500 hover:bg-green-600",
+    info: "bg-brand-500 hover:bg-brand-600",
   };
 
   return (

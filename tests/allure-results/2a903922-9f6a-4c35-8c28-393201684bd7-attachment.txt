@@ -1,0 +1,3 @@
+[92m✓[0m Listagem de instâncias
+[92m✓[0m JSON keys OK: ['instances', 'count']
+[92m✓[0m Instâncias listadas: 1

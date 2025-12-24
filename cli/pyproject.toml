@@ -31,13 +31,19 @@ dependencies = [
 dev = [
     "pytest>=7.0",
     "pytest-cov>=3.0",
+    "pytest-benchmark>=4.0",
+    "pytest-timeout>=2.0",
+    "pytest-xdist>=3.0",
+    "pytest-testmon>=2.0",
+    "pytest-cache>=1.0",
     "black>=22.0",
     "flake8>=4.0",
+    "flake8-docstrings>=1.7",
     "mypy>=0.950",
 ]
 
 [project.scripts]
-dumont = "cli.__main__:main"
+dumont = "dumont_cli:main"
 
 [project.urls]
 Homepage = "https://dumontcloud.com"
@@ -46,16 +52,61 @@ Repository = "https://github.com/dumontcloud/cli"
 "Bug Tracker" = "https://github.com/dumontcloud/cli/issues"
 
 [tool.setuptools]
-packages = ["cli", "cli.commands", "cli.utils"]
+py-modules = ["dumont_cli"]
+packages = ["commands", "utils"]
 
 [tool.setuptools.package-data]
-cli = ["py.typed"]
+"*" = ["py.typed"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+# SEMPRE rodar TODOS os testes em paralelo com 10 workers
+# Não segregar testes por tipo - GPU, CPU, integration, todos juntos
+addopts = [
+    "-n", "10",
+    "-v",
+    "--tb=short",
+    "--dist=loadscope",
+]
+timeout = 300
+timeout_method = "thread"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::pytest.PytestCollectionWarning",
+    "ignore::pytest_benchmark.logger.PytestBenchmarkWarning",
+]
+
+# Rate limiting is configured in conftest.py via environment variables:
+# RATE_LIMIT_DELAY=1.0
+# RATE_LIMIT_MAX_RETRIES=5
+# RATE_LIMIT_INITIAL_BACKOFF=2.0
+# RATE_LIMIT_MAX_BACKOFF=60.0
+
+[tool.coverage.run]
+source = ["cli"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/conftest.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
 
 [tool.black]
 line-length = 100
@@ -75,3 +126,19 @@ python_version = "3.8"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
+
+[tool.flake8]
+max-line-length = 100
+extend-ignore = ["E203", "W503", "D100", "D104", "D107"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    ".venv",
+    "venv",
+]
+per-file-ignores = [
+    "tests/*:D101,D102,D103",
+    "__init__.py:F401",
+]

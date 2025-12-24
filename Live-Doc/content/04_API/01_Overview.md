@@ -154,6 +154,39 @@ X-RateLimit-Reset: 1704067200
 |--------|----------|-----------|
 | GET | `/hibernation/stats` | Estatisticas de economia |
 
+### Machine History (Novo)
+
+Sistema de rastreamento de confiabilidade de maquinas GPU.
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/machines/history/blacklist` | Listar maquinas bloqueadas |
+| POST | `/machines/history/blacklist` | Adicionar ao blacklist |
+| GET | `/machines/history/blacklist/check/{provider}/{machine_id}` | Verificar se bloqueada |
+| DELETE | `/machines/history/blacklist/{provider}/{machine_id}` | Remover do blacklist |
+| GET | `/machines/history/summary` | Resumo do historico |
+
+#### Ofertas com Machine History
+
+O endpoint `/instances/offers` agora retorna campos de confiabilidade:
+
+```json
+{
+  "id": 29102584,
+  "gpu_name": "RTX 4090",
+  "dph_total": 0.25,
+  "machine_id": "12345",
+  "is_blacklisted": false,
+  "success_rate": 0.85,
+  "total_attempts": 20,
+  "reliability_status": "good"
+}
+```
+
+| Parametro | Descricao |
+|-----------|-----------|
+| `include_blacklisted=true` | Mostra maquinas blacklisted (ocultas por padrao) |
+
 ---
 
 ## Exemplos

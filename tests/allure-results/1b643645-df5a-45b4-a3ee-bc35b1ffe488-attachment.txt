@@ -1,0 +1,2 @@
+[94mℹ[0m Endpoint /api/v1/regions não implementado (status 200)
+[94mℹ[0m Endpoint /api/v1/regions/detect não implementado (status 200)

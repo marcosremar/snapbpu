@@ -1,0 +1,1 @@
+[92m✓[0m source_path padrão aceito (falhou por outro motivo)

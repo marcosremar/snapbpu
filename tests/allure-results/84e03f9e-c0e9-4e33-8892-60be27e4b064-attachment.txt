@@ -1,0 +1,10 @@
+2025-12-21 06:31:46,347 - tests.backend.conftest - INFO - INFO: Passo 1: Verificar autenticação
+2025-12-21 06:31:46,348 - tests.backend.conftest - INFO - PASS: Usuário autenticado
+2025-12-21 06:31:46,348 - tests.backend.conftest - INFO - INFO: Passo 2: Listar instâncias
+2025-12-21 06:31:46,935 - tests.backend.conftest - INFO - PASS: Instâncias listadas: 1
+2025-12-21 06:31:46,935 - tests.backend.conftest - INFO - INFO: Passo 3: Ver savings
+2025-12-21 06:31:46,938 - tests.backend.conftest - INFO - PASS: Savings carregado
+2025-12-21 06:31:46,938 - tests.backend.conftest - INFO - INFO: Passo 4: Ver standby status
+2025-12-21 06:31:46,939 - tests.backend.conftest - INFO - PASS: Standby status carregado
+2025-12-21 06:31:46,939 - tests.backend.conftest - INFO - INFO: Passo 5: Ver hibernation stats
+2025-12-21 06:31:46,942 - tests.backend.conftest - INFO - PASS: Hibernation stats carregado

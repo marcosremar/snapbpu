@@ -101,12 +101,12 @@ export default function TrainingCost({ getAuthHeaders }) {
         {data?.best_option && (
           <div className="spot-highlight mb-5">
             <div className="flex items-center justify-center gap-3 relative z-10">
-              <Award size={28} className="text-emerald-400" />
+              <Award size={28} className="text-brand-400" />
               <div className="text-left">
-                <span className="block text-xs text-emerald-300/70 uppercase font-semibold">Melhor Opção</span>
+                <span className="block text-xs text-brand-300/70 uppercase font-semibold">Melhor Opção</span>
                 <span className="block text-xl font-bold text-white">{data.best_option.gpu_name}</span>
-                <span className="block text-sm text-emerald-200/60">
-                  Total: <strong className="text-emerald-300">{formatPrice(data.best_option.total_cost)}</strong> para {trainingHours}h
+                <span className="block text-sm text-brand-200/60">
+                  Total: <strong className="text-brand-300">{formatPrice(data.best_option.total_cost)}</strong> para {trainingHours}h
                 </span>
               </div>
             </div>
@@ -126,13 +126,13 @@ export default function TrainingCost({ getAuthHeaders }) {
             </thead>
             <tbody>
               {data?.comparisons?.slice(0, 8).map((item, idx) => (
-                <tr key={idx} className={`animate-fade-in ${idx === 0 ? 'bg-emerald-500/10' : ''}`} style={{ animationDelay: `${idx * 50}ms` }}>
+                <tr key={idx} className={`animate-fade-in ${idx === 0 ? 'bg-brand-500/10' : ''}`} style={{ animationDelay: `${idx * 50}ms` }}>
                   <td>
                     <span className="gpu-badge">{item.gpu_name}</span>
                   </td>
                   <td className="text-gray-300">${item.spot_price_per_hour?.toFixed(2)}</td>
                   <td className="font-bold text-white">{formatPrice(item.total_spot_cost)}</td>
-                  <td className="text-emerald-400">
+                  <td className="text-brand-400">
                     <span className="font-semibold">-{formatPrice(item.savings_vs_ondemand)}</span>
                     <span className="text-xs opacity-80 ml-1">({item.savings_percent?.toFixed(0)}%)</span>
                   </td>
@@ -143,12 +143,12 @@ export default function TrainingCost({ getAuthHeaders }) {
           </table>
         </div>
 
-        <div className="mt-4 p-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-xl">
+        <div className="mt-4 p-4 bg-gradient-to-r from-brand-500/10 to-teal-500/10 border border-brand-500/20 rounded-xl">
           <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
-            <Cpu size={16} className="text-emerald-400" />
+            <Cpu size={16} className="text-brand-400" />
             Dicas para Economia
           </h4>
-          <ul className="text-xs text-gray-300 space-y-2 pl-5 list-disc marker:text-emerald-400">
+          <ul className="text-xs text-gray-300 space-y-2 pl-5 list-disc marker:text-brand-400">
             <li>Use checkpointing para salvar progresso a cada hora</li>
             <li>Prefira horários de baixa demanda (madrugada UTC)</li>
             <li>Considere GPUs menos populares para menores preços</li>

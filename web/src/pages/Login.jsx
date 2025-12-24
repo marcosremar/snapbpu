@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Moon, Sun, ArrowRight, Shield, Zap, Server, User, Lock, Eye, EyeOff } from 'lucide-react'
-import { useTheme } from '../context/ThemeContext'
-import DumontLogo from '../components/DumontLogo'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Shield, Zap, Server, User, Lock, Eye, EyeOff } from 'lucide-react'
+import Logo from '../components/Logo'
+import '../styles/landing.css'
 
 export default function Login({ onLogin }) {
   const [username, setUsername] = useState('')
@@ -9,7 +10,6 @@ export default function Login({ onLogin }) {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { theme, toggleTheme } = useTheme()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -58,35 +58,28 @@ export default function Login({ onLogin }) {
   }
 
   return (
-    <div className="flex min-h-screen w-full bg-[#0a0d0a] text-white overflow-hidden font-sans">
-      {/* Absolute Theme Toggle */}
-      <button
-        onClick={toggleTheme}
-        className="fixed top-6 right-6 z-50 p-2 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-all backdrop-blur-sm border border-white/5"
-        aria-label="Toggle Dark Mode"
-      >
-        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-      </button>
-
+    <div className="flex min-h-screen w-full bg-[#0a0d0a] text-white overflow-hidden font-sans relative">
       {/* Left Side - Branding & Visuals (Hidden on mobile) */}
-      <div className="hidden lg:flex relative w-1/2 flex-col justify-between p-12 lg:p-16 border-r border-white/5 bg-[#0f1210]">
-        {/* Background Effects */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[120px]" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-900/10 rounded-full blur-[100px]" />
+      <div className="hidden lg:flex relative w-1/2 flex-col justify-between p-12 lg:p-16 border-r border-white/5 bg-[#0a0d0a] z-10">
+        {/* Background with decoration circles - same as landing page */}
+        <div className="hero-decoration">
+          <div className="decoration-circle c1"></div>
+          <div className="decoration-circle c2"></div>
+          <div className="decoration-circle c3"></div>
+          <div className="decoration-circle c4"></div>
+          <div className="decoration-circle c5"></div>
         </div>
 
-        {/* Logo Area */}
-        <div className="relative z-10 flex items-center gap-3">
-          <DumontLogo size={40} />
-          <span className="text-2xl font-bold tracking-tight text-white">Dumont Cloud</span>
+        {/* Logo Area - Using Logo component with text */}
+        <div className="relative z-10">
+          <Logo size={44} />
         </div>
 
         {/* Hero Content */}
         <div className="relative z-10 max-w-lg">
           <h1 className="text-4xl font-bold leading-tight mb-6">
             Intelligence <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#4caf50] to-[#81c784]">
               Accelerated
             </span>
           </h1>
@@ -96,19 +89,19 @@ export default function Login({ onLogin }) {
 
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-gray-300">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-500">
                 <Zap size={16} />
               </div>
               <span className="text-sm">Provisionamento em segundos</span>
             </div>
             <div className="flex items-center gap-3 text-gray-300">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-500">
                 <Shield size={16} />
               </div>
               <span className="text-sm">Failover automático 24/7</span>
             </div>
             <div className="flex items-center gap-3 text-gray-300">
-              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-brand-500/10 border border-brand-500/20 text-brand-500">
                 <Server size={16} />
               </div>
               <span className="text-sm">Acesso direto via SSH & Jupyter</span>
@@ -119,18 +112,18 @@ export default function Login({ onLogin }) {
         {/* Footer/Testimonial */}
         <div className="relative z-10 pt-8 border-t border-white/5">
           <p className="text-sm text-gray-500 font-mono">
-            v2.5.0-stable • System Status: <span className="text-emerald-500">Operational</span>
+            v2.5.0-stable • System Status: <span className="text-[#4caf50]">Operational</span>
           </p>
         </div>
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative z-10">
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative z-10 bg-[#0a0d0a]">
         <div className="w-full max-w-sm space-y-8">
 
           {/* Mobile Logo (visible only on small screens) */}
           <div className="lg:hidden flex justify-center mb-8">
-            <DumontLogo size={48} />
+            <Logo size={48} showText={false} />
           </div>
 
           <div className="text-center lg:text-left">
@@ -173,7 +166,7 @@ export default function Login({ onLogin }) {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full h-14 pl-12 pr-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                    className="w-full h-14 pl-12 pr-4 rounded-xl bg-[#131713] border border-[#2a352a] text-white placeholder-gray-500 focus:outline-none focus:border-[#4caf50] focus:ring-2 focus:ring-[#2e7d32]/20 transition-all text-sm"
                     placeholder="seu@email.com"
                     autoFocus
                     required
@@ -184,7 +177,7 @@ export default function Login({ onLogin }) {
               <div className="space-y-2">
                 <div className="flex items-center justify-between ml-1">
                   <label className="text-sm font-medium text-white">Senha</label>
-                  <a href="#" className="text-sm text-emerald-400 hover:text-emerald-300 transition-colors">Esqueceu?</a>
+                  <Link to="/esqueci-senha" className="text-sm text-[#4caf50] hover:text-[#81c784] transition-colors font-medium">Esqueceu?</Link>
                 </div>
                 <div className="relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
@@ -194,14 +187,14 @@ export default function Login({ onLogin }) {
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full h-14 pl-12 pr-12 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                    className="w-full h-14 pl-12 pr-12 rounded-xl bg-[#131713] border border-[#2a352a] text-white placeholder-gray-500 focus:outline-none focus:border-[#4caf50] focus:ring-2 focus:ring-[#2e7d32]/20 transition-all text-sm"
                     placeholder="••••••••"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-400 transition-colors"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#4caf50] transition-colors"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -212,10 +205,10 @@ export default function Login({ onLogin }) {
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full h-14 flex items-center justify-center gap-2.5 rounded-xl bg-emerald-300 hover:bg-emerald-400 text-gray-900 font-semibold transition-all shadow-lg shadow-emerald-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
+              className="group relative w-full h-14 flex items-center justify-center gap-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white font-semibold transition-all shadow-lg shadow-brand-500/20 disabled:opacity-70 disabled:cursor-not-allowed"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
                   <span>Entrar</span>
@@ -224,7 +217,7 @@ export default function Login({ onLogin }) {
               )}
             </button>
             <div className="text-center">
-              <a href="/demo-app" className="text-xs text-gray-500 hover:text-emerald-400 transition-colors">Acessar Demonstração (Sem Login)</a>
+              <a href="/demo-app" className="text-xs text-gray-500 hover:text-[#4caf50] transition-colors">Acessar Demonstração (Sem Login)</a>
             </div>
           </form>
         </div>

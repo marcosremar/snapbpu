@@ -1,0 +1,1 @@
+2025-12-21 06:31:46,297 - tests.backend.conftest - INFO - PASS: Logins concorrentes: 3/3 bem-sucedidos

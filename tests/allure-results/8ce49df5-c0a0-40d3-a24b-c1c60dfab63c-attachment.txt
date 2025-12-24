@@ -1,0 +1,1 @@
+INFO     tests.backend.conftest:conftest.py:265 INFO: Validação de target_offer_id: status 500
