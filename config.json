@@ -1,54 +1,169 @@
 {
   "users": {
-    "marcosemar@gmail.com": {
-      "password": "d52d73c7f98eaf8689eb9203765ff63c991ae2948d84ca348ab5d986ebeb6ff6",
-      "vast_api_key": "a9df8f732d9b1b8a6bb54fd43c477824254552b0d964c58bd92b16c6f25ca3dd",
-      "settings": {
-        "stage_timeout": 30,
-        "restic_connections": 32,
-        "remove_tmux": true,
-        "auto_restore": true,
-        "preferred_region": "EU",
-        "r2_access_key": "f0a6f424064e46c903c76a447f5e73d2",
-        "r2_secret_key": "1dcf325fe8556fca221cf8b383e277e7af6660a246148d5e11e4fc67e822c9b5",
-        "r2_endpoint": "https://142ed673a5cc1a9e91519c099af3d791.r2.cloudflarestorage.com",
-        "r2_bucket": "musetalk",
-        "restic_password": "musetalk123",
-        "restic_repo": "s3:https://142ed673a5cc1a9e91519c099af3d791.r2.cloudflarestorage.com/musetalk/restic",
-        "tailscale_authkey": "tskey-auth-kQmnJuii4411CNTRL-bjWkofSrsnQNAfYo4WPRnQEfFC2aoPnN",
-        "tailscale_vps_ip": "100.66.203.60",
-        "has_completed_onboarding": true,
-        "cloud_storage": {
-          "provider": "gcs",
-          "bucket": "test-bucket",
-          "region": "us-central1"
-        }
-      },
-      "agent_settings": {
-        "sync_interval": 30,
-        "keep_last": 10
-      },
-      "tensordock_auth_id": "cbbecb8d-f9d9-4f4a-a5c9-3c641de70440",
-      "tensordock_api_token": "GLRaWuaDW16nIHy5cQIZBNsOrzhyWHvs"
-    },
-    "test@test.com": {
-      "password": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
-      "vast_api_key": "a9df8f732d9b1b8a6bb54fd43c477824254552b0d964c58bd92b16c6f25ca3dd",
-      "settings": {
-        "has_completed_onboarding": true
-      }
-    },
-    "marcosremar@gmail.com": {
-      "password": "ecd71870d1963316a97e3ac3408c9835ad8cf0f3c1bc703527c30265534f75ae",
+    "e2e_test_1766548816@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
       "vast_api_key": null,
-      "settings": {
-        "has_completed_onboarding": true,
-        "cloud_storage": {
-          "provider": "gcs",
-          "bucket": "test-bucket",
-          "region": "us-central1"
-        }
-      }
+      "settings": {}
+    },
+    "e2e_test_1766548920@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549001@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549065@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549110@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766549110@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549123@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766549123@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549168@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766549167@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549190@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766549189@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766549540@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766549218@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766551151@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766551150@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766551910@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766551910@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766552269@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766552269@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766552920@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766553092@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766554438@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766554438@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766559443@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766559443@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766559497@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766559497@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766559498@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766559540@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766559541@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_test_1766560537@example.com": {
+      "password": "ea358ca5c6aabae0359507e983633541074089fdee99b4e49227fb8d1476515c",
+      "vast_api_key": null,
+      "settings": {}
+    },
+    "e2e_auto_1766560537@example.com": {
+      "password": "bbb34dac45436ffb06fa1181507d3139077df865db3944e5f34de898728b0744",
+      "vast_api_key": null,
+      "settings": {}
     }
   },
   "locked_instances": {}

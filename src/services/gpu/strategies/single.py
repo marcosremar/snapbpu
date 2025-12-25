@@ -29,13 +29,16 @@ class SingleStrategy(ProvisioningStrategy):
 
     Algorithm:
     1. Search for available offers
-    2. Create single machine (best offer)
-    3. Poll for SSH readiness
-    4. Return result (success or timeout)
+    2. Try to create machine from best offer
+    3. If creation fails, try next offer (up to max_retries)
+    4. Poll for SSH readiness
+    5. Return result (success or timeout)
 
     This strategy is simpler but may be slower than RaceStrategy.
     Use when cost is more important than startup time.
     """
+
+    MAX_CREATE_RETRIES = 5  # Try up to 5 different offers if creation fails
 
     @property
     def name(self) -> str:
@@ -47,9 +50,10 @@ class SingleStrategy(ProvisioningStrategy):
         vast_service: Any,
         progress_callback: Optional[callable] = None,
     ) -> ProvisionResult:
-        """Execute single-machine provisioning"""
+        """Execute single-machine provisioning with retry on creation failure"""
         start_time = time.time()
         candidate: Optional[MachineCandidate] = None
+        machines_tried = 0
 
         def report_progress(status: str, message: str, progress: int = 0):
             if progress_callback:
@@ -70,21 +74,37 @@ class SingleStrategy(ProvisioningStrategy):
 
             report_progress("searching", f"Found {len(offers)} offers", 10)
 
-            # Create single machine (best offer)
-            offer = offers[0]
-            report_progress(
-                "creating",
-                f"Creating {offer.get('gpu_name')} @ ${offer.get('dph_total', 0):.2f}/hr...",
-                20,
-            )
+            # Try to create machine, with retry on failure
+            max_retries = min(self.MAX_CREATE_RETRIES, len(offers))
+            last_error = None
 
-            candidate = self._create_machine(vast_service, offer, config)
+            for i in range(max_retries):
+                offer = offers[i]
+                machines_tried += 1
+
+                report_progress(
+                    "creating",
+                    f"Creating {offer.get('gpu_name')} @ ${offer.get('dph_total', 0):.2f}/hr... (attempt {i+1}/{max_retries})",
+                    20,
+                )
+
+                candidate = self._create_machine(vast_service, offer, config)
+
+                if candidate:
+                    # Successfully created, break out of retry loop
+                    break
+                else:
+                    last_error = f"Failed to create machine from offer {offer.get('id')}"
+                    logger.warning(f"[SingleStrategy] {last_error}, trying next offer...")
+                    candidate = None
+                    # Small delay before trying next offer to avoid rate limiting
+                    time.sleep(1)
 
             if not candidate:
                 return ProvisionResult(
                     success=False,
-                    error="Failed to create machine",
-                    machines_tried=1,
+                    error=f"Failed to create machine after {machines_tried} attempts: {last_error}",
+                    machines_tried=machines_tried,
                     total_time_seconds=time.time() - start_time,
                 )
 
@@ -114,7 +134,7 @@ class SingleStrategy(ProvisioningStrategy):
                     dph_total=candidate.dph_total,
                     port_mappings=candidate.port_mappings,
                     rounds_attempted=1,
-                    machines_tried=1,
+                    machines_tried=machines_tried,
                     machines_created=1,
                     total_time_seconds=total_time,
                     time_to_ready_seconds=candidate.ready_time,
@@ -128,7 +148,7 @@ class SingleStrategy(ProvisioningStrategy):
                     success=False,
                     error=f"Machine did not become ready in {timeout}s",
                     rounds_attempted=1,
-                    machines_tried=1,
+                    machines_tried=machines_tried,
                     machines_created=1,
                     total_time_seconds=total_time,
                 )
@@ -141,7 +161,7 @@ class SingleStrategy(ProvisioningStrategy):
             return ProvisionResult(
                 success=False,
                 error=str(e),
-                machines_tried=1,
+                machines_tried=machines_tried,
                 machines_created=1 if candidate else 0,
                 total_time_seconds=time.time() - start_time,
             )
@@ -161,7 +181,7 @@ class SingleStrategy(ProvisioningStrategy):
             min_reliability=config.min_reliability,
             region=config.region if config.region != "global" else None,
             machine_type=config.machine_type,
-            limit=10,  # Only need a few for single strategy
+            limit=20,  # Get more offers for retry capability
         )
 
         # Sort by reliability first (higher = faster startup), then by price
@@ -206,7 +226,7 @@ class SingleStrategy(ProvisioningStrategy):
                 )
 
         except Exception as e:
-            logger.error(f"[SingleStrategy] Failed to create machine: {e}")
+            logger.warning(f"[SingleStrategy] Failed to create machine from offer {offer.get('id')}: {e}")
 
         return None
 

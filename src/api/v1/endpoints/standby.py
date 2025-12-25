@@ -1173,7 +1173,7 @@ ollama list
                 "original_id": gpu_instance_id,
                 "original_type": instance_info.get("gpu_name"),
                 "new_id": new_gpu_id,
-                "new_type": best_offer.get("gpu_name"),
+                "new_type": successful_offer.get("gpu_name") if successful_offer else "unknown",
             },
             "inference": {
                 "model": request.model,

@@ -1,117 +1,176 @@
-# Dumont Cloud - Sistema de Gerenciamento de GPU Cloud (v3)
+# Dumont Cloud - GPU Cloud Orchestration Platform (v3.2)
 
-## Objetivo Principal
+## Project Overview
 
-Sistema de gerenciamento e backup/restore ultra-rápido para ambientes de GPU cloud (vast.ai, runpod, etc).
-**O tempo de inicialização e a economia de custos são críticos** - o sistema deve restaurar o ambiente o mais rápido possível e hibernar máquinas ociosas automaticamente.
+High-performance GPU cloud orchestration platform that combines:
+- **Vast.ai/TensorDock** for low-cost GPU instances
+- **GCP** for CPU standby failover
+- **B2/R2/S3** for high-speed snapshots
+- **Auto-hibernation** for cost savings
 
-## Princípios de Design
+**Critical priorities**: Fast boot time (< 30s) and automatic cost reduction via hibernation.
 
-### 1. Velocidade é Prioridade #1
-- Cada segundo conta na inicialização.
-- Uso de compactação ANS e restic otimizado (32+ conexões).
-- Restore em menos de 15 segundos para 7GB.
+## Architecture
 
-### 2. Auto-Hibernação Inteligente (Custo Zero)
-- **REGRA CRÍTICA**: Monitoramento constante via `DumontAgent`.
-- Se GPU ociosa (< 5%) por **3 minutos**: Instantânea criação de snapshot e destruição da máquina.
-- Se hibernada por **30 minutos**: Limpeza da reserva, mantendo apenas o snapshot no R2 ($0.01/mês).
+### Tech Stack
+- **Backend**: FastAPI + Pydantic v2 + JWT auth
+- **Frontend**: React 18 + Redux + Tailwind CSS + shadcn/ui
+- **CLI**: Python + Click
+- **Storage**: Multi-provider (B2, R2, S3, Wasabi)
+- **GPU Providers**: Vast.ai, TensorDock, GCP
 
-### 3. Estratégia de Multi-Start Dinâmico (Batches)
-- **Implementado**: Supera a variabilidade de boot das clouds iniciando máquinas em paralelo.
-- **Batches**: Inicia batches de 5 máquinas (até 3 rounds/15 máquinas total).
-- **Vencedor**: Monitora todas via API; a primeira que reportar status "Running" e liberar dados de SSH vence.
-- **Cleanup Imediato**: Todas as outras máquinas são destruídas no instante em que o vencedor é confirmado.
-- **Timeouts**: Timeout agressivo de 90s por batch para garantir rapidez.
+### Key Design Patterns
+1. **Strategy Pattern** for GPU provisioning (Race, RoundRobin, Coldstart, Serverless)
+2. **Repository Pattern** for provider abstraction
+3. **Dependency Injection** via FastAPI's `Depends()`
+4. **Domain-Driven Design** with clear layer separation
 
-### 4. Arquitetura SOLID & FastAPI
-- Backend moderno com **FastAPI**, **Pydantic v2** e **Dependency Injection**.
-- Autenticação via **JWT** (stateless).
-- Camadas bem definidas: Domain, Infrastructure, API, Core.
-
-## Arquitetura
-
+### Directory Structure
 ```
-VPS (Control Plane)             GPU Cloud (Data Plane)
-┌─────────────────┐           ┌──────────────────┐
-│ FastAPI Backend │           │ DumontAgent      │
-│ - Domain Logic  │◄─────────►│ - GPU Monitor    │
-│ - Auto-Hiber.   │   (SSH)   │ - Sync Service   │
-└────────┬────────┘           └──────────────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Cloudflare R2   │
-│ - Snapshots ANS │
-│ - Restic Repos  │
-└─────────────────┘
+src/
+├── api/v1/          # REST endpoints
+│   ├── endpoints/   # Route handlers
+│   ├── schemas/     # Request/Response models
+│   └── dependencies.py
+├── domain/          # Business logic
+│   ├── models/      # Domain entities
+│   ├── repositories/# Provider interfaces
+│   └── services/    # Core services
+├── services/        # Application services
+│   ├── gpu/         # GPU strategies
+│   ├── standby/     # Failover logic
+│   └── storage/     # Storage providers
+├── infrastructure/  # External integrations
+└── core/            # Config, JWT, exceptions
+
+cli/                 # Python CLI
+├── commands/        # CLI command groups
+└── utils/           # API client
+
+web/                 # React frontend
+├── src/components/  # UI components
+└── src/pages/       # Route pages
 ```
 
-## APIs Principais (v1)
+## Main API Endpoints
 
-- `/api/v1/auth/login` - Autenticação JWT
-- `/api/v1/instances` - Gerenciamento de instâncias (list, create, destroy, pause, resume)
-- `/api/v1/instances/{id}/wake` - Reativação ultra-rápida de máquina hibernada
-- `/api/v1/snapshots` - Lista e gerencia backups
-- `/api/v1/metrics` - Métricas de performance e uso
-- `/api/v1/metrics/savings/real` - Economia real acumulada via hibernação
-- `/api/v1/agent/status` - Recebe heartbeats do DumontAgent
-- `/api/v1/standby` - Configura CPU Standby/Failover (GCP)
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/auth/login` | POST | JWT authentication |
+| `/api/v1/instances` | GET | List running instances |
+| `/api/v1/instances/provision` | POST | Deploy new GPU |
+| `/api/v1/instances/{id}/wake` | POST | Wake hibernated machine |
+| `/api/v1/instances/{id}/destroy` | DELETE | Destroy instance |
+| `/api/v1/standby` | GET/POST | Failover configuration |
+| `/api/v1/standby/failover` | POST | Trigger manual failover |
+| `/api/v1/models/deploy` | POST | Deploy LLM model |
+| `/api/v1/spot/market` | GET | Spot market analysis |
+| `/api/v1/machines/history` | GET | Machine reliability stats |
 
-## Credenciais e Acesso (Dev)
+## Development Guidelines
 
-- VPS: ubuntu@54.37.225.188
-- Dashboard: http://vps-a84d392b.vps.ovh.net:8765/
-- Restic repo: s3:https://....r2.cloudflarestorage.com/musetalk/restic
-
-## Boas Práticas de Desenvolvimento
-
-### 1. Camada de Domínio Primeiro
-Sempre defina os modelos em `src/domain/models/` e interfaces em `src/domain/repositories/` antes de implementar infraestrutura.
+### 1. Domain-First Development
+Always define models in `src/domain/models/` and interfaces in `src/domain/repositories/` before implementing infrastructure.
 
 ### 2. Dependency Injection
-Use o decorator `Depends()` do FastAPI para injetar serviços e repositórios. Nunca instancie classes de infraestrutura diretamente nos endpoints.
+Use FastAPI's `Depends()` decorator. Never instantiate infrastructure classes directly in endpoints.
 
-### 3. SSH Otimizado
-Evite comandos inline complexos. Use `src/infrastructure/providers/vast_provider.py` para abstrair operações SSH.
+---
 
-## Testes - Regras Importantes
+## Code Standards
 
-### SEMPRE rodar TODOS os testes juntos
-- **NÃO segregar** testes por tipo (GPU, CPU, integration, unit, etc.)
-- **SEMPRE** rodar todos os testes em paralelo com 10 workers
-- Testes de GPU rodam em máquinas separadas na VAST.ai, não na máquina local
-- Comando padrão: `cd cli && pytest` (já configurado com `-n 10`)
+### Exception Handling
+- Never use bare `except:` or `except: pass`
+- Always specify exception types (e.g., `json.JSONDecodeError`, `IOError`, `KeyError`)
+- Log errors before re-raising when appropriate
 
-### Configuração (pyproject.toml)
+### Logging
+- Use `logger` from `src.core.logging` instead of `print()`
+- Never use `print("[DEBUG]...")` - use `logger.debug()`
+- Log levels: `debug` → `info` → `warning` → `error`
+
+### Credentials & Security
+- Never hardcode credentials in source code
+- Always use `os.environ.get("VAR", "")` for secrets
+- Never commit API keys, passwords, or tokens to git
+
+### Code Cleanliness
+- Remove commented-out code blocks
+- Remove unreachable code (code after `return`)
+- Define variables before using them
+
+### Imports
+- Order: standard library → third-party → local
+- Group imports by category with blank lines between
+
+### Error Messages
+- Always include context in error messages
+- Avoid vague messages like "Error" or "Failed"
+
+### API Responses
+- Use consistent format: `{"success": bool, "data": ...}`
+- Include meaningful error details in HTTPException
+
+### Config Files
+- Never store sensitive data in config.json
+- Use empty templates, load values from environment
+
+## Testing
+
+### Running Tests
+```bash
+# All tests (parallel, 10 workers)
+cd cli && pytest
+
+# Specific test file
+pytest tests/test_real_integration.py -v
+
+# With timeout
+pytest -v --timeout=600
+```
+
+### Test Configuration (pyproject.toml)
 ```toml
 addopts = ["-n", "10", "-v", "--tb=short", "--dist=loadscope"]
 ```
 
-### Por que paralelo?
-- Testes de GPU rodam em instâncias VAST.ai separadas
-- Não há conflito entre testes - cada um usa recursos independentes
-- Execução 5-10x mais rápida
+### Important Notes
+- Tests provision **real GPU instances** on Vast.ai (costs money)
+- Each test is self-contained: provisions its own instance and destroys it
+- Tests run in parallel across separate instances
+- No shared state between tests
 
-## Status Atual (Atualizado 2024-12-23)
+### Test Fixture Pattern
+```python
+@pytest.fixture
+def gpu_instance(api_client):
+    """Provisions instance for test and destroys after."""
+    instance = api_client.provision_instance(gpu_type="RTX_4090")
+    wait_for_ready(instance)
+    yield instance
+    api_client.destroy_instance(instance.id)
 
-- [x] Migração Flask → FastAPI (100%)
-- [x] Autenticação JWT (100%)
-- [x] Sistema de Auto-Hibernação (100%) - Inclui endpoint `/wake` e agents inicializados
-- [x] Refatoração SOLID (100%)
-- [x] Multi-Start Dinâmico (Batches 5x3) (100%)
-- [x] Dashboard de Economia Real (100%) - Endpoints e componentes React prontos
-- [x] Endpoint de Heartbeats `/api/agent/status` (100%)
-- [x] CPU Standby/Failover Backend (100%)
-- [x] CPU Standby UI (100%) - Componente Config pronto com badges
-- [x] Machine History/Blacklist (100%) - Sistema de rastreamento de confiabilidade
-- [x] Testes E2E Machine History (100%) - 20/20 testes passando
+def test_gpu_operation(gpu_instance):
+    result = gpu_instance.run_command("nvidia-smi")
+    assert "CUDA" in result
+```
 
-### Machine History (Novo - 2024-12-22)
+## Key Features
 
-Sistema de rastreamento de confiabilidade de máquinas GPU:
-- **Blacklist automático**: Máquinas com taxa de sucesso < 30% são bloqueadas
-- **Integração no Deploy Wizard**: Ofertas filtradas automaticamente
-- **API `/api/v1/machines/history`**: Gerenciar blacklist e ver estatísticas
-- **UI atualizada**: Cards de oferta mostram indicadores de confiabilidade
-- **Banco PostgreSQL**: Tabelas `machine_attempts`, `machine_blacklist`, `machine_stats`
+### GPU Provisioning Strategies
+| Strategy | Description |
+|----------|-------------|
+| Race | 5 machines in parallel, first ready wins |
+| RoundRobin | Sequential attempts across providers |
+| Coldstart | Single machine, wait for boot |
+| Serverless | Pre-warmed pool + auto-hibernate |
+
+### Machine History & Blacklist
+- Tracks success/failure rate per machine
+- Auto-blacklists machines with <30% success rate
+- Deploy wizard filters unreliable hosts
+
+### Auto-Hibernation
+- GPU idle (<5%) for 3 min → snapshot + destroy
+- Hibernated 30 min → cleanup reservation
+- Only snapshot kept in R2 ($0.01/month)

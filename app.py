@@ -1262,16 +1262,6 @@ server {{
             target_url += f"/{subpath}"
         return redirect(target_url)
 
-        # Se nao tiver porta direta, retorna erro informativo
-        return {
-            'error': 'VS Code web nao disponivel diretamente',
-            'hint': 'Porta 8080 nao esta mapeada ou code-server nao esta rodando',
-            'ssh': f"ssh -L 8080:localhost:8080 root@{status.get('ssh_host')} -p {status.get('ssh_port')}",
-            'instance_id': instance_id,
-            'ports': ports,
-            'public_ip': public_ip
-        }, 400
-
     # ========== PATH-BASED PORT PROXY ==========
     # Alternativa ao subdominio - funciona sem configuracao de DNS wildcard
     # Formato: /p/<instance_id>/<port>/

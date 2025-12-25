@@ -134,7 +134,8 @@ class GPUSnapshotService:
         try:
             last_line = result['stdout'].strip().split('\n')[-1]
             stats = json.loads(last_line)
-        except:
+        except (json.JSONDecodeError, IndexError) as e:
+            logger.warning(f"Could not parse restore stats: {e}")
             stats = {}
 
         total_time = time.time() - start_time
@@ -221,7 +222,8 @@ def compress_chunk_task(args):
         for f in file_list:
             try:
                 tar.add(f, arcname=os.path.relpath(f, WORKSPACE))
-            except: pass
+            except Exception as e:
+                print(f"Warning: Could not add {{f}}: {{e}}", flush=True)
     
     # Compress with LZ4
     with open(tar_path, "rb") as f_in:
@@ -303,12 +305,18 @@ print(f"Created {{len(compressed_files)}} compressed files", flush=True)
 print("Uploading to Backblaze B2 (best: 150 MB/s)...", flush=True)
 from concurrent.futures import ThreadPoolExecutor
 
-# Initialize R2 credentials for s5cmd
+# Initialize R2 credentials for s5cmd from environment
 import subprocess as sp
-os.environ["AWS_ACCESS_KEY_ID_R2"] = "f0a6f424064e46c903c76a447f5e73d2"
-os.environ["AWS_SECRET_ACCESS_KEY_R2"] = "1dcf325fe8556fca221cf8b383e277e7af6660a246148d5e11e4fc67e822c9b5"
-R2_ENDPOINT = "https://142ed673a5cc1a9e91519c099af3d791.r2.cloudflarestorage.com"
-R2_BUCKET = "musetalk"
+R2_ACCESS_KEY = os.environ.get("R2_ACCESS_KEY_ID", "")
+R2_SECRET_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "")
+R2_ENDPOINT = os.environ.get("R2_ENDPOINT", "")
+R2_BUCKET = os.environ.get("R2_BUCKET", "")
+
+if R2_ACCESS_KEY and R2_SECRET_KEY:
+    os.environ["AWS_ACCESS_KEY_ID_R2"] = R2_ACCESS_KEY
+    os.environ["AWS_SECRET_ACCESS_KEY_R2"] = R2_SECRET_KEY
+else:
+    print("⚠️  R2 credentials not configured in environment", flush=True)
 
 # Install s5cmd if needed for R2
 if not os.path.exists("/usr/local/bin/s5cmd"):
@@ -452,9 +460,9 @@ if shutil.which("s5cmd") is None:
             shutil.move("/tmp/s5cmd", "/usr/local/bin/s5cmd")
             os.chmod("/usr/local/bin/s5cmd", 0o755)
 
-# Configuration
-os.environ["AWS_ACCESS_KEY_ID"] = "f0a6f424064e46c903c76a447f5e73d2"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "1dcf325fe8556fca221cf8b383e277e7af6660a246148d5e11e4fc67e822c9b5"
+# Configuration - credentials passed from environment
+os.environ["AWS_ACCESS_KEY_ID"] = "{r2_access_key}"
+os.environ["AWS_SECRET_ACCESS_KEY"] = "{r2_secret_key}"
 os.environ["AWS_REGION"] = "auto"
 
 WORKSPACE = "{workspace_path}"
@@ -477,7 +485,8 @@ def compress_chunk_task(args):
         for f in file_list:
             try:
                 tar.add(f, arcname=os.path.relpath(f, WORKSPACE))
-            except: pass
+            except Exception as e:
+                print(f"Warning: Could not add {{f}}: {{e}}", flush=True)
     
     # Compress
     with open(tar_path, "rb") as f_in:
@@ -708,14 +717,14 @@ for file_version, _ in bucket_obj.ls(f"snapshots/{{SNAPSHOT_ID}}/"):
     if file_version.file_name.endswith(".lz4"):
         b2_files.append(file_version.file_name)
 
-# List files from R2 using s5cmd
+# List files from R2 using s5cmd - credentials from environment
 r2_files = []
 env_r2 = os.environ.copy()
-env_r2["AWS_ACCESS_KEY_ID"] = "f0a6f424064e46c903c76a447f5e73d2"
-env_r2["AWS_SECRET_ACCESS_KEY"] = "1dcf325fe8556fca221cf8b383e277e7af6660a246148d5e11e4fc67e822c9b5"
+env_r2["AWS_ACCESS_KEY_ID"] = "{r2_access_key}"
+env_r2["AWS_SECRET_ACCESS_KEY"] = "{r2_secret_key}"
 env_r2["AWS_REGION"] = "auto"
-R2_ENDPOINT = "https://142ed673a5cc1a9e91519c099af3d791.r2.cloudflarestorage.com"
-R2_BUCKET = "musetalk"
+R2_ENDPOINT = "{r2_endpoint}"
+R2_BUCKET = "{r2_bucket}"
 
 # Install s5cmd if not present
 if not os.path.exists("/usr/local/bin/s5cmd"):
@@ -864,11 +873,12 @@ def decompress_and_extract(fpath):
     tar_tmp = fpath + ".tar"
     with open(tar_tmp, "wb") as f_tar:
         f_tar.write(decompressed)
-    
+
     try:
         with tarfile.open(tar_tmp, "r") as tar:
             tar.extractall(path=WORKSPACE)
-    except: pass
+    except Exception as e:
+        print(f"Warning: Failed to extract {{fpath}}: {{e}}", flush=True)
     
     os.remove(tar_tmp)
     os.remove(fpath)
@@ -989,8 +999,9 @@ ENDPOINT = "{endpoint}"
 BUCKET = "{bucket}"
 WORKSPACE = "{workspace_path}"
 
-os.environ["AWS_ACCESS_KEY_ID"] = "f0a6f424064e46c903c76a447f5e73d2"
-os.environ["AWS_SECRET_ACCESS_KEY"] = "1dcf325fe8556fca221cf8b383e277e7af6660a246148d5e11e4fc67e822c9b5"
+# Credentials passed from environment
+os.environ["AWS_ACCESS_KEY_ID"] = "{r2_access_key}"
+os.environ["AWS_SECRET_ACCESS_KEY"] = "{r2_secret_key}"
 os.environ["AWS_REGION"] = "auto"
 
 os.makedirs("/tmp/restore", exist_ok=True)
@@ -1023,11 +1034,12 @@ def restore_chunk(fpath):
     tar_tmp = fpath + ".tar"
     with open(tar_tmp, "wb") as f_tar:
         f_tar.write(decompressed)
-        
+
     try:
         with tarfile.open(tar_tmp, "r") as tar:
             tar.extractall(path=WORKSPACE)
-    except: pass
+    except Exception as e:
+        print(f"Warning: Failed to extract {{fpath}}: {{e}}", flush=True)
         
     os.remove(tar_tmp)
     os.remove(fpath)
@@ -1294,8 +1306,8 @@ for root, dirs, files in os.walk(WORKSPACE):
             # Arquivo novo ou modificado?
             if relative_path not in base_files or base_files[relative_path] < mtime:
                 changed_files.append(fpath)
-        except:
-            pass
+        except OSError as e:
+            print(f"Warning: Could not stat {{fpath}}: {{e}}", flush=True)
 
 print(f"Files changed: {{len(changed_files)}}", flush=True)
 
@@ -1313,8 +1325,8 @@ with tarfile.open(tar_path, "w") as tar:
     for fpath in changed_files:
         try:
             tar.add(fpath, arcname=os.path.relpath(fpath, WORKSPACE))
-        except:
-            pass
+        except Exception as e:
+            print(f"Warning: Could not add {{fpath}}: {{e}}", flush=True)
 
 # 4. Comprimir com LZ4
 print("Compressing...", flush=True)

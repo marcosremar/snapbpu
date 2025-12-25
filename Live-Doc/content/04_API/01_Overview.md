@@ -154,7 +154,32 @@ X-RateLimit-Reset: 1704067200
 |--------|----------|-----------|
 | GET | `/hibernation/stats` | Estatisticas de economia |
 
-### Machine History (Novo)
+### Model Deployment
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| POST | `/models/deploy` | Deploy LLM model |
+| GET | `/models/status/{deployment_id}` | Status do deployment |
+| POST | `/models/stop/{deployment_id}` | Parar deployment |
+| GET | `/models/list` | Listar modelos disponiveis |
+
+### Serverless
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| POST | `/serverless/deploy` | Deploy serverless |
+| GET | `/serverless/status` | Status geral |
+| POST | `/serverless/scale` | Escalar instancias |
+
+### Spot Market Analysis
+
+| Metodo | Endpoint | Descricao |
+|--------|----------|-----------|
+| GET | `/spot/market` | Analise de mercado spot |
+| GET | `/spot/prices/{gpu_type}` | Historico de precos |
+| GET | `/spot/availability` | Disponibilidade por regiao |
+
+### Machine History
 
 Sistema de rastreamento de confiabilidade de maquinas GPU.
 

@@ -46,27 +46,7 @@ async def lifespan(app: FastAPI):
     agents_started = []
     try:
         settings = get_settings()
-        
-#         # Initialize Auto-Hibernation Manager
-#         from .services.standby.hibernation import init_auto_hibernation_manager
-#         
-#         vast_api_key = os.environ.get("VAST_API_KEY", "")
-#         r2_endpoint = os.environ.get("R2_ENDPOINT", "")
-#         r2_bucket = os.environ.get("R2_BUCKET", "")
-#         
-#         if vast_api_key and r2_endpoint:
-#             hibernation_manager = init_auto_hibernation_manager(
-#                 vast_api_key=vast_api_key,
-#                 r2_endpoint=r2_endpoint,
-#                 r2_bucket=r2_bucket,
-#                 check_interval=30
-#             )
-#             hibernation_manager.start()
-#             agents_started.append("AutoHibernationManager")
-#             logger.info("✓ AutoHibernationManager started")
-#         else:
-#             logger.warning("⚠ AutoHibernationManager not started (missing VAST_API_KEY or R2_ENDPOINT)")
-        logger.warning("⚠ AutoHibernationManager not started (missing VAST_API_KEY or R2_ENDPOINT)")
+        vast_api_key = os.environ.get("VAST_API_KEY", "")
         
         # Initialize CPU Standby Manager
         try:

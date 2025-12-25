@@ -151,29 +151,55 @@ class VastService:
             "limit": limit,
         }
 
-        try:
-            resp = requests.get(
-                f"{self.API_URL}/bundles",
-                params=params,
-                headers=self.headers,
-                timeout=30,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            offers = data.get("offers", []) if isinstance(data, dict) else data
+        max_retries = 10
+        delay = 3.0
+        
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.get(
+                    f"{self.API_URL}/bundles",
+                    params=params,
+                    headers=self.headers,
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                offers = data.get("offers", []) if isinstance(data, dict) else data
 
-            if region:
-                region_codes = self._get_region_codes(region)
-                offers = [
-                    o for o in offers
-                    if any(code in str(o.get("geolocation", "")) for code in region_codes)
-                ]
+                if region:
+                    region_codes = self._get_region_codes(region)
+                    offers = [
+                        o for o in offers
+                        if any(code in str(o.get("geolocation", "")) for code in region_codes)
+                    ]
 
-            logger.debug(f"search_offers: API retornou {len(offers)} ofertas")
-            return offers
-        except Exception as e:
-            logger.exception(f"Erro ao buscar ofertas: {e}")
-            return []
+                logger.debug(f"search_offers: API retornou {len(offers)} ofertas")
+                return offers
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on search_gpu_offers, "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 60.0)
+                        continue
+                logger.exception(f"Erro ao buscar ofertas: {e}")
+                return []
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on search_gpu_offers, "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 60.0)
+                        continue
+                logger.exception(f"Erro ao buscar ofertas: {e}")
+                return []
+        return []
 
     def _get_region_codes(self, region: str) -> List[str]:
         """Retorna codigos de paises para uma regiao"""
@@ -270,20 +296,47 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
                 payload["image"] = image
                 logger.debug(f"create_instance: offer_id={offer_id}, IMAGE={image}, disk={disk}")
 
-            resp = requests.put(
-                f"{self.API_URL}/asks/{offer_id}/",
-                json=payload,
-                headers=self.headers,
-                timeout=30,
-            )
-            if not resp.ok:
-                error_body = resp.text[:500] if resp.text else "empty response"
-                logger.warning(f"create_instance: Error {resp.status_code} for offer {offer_id}: {error_body}")
-            resp.raise_for_status()
-            data = resp.json()
-            instance_id = data.get("new_contract")
-            logger.debug(f"create_instance: Criada instancia {instance_id}")
-            return instance_id
+            # Retry logic for rate limiting
+            max_retries = 10
+            delay = 3.0
+            
+            for attempt in range(max_retries + 1):
+                try:
+                    resp = requests.put(
+                        f"{self.API_URL}/asks/{offer_id}/",
+                        json=payload,
+                        headers=self.headers,
+                        timeout=30,
+                    )
+                    if resp.status_code == 429:
+                        if attempt < max_retries:
+                            logger.warning(
+                                f"[VastAPI] Rate limited on create_instance, "
+                                f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                            )
+                            time.sleep(delay)
+                            delay = min(delay * 2, 60.0)
+                            continue
+                    if not resp.ok:
+                        error_body = resp.text[:500] if resp.text else "empty response"
+                        logger.warning(f"create_instance: Error {resp.status_code} for offer {offer_id}: {error_body}")
+                    resp.raise_for_status()
+                    data = resp.json()
+                    instance_id = data.get("new_contract")
+                    logger.debug(f"create_instance: Criada instancia {instance_id}")
+                    return instance_id
+                except requests.exceptions.HTTPError as e:
+                    if e.response is not None and e.response.status_code == 429:
+                        if attempt < max_retries:
+                            logger.warning(
+                                f"[VastAPI] Rate limited on create_instance, "
+                                f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                            )
+                            time.sleep(delay)
+                            delay = min(delay * 2, 60.0)
+                            continue
+                    raise
+            return None
         except Exception as e:
             logger.exception(f"Erro ao criar instancia: {e}")
             return None
@@ -560,43 +613,95 @@ tailscale up --authkey={tailscale_authkey} --hostname={hostname} --ssh &
             return f"Erro ao buscar logs: {e}"
 
     def get_my_instances(self) -> List[Dict[str, Any]]:
-        """Lista todas as instancias do usuario"""
-        try:
-            resp = requests.get(
-                f"{self.API_URL}/instances/",
-                params={"owner": "me"},
-                headers=self.headers,
-                timeout=30,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            return data.get("instances", [])
-        except Exception as e:
-            logger.error(f"Erro ao listar instancias: {e}")
-            return []
+        """Lista todas as instancias do usuario com retry para rate limiting"""
+        max_retries = 10
+        delay = 3.0
+        
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.get(
+                    f"{self.API_URL}/instances/",
+                    params={"owner": "me"},
+                    headers=self.headers,
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                return data.get("instances", [])
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on get_my_instances, "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 60.0)
+                        continue
+                logger.error(f"Erro ao listar instancias: {e}")
+                return []
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on get_my_instances, "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 60.0)
+                        continue
+                logger.error(f"Erro ao listar instancias: {e}")
+                return []
+        return []
 
     # Alias for backwards compatibility
     list_instances = get_my_instances
 
     def get_balance(self) -> Dict[str, Any]:
-        """Retorna o saldo da conta vast.ai"""
-        try:
-            resp = requests.get(
-                f"{self.API_URL}/users/current/",
-                headers=self.headers,
-                timeout=30,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            return {
-                "credit": data.get("credit", 0),
-                "balance": data.get("balance", 0),
-                "balance_threshold": data.get("balance_threshold", 0),
-                "email": data.get("email", ""),
-            }
-        except Exception as e:
-            logger.error(f"Erro ao buscar saldo: {e}")
-            return {"error": str(e), "credit": 0}
+        """Retorna o saldo da conta vast.ai com retry para rate limiting"""
+        max_retries = 10
+        delay = 3.0
+        
+        for attempt in range(max_retries + 1):
+            try:
+                resp = requests.get(
+                    f"{self.API_URL}/users/current/",
+                    headers=self.headers,
+                    timeout=30,
+                )
+                resp.raise_for_status()
+                data = resp.json()
+                return {
+                    "credit": data.get("credit", 0),
+                    "balance": data.get("balance", 0),
+                    "balance_threshold": data.get("balance_threshold", 0),
+                    "email": data.get("email", ""),
+                }
+            except requests.exceptions.HTTPError as e:
+                if e.response is not None and e.response.status_code == 429:
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on get_balance, "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 60.0)
+                        continue
+                logger.error(f"Erro ao buscar saldo: {e}")
+                return {"error": str(e), "credit": 0}
+            except Exception as e:
+                if "429" in str(e) or "too many" in str(e).lower():
+                    if attempt < max_retries:
+                        logger.warning(
+                            f"[VastAPI] Rate limited on get_balance, "
+                            f"retrying in {delay:.1f}s (attempt {attempt + 1}/{max_retries})"
+                        )
+                        time.sleep(delay)
+                        delay = min(delay * 2, 60.0)
+                        continue
+                logger.error(f"Erro ao buscar saldo: {e}")
+                return {"error": str(e), "credit": 0}
+        return {"error": "Max retries exceeded", "credit": 0}
 
     def search_cpu_offers(
         self,

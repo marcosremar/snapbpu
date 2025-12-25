@@ -63,6 +63,9 @@ testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (provisions real GPUs, costs money)",
+]
 # SEMPRE rodar TODOS os testes em paralelo com 10 workers
 # Não segregar testes por tipo - GPU, CPU, integration, todos juntos
 addopts = [

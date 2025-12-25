@@ -1,12 +1,12 @@
-# 🌌 DUMONT CLOUD v3.1: Enterprise GPU Orchestration
+# DUMONT CLOUD v3.2: Enterprise GPU Orchestration
 
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-Framework-009688.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.0-61DAFB.svg)](https://reactjs.org/)
+[![CLI](https://img.shields.io/badge/CLI-Click-yellow.svg)](https://click.palletsprojects.com/)
 [![Performance](https://img.shields.io/badge/Sync_Speed-4GB%2Fs-orange.svg)](#)
-[![ROI](https://img.shields.io/badge/ROI-1,650%25-green.svg)](#)
 
-**Dumont Cloud** é uma plataforma de orquestração de GPUs em nuvem de alto desempenho, projetada para reduzir custos massivamente enquanto garante resiliência de nível empresarial. Unimos o baixo custo do mercado **Spot (Vast.ai)** com a confiabilidade da **Google Cloud (GCP)** e a velocidade do **s5cmd + LZ4**.
+**Dumont Cloud** is a high-performance GPU cloud orchestration platform designed to massively reduce costs while ensuring enterprise-grade resilience. We combine the low cost of the **Spot market (Vast.ai, TensorDock)** with the reliability of **Google Cloud (GCP)** and the speed of **s5cmd + LZ4**.
 
 ---
 
@@ -125,85 +125,174 @@ O Dumont Cloud possui um sistema de documentação viva, desacoplado do frontend
 
 ---
 
-## 🛠️ ESTRUTURA DO CÓDIGO (SOLID)
+## PROJECT STRUCTURE (SOLID Architecture)
 
 ```text
-src/
-├── api/             # Endpoints FastAPI por domínio
-├── services/        # Lógica de negócio (Singleton Pattern)
-│   ├── instance_service      # Orquestração de instâncias
-│   ├── gpu_snapshot_service  # Engine de compressão ultra-rápida
-│   ├── standby_manager       # Gestão do failover
-│   └── telemetry_service     # Exportador de métricas
-├── core/            # Configurações globais e JWT
-├── infrastructure/  # Providers (GCP, Vast, S3)
-├── ml/              # Modelos de predição de custo
-└── Live-Doc/        # 🆕 CMS de Documentação Viva (Micro-servidor)
+dumontcloud/
+├── src/                    # Backend FastAPI
+│   ├── api/v1/             # REST API endpoints
+│   │   ├── endpoints/      # Route handlers (instances, standby, models, etc.)
+│   │   ├── schemas/        # Pydantic request/response models
+│   │   └── dependencies.py # Dependency injection
+│   ├── domain/             # Business logic layer
+│   │   ├── models/         # Domain entities
+│   │   ├── repositories/   # Provider interfaces
+│   │   └── services/       # Core business services
+│   ├── services/           # Application services
+│   │   ├── gpu/            # GPU provisioning strategies (Race, RoundRobin, Coldstart)
+│   │   ├── standby/        # Failover & hibernation
+│   │   ├── storage/        # Multi-provider storage (B2, R2, S3, Wasabi)
+│   │   └── warmpool/       # GPU warm pool management
+│   ├── infrastructure/     # External providers (Vast.ai, GCP, TensorDock)
+│   └── core/               # Config, JWT, exceptions
+├── cli/                    # Python CLI (Click)
+│   ├── commands/           # CLI command groups
+│   ├── utils/              # API client, helpers
+│   └── tests/              # CLI integration tests
+├── web/                    # React 18 Frontend
+│   ├── src/components/     # UI components (Tailwind + shadcn/ui)
+│   ├── src/pages/          # Route pages
+│   └── src/styles/         # CSS (Tailwind)
+├── Live-Doc/               # Live documentation CMS
+│   └── content/            # Markdown docs (auto-rendered)
+└── tests/                  # Backend tests (pytest)
 ```
 
 ---
 
-## ⚙️ CONFIGURAÇÃO RÁPIDA
+## QUICK START
 
-1.  **Requisitos**: Python 3.10+, Docker (opcional), GCP Credentials, Vast.ai API Key.
-2.  **Variáveis de Ambiente**:
-    ```bash
-    VAST_API_KEY=sua_chave
-    GCP_CREDENTIALS={"type": "service_account", ...}
-    R2_ENDPOINT=https://backblazeb2.com/...
-    RESTIC_PASSWORD=senha_segura
-    ```
-3.  **Execução**:
-    ```bash
-    # Backend
-    pip install -r requirements.txt
-    python -m uvicorn src.main:app --port 8766
+### Requirements
+- Python 3.10+
+- Node.js 18+
+- Vast.ai API Key (for GPU provisioning)
+- Storage credentials (B2/R2/S3)
 
-    # Frontend
-    cd web && npm install && npm run dev
-    ```
+### Environment Variables
+```bash
+# Required
+VAST_API_KEY=your_vast_api_key
+JWT_SECRET=your_jwt_secret
 
-4.  **Modo Demo** (sem credenciais):
-    ```bash
-    # Backend em modo demo
-    DEMO_MODE=true python -m uvicorn src.main:app --port 8000
+# Storage (choose one)
+STORAGE_PROVIDER=b2  # or r2, s3, wasabi
+B2_KEY_ID=your_key_id
+B2_APPLICATION_KEY=your_app_key
+B2_BUCKET=your_bucket
 
-    # Acesse: http://localhost:8000/demo-app
-    ```
-    O modo demo permite testar a interface completa com dados fictícios, sem necessidade de configurar APIs externas.
+# Optional
+GCP_CREDENTIALS={"type": "service_account", ...}
+RESTIC_PASSWORD=secure_password
+```
+
+### Running the Application
+```bash
+# Backend
+pip install -r requirements.txt
+python -m uvicorn src.main:app --port 8766
+
+# Frontend
+cd web && npm install && npm run dev
+
+# CLI (install globally)
+cd cli && pip install -e .
+dumont --help
+```
+
+### CLI Usage
+```bash
+# Login
+dumont login --email user@example.com --password secret
+
+# List available GPUs
+dumont gpus list
+
+# Deploy a GPU instance
+dumont gpus deploy --gpu RTX_4090 --strategy race
+
+# List running machines
+dumont machines list
+
+# Stop a machine
+dumont machines stop <machine_id>
+```
+
+### Demo Mode (no credentials needed)
+```bash
+DEMO_MODE=true python -m uvicorn src.main:app --port 8000
+# Access: http://localhost:8000/demo-app
+```
 
 ---
 
-## 🎭 MODO DEMO
+## GPU PROVISIONING STRATEGIES
 
-Para testar a plataforma sem credenciais, use a URL `/demo-app`:
+Dumont Cloud implements multiple GPU provisioning strategies via the Strategy Pattern:
 
-| URL | Descrição |
-|-----|-----------|
-| `/demo-app` | Dashboard com cards de status e wizard de deploy |
-| `/demo-app/machines` | Lista de máquinas demo (RTX 4090, A100, RTX 3090) |
-| `/demo-app/metrics-hub` | Hub de métricas e relatórios |
-| `/demo-app/settings` | Configurações do sistema |
+| Strategy | Description | Use Case |
+|----------|-------------|----------|
+| **Race** | Starts 5 machines in parallel, uses first ready | Fastest boot time (~30s) |
+| **RoundRobin** | Sequential attempts across providers | Reliable, cost-effective |
+| **Coldstart** | Single machine, waits for full boot | Budget-conscious |
+| **Serverless** | Uses pre-warmed pool + auto-hibernate | Production LLM inference |
 
-Todas as rotas `/demo-app/*` automaticamente:
-- Usam dados fictícios nas APIs
-- Não requerem login
-- Mostram badge "DEMO" no header
+### Machine History & Reliability
 
----
-
-## 🎯 ROADMAP ESTRATÉGICO
-
-- [x] Mapeamento de Regiões via Geolocalização IP.
-- [x] Telemetria Prometheus e Dashboard API.
-- [ ] **Parallel Sync (10 streams)**: 5x mais vazão de rede.
-- [ ] **ML Prediction v2**: Previsão de janelas de interrupção Spot.
-- [ ] **Spot Market Maker**: Arbitragem inteligente entre provedores.
+The system tracks machine reliability automatically:
+- Machines with <30% success rate are **blacklisted**
+- Deploy wizard filters unreliable hosts
+- API: `GET /api/v1/machines/history`
 
 ---
 
-**Versão 3.1 (Artesão de Nuvens)**  
-**Status**: Production-Ready  
-**Desenvolvedor**: Dumont Cloud Engineering Team
+## API ENDPOINTS
 
-> "Nós não apenas criamos GPUs. Nós orquestramos economia resiliente."
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/v1/auth/login` | JWT authentication |
+| `GET /api/v1/instances` | List running instances |
+| `POST /api/v1/instances/provision` | Deploy new GPU |
+| `POST /api/v1/instances/{id}/wake` | Wake hibernated machine |
+| `GET /api/v1/standby` | Get failover config |
+| `POST /api/v1/standby/failover` | Trigger manual failover |
+| `GET /api/v1/metrics/savings/real` | Real savings metrics |
+| `POST /api/v1/models/deploy` | Deploy LLM model |
+| `GET /api/v1/spot/market` | Spot market analysis |
+
+Full API docs: `http://localhost:8766/docs`
+
+---
+
+## TESTING
+
+```bash
+# Run all tests (parallel, 10 workers)
+cd cli && pytest
+
+# Run specific test file
+pytest tests/test_real_integration.py -v
+
+# Run with timeout
+pytest -v --timeout=600
+```
+
+Tests provision **real GPU instances** on Vast.ai - this costs money but validates the full system.
+
+---
+
+## STATUS
+
+- [x] FastAPI Backend with SOLID architecture
+- [x] React 18 Frontend with Tailwind CSS
+- [x] Python CLI with Click
+- [x] Multi-provider storage (B2, R2, S3, Wasabi)
+- [x] GPU Warm Pool (pre-provisioned instances)
+- [x] CPU Standby Failover (GCP)
+- [x] Machine History & Blacklist
+- [x] LLM Model Deployment (vLLM, Ollama)
+- [x] Auto-Hibernation (3 min idle = snapshot + destroy)
+
+---
+
+**Version 3.2**
+**Status**: Production-Ready

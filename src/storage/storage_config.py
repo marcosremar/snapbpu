@@ -63,18 +63,18 @@ class StorageConfig:
         Provider.BACKBLAZE_B2: lambda: ProviderConfig(
             name="b2",
             endpoint=f"https://s3.{os.getenv('B2_REGION', 'us-west-004')}.backblazeb2.com",
-            bucket=os.getenv("B2_BUCKET", "dumoncloud-snapshot"),
-            access_key=os.getenv("B2_KEY_ID", "a1ef6268a3f3"),  # Master Application Key
-            secret_key=os.getenv("B2_APPLICATION_KEY", "00309def7dbba65c97bb234af3ce2e89ea62fdf7dd"),
+            bucket=os.getenv("B2_BUCKET", ""),
+            access_key=os.getenv("B2_KEY_ID", ""),
+            secret_key=os.getenv("B2_APPLICATION_KEY", ""),
             region=os.getenv("B2_REGION", "us-west-004")
         ),
         
         Provider.CLOUDFLARE_R2: lambda: ProviderConfig(
             name="r2",
-            endpoint=f"https://{os.getenv('R2_ACCOUNT_ID', '142ed673a5cc1a9e91519c099af3d791')}.r2.cloudflarestorage.com",
-            bucket=os.getenv("R2_BUCKET", "musetalk"),
-            access_key=os.getenv("R2_ACCESS_KEY", "f0a6f424064e46c903c76a447f5e73d2"),
-            secret_key=os.getenv("R2_SECRET_KEY", "1dcf325fe8556fca221cf8b383e277e7af6660a246148d5e11e4fc67e822c9b5"),
+            endpoint=f"https://{os.getenv('R2_ACCOUNT_ID', '')}.r2.cloudflarestorage.com",
+            bucket=os.getenv("R2_BUCKET", ""),
+            access_key=os.getenv("R2_ACCESS_KEY", ""),
+            secret_key=os.getenv("R2_SECRET_KEY", ""),
             region="auto"
         ),
         
