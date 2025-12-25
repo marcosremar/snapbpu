@@ -21,47 +21,93 @@ from .commands.model import ModelCommands
 from .commands.models import ModelsCommands
 
 
+def generate_dynamic_help() -> str:
+    """Generate help text dynamically from SmartRouter shortcuts"""
+    import re
+    lines = []
+
+    # Config commands (static - not in SmartRouter)
+    lines.append("Configuração:")
+    lines.append("  config setup                    Configurar API key")
+    lines.append("  config show                     Mostrar configuração")
+    lines.append("  config set-key <key>            Definir API key")
+    lines.append("  config set-url <url>            Definir URL da API")
+    lines.append("")
+
+    # Group shortcuts by category, merging singular/plural
+    category_merge = {
+        "instance": "instances",
+        "job": "jobs",
+        "snapshot": "snapshots",
+    }
+
+    groups = {}
+    for key, (method, path) in SmartRouter.SHORTCUTS.items():
+        category = key[0]
+        # Merge singular into plural
+        category = category_merge.get(category, category)
+
+        if category not in groups:
+            groups[category] = []
+        cmd = " ".join(key)
+        # Extract path params
+        params = ""
+        if "{" in path:
+            params = " " + " ".join(f"<{p}>" for p in re.findall(r'\{([^}]+)\}', path))
+        # Simplify path for display
+        display_path = path.replace("/api/v1/", "").replace("/api/", "")
+        groups[category].append((cmd, params, method, display_path))
+
+    # Category display names and order
+    category_order = [
+        ("auth", "Autenticação"),
+        ("health", "Sistema"),
+        ("instances", "Instâncias"),
+        ("spot", "Mercado (Spot)"),
+        ("savings", "Economia"),
+        ("serverless", "Serverless GPU"),
+        ("warmpool", "Warm Pool"),
+        ("jobs", "Jobs"),
+        ("snapshots", "Snapshots"),
+        ("models", "Modelos"),
+        ("hibernation", "Hibernação"),
+        ("finetune", "Fine-tune"),
+    ]
+
+    # Print categories in order
+    for category, display_name in category_order:
+        if category not in groups:
+            continue
+
+        lines.append(f"{display_name}:")
+        for cmd, params, method, path in sorted(groups[category]):
+            full_cmd = f"{cmd}{params}"
+            lines.append(f"  {full_cmd:<35} {method} {path}")
+        lines.append("")
+
+    # API direct access
+    lines.append("API Direta:")
+    lines.append("  api list                        Listar todos endpoints")
+    lines.append("  api GET /path                   GET request")
+    lines.append("  api POST /path key=value        POST request")
+    lines.append("")
+
+    # Wizard
+    lines.append("Wizard:")
+    lines.append("  wizard deploy [gpu] [options]   Deploy rápido de GPU")
+
+    return "\n".join(lines)
+
+
 def main():
+    # Generate dynamic epilog
+    dynamic_help = generate_dynamic_help()
+
     parser = argparse.ArgumentParser(
         prog="dumont",
         description="Dumont Cloud CLI - GPU Cloud Management",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="""
-Exemplos:
-  dumont config setup                # Configurar API key
-  dumont spot monitor                # Ver preços de GPUs
-  dumont spot predict RTX4090        # Previsão de preço
-  dumont instances list              # Listar instâncias
-  dumont api GET /api/v1/health      # Chamada direta à API
-
-Comandos de Configuração:
-  dumont config setup                # Setup interativo
-  dumont config show                 # Mostrar configuração
-  dumont config set-key <key>        # Definir API key
-  dumont config set-url <url>        # Definir URL da API
-
-Comandos de Mercado (Spot):
-  dumont spot monitor                # Preços atuais
-  dumont spot predict <gpu>          # Previsão de preço
-  dumont spot reliability            # Confiabilidade de providers
-  dumont spot llm-gpus               # GPUs recomendadas para LLM
-  dumont spot training-cost          # Estimativa de custos
-
-Comandos de Instâncias:
-  dumont instances list              # Listar instâncias
-  dumont instance get <id>           # Detalhes de instância
-  dumont instance pause <id>         # Pausar instância
-  dumont instance resume <id>        # Resumir instância
-
-Comandos de Deploy:
-  dumont wizard deploy               # Deploy rápido
-  dumont models deploy llm <model>   # Deploy de modelo
-
-API Direta:
-  dumont api list                    # Listar todos endpoints
-  dumont api GET /path               # GET request
-  dumont api POST /path key=value    # POST request
-        """
+        epilog=dynamic_help
     )
 
     parser.add_argument(
