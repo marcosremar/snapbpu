@@ -3,9 +3,12 @@ API endpoints para GPU Checkpoint e Sync Machines
 """
 
 from flask import Blueprint, request, jsonify, g
-from src.services.gpu.checkpoint import get_gpu_checkpoint_service
+from src.modules.serverless import get_checkpoint_service
 from ..services.sync_machine_service import get_sync_machine_service
 from ..services.gpu.vast import VastService
+
+# Alias para compatibilidade
+get_gpu_checkpoint_service = get_checkpoint_service
 
 
 gpu_bp = Blueprint('gpu', __name__)

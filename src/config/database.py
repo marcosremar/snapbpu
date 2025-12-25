@@ -38,3 +38,8 @@ def get_db():
 def init_db():
     """Inicializa o banco de dados criando todas as tabelas."""
     Base.metadata.create_all(bind=engine)
+
+
+def get_session_factory():
+    """Retorna a factory de sessões do banco de dados."""
+    return SessionLocal

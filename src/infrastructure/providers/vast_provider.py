@@ -685,6 +685,24 @@ class VastProvider(IGpuProvider):
             logger.error(f"Unexpected error getting instance: {e}")
             raise VastAPIException(f"Failed to get instance: {e}")
 
+    def get_instance_status(self, instance_id: int) -> Dict[str, Any]:
+        """Get instance status as dict (compatibility method for ServerlessManager)"""
+        try:
+            instance = self.get_instance(instance_id)
+            return {
+                "id": instance.id,
+                "actual_status": instance.actual_status,
+                "status": instance.status,
+                "ssh_host": instance.ssh_host,
+                "ssh_port": instance.ssh_port,
+                "gpu_name": instance.gpu_name,
+                "dph_total": instance.dph_total,
+                "public_ipaddr": instance.public_ipaddr,
+            }
+        except Exception as e:
+            logger.error(f"Failed to get instance status {instance_id}: {e}")
+            return {"actual_status": "unknown", "error": str(e)}
+
     def list_instances(self) -> List[Instance]:
         """List all user instances"""
         try:

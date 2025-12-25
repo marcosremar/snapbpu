@@ -11,7 +11,7 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime
 
 from ....services.standby.hibernation import get_auto_hibernation_manager
-from ....services.standby.serverless import get_serverless_manager
+from ....modules.serverless import get_serverless_manager
 
 logger = logging.getLogger(__name__)
 

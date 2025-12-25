@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 from enum import Enum
 
 from ..dependencies import require_auth, get_current_user_email
-from ....services.standby.serverless import get_serverless_manager, ServerlessMode
+from ....modules.serverless import get_serverless_manager, ServerlessMode
 from ....infrastructure.providers import FileUserRepository
 from ....core.config import get_settings
 
