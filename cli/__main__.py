@@ -1,9 +1,20 @@
-"""Main entry point for Dumont CLI"""
-import argparse
-import os
-import sys
+"""
+Dumont Cloud CLI - Main entry point
 
-from .utils.api_client import APIClient, DEFAULT_API_URL
+Usage:
+    dumont                           # Show help
+    dumont config setup              # Configure API key
+    dumont spot monitor              # Market data
+    dumont instances list            # List instances
+    dumont api GET /api/v1/health    # Direct API call
+"""
+import argparse
+import sys
+import os
+
+from .utils.api_client import APIClient
+from .commands.config import ConfigManager, ConfigCommands, ensure_configured
+from .commands.api import APICommands, SmartRouter
 from .commands.base import CommandBuilder
 from .commands.wizard import WizardCommands
 from .commands.model import ModelCommands
@@ -12,77 +23,150 @@ from .commands.models import ModelsCommands
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Dumont Cloud CLI - Natural Commands",
+        prog="dumont",
+        description="Dumont Cloud CLI - GPU Cloud Management",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  # Wizard Deploy (multi-start strategy)
-  dumont wizard deploy                          # Deploy any GPU
-  dumont wizard deploy "RTX 4090"               # Deploy specific GPU
-  dumont wizard deploy gpu="RTX 4090" speed=fast price=1.5
+Exemplos:
+  dumont config setup                # Configurar API key
+  dumont spot monitor                # Ver preços de GPUs
+  dumont spot predict RTX4090        # Previsão de preço
+  dumont instances list              # Listar instâncias
+  dumont api GET /api/v1/health      # Chamada direta à API
 
-  # Model Deployment (with API endpoint)
-  dumont models list                     # List deployed models
-  dumont models templates                # Show available templates
-  dumont models deploy llm meta-llama/Llama-3.1-8B-Instruct
-  dumont models deploy speech openai/whisper-large-v3
-  dumont models deploy image stabilityai/stable-diffusion-xl-base-1.0
-  dumont models stop <deployment_id>     # Stop a deployment
-  dumont models delete <deployment_id>   # Delete a deployment
+Comandos de Configuração:
+  dumont config setup                # Setup interativo
+  dumont config show                 # Mostrar configuração
+  dumont config set-key <key>        # Definir API key
+  dumont config set-url <url>        # Definir URL da API
 
-  # Model Installation (Ollama on instance)
-  dumont model install <instance_id> <model_id>
-  dumont model install 12345 llama3.2
-  dumont model install 12345 qwen3:0.6b
+Comandos de Mercado (Spot):
+  dumont spot monitor                # Preços atuais
+  dumont spot predict <gpu>          # Previsão de preço
+  dumont spot reliability            # Confiabilidade de providers
+  dumont spot llm-gpus               # GPUs recomendadas para LLM
+  dumont spot training-cost          # Estimativa de custos
 
-  # Instances
-  dumont instance list
-  dumont instance get 12345
-  dumont instance pause 12345
-  dumont instance resume 12345
-  dumont instance delete 12345
+Comandos de Instâncias:
+  dumont instances list              # Listar instâncias
+  dumont instance get <id>           # Detalhes de instância
+  dumont instance pause <id>         # Pausar instância
+  dumont instance resume <id>        # Resumir instância
 
-  # Authentication
-  dumont auth login user@email.com password
-  dumont auth me
+Comandos de Deploy:
+  dumont wizard deploy               # Deploy rápido
+  dumont models deploy llm <model>   # Deploy de modelo
 
-  # Snapshots
-  dumont snapshot list
-  dumont snapshot create name=backup instance_id=12345
+API Direta:
+  dumont api list                    # Listar todos endpoints
+  dumont api GET /path               # GET request
+  dumont api POST /path key=value    # POST request
         """
     )
 
     parser.add_argument(
-        "--base-url",
-        default=DEFAULT_API_URL,
-        help=f"Base URL of the API (default: {DEFAULT_API_URL}, env: DUMONT_API_URL)"
+        "--api-url",
+        help="URL da API (default: ~/.dumont/config.json ou localhost:8000)"
     )
 
-    parser.add_argument("resource", nargs="?", help="Resource (instance, wizard, model, auth, etc)")
-    parser.add_argument("action", nargs="?", help="Action (list, deploy, install, etc)")
-    parser.add_argument("args", nargs="*", help="Additional arguments")
+    parser.add_argument(
+        "--api-key",
+        help="API Key (default: ~/.dumont/config.json ou DUMONT_API_KEY)"
+    )
+
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Modo debug"
+    )
+
+    parser.add_argument("command", nargs="?", help="Comando ou recurso")
+    parser.add_argument("subcommand", nargs="?", help="Subcomando ou ação")
+    parser.add_argument("args", nargs="*", help="Argumentos adicionais")
 
     args = parser.parse_args()
 
-    # Create API client
-    api = APIClient(base_url=args.base_url)
+    # Handle config commands (don't require API key)
+    if args.command == "config":
+        config_cmd = ConfigCommands()
 
-    # Get resource and action
-    resource = args.resource or "help"
-    action = args.action
+        if args.subcommand == "setup" or args.subcommand is None:
+            config_cmd.setup(
+                api_key=args.args[0] if args.args else None,
+                api_url=args.api_url
+            )
+            return
+
+        if args.subcommand == "show":
+            config_cmd.show()
+            return
+
+        if args.subcommand == "set-key":
+            if not args.args:
+                print("❌ Uso: dumont config set-key <api_key>")
+                sys.exit(1)
+            config_cmd.set_key(args.args[0])
+            return
+
+        if args.subcommand == "set-url":
+            if not args.args:
+                print("❌ Uso: dumont config set-url <url>")
+                sys.exit(1)
+            config_cmd.set_url(args.args[0])
+            return
+
+        if args.subcommand == "clear":
+            config_cmd.clear()
+            return
+
+        print(f"❌ Subcomando desconhecido: {args.subcommand}")
+        print("Disponíveis: setup, show, set-key, set-url, clear")
+        sys.exit(1)
+
+    # Handle help
+    if args.command in (None, "help", "--help", "-h"):
+        parser.print_help()
+        return
+
+    # Handle version
+    if args.command in ("version", "--version", "-v"):
+        print("Dumont Cloud CLI v1.0.0")
+        return
+
+    # For other commands, ensure configured (will prompt if needed)
+    try:
+        config = ensure_configured()
+    except SystemExit:
+        return
+
+    # Get API URL and key
+    api_url = args.api_url or config.get_api_url()
+    api_key = args.api_key or config.get_api_key()
+
+    # Create API client
+    api = APIClient(base_url=api_url)
+    if api_key:
+        api.token_manager.save(api_key)
+
+    # Handle direct API commands
+    if args.command == "api":
+        api_cmd = APICommands(api)
+        all_args = [args.subcommand] if args.subcommand else []
+        all_args.extend(args.args or [])
+        api_cmd.execute(all_args)
+        return
 
     # Handle wizard commands
-    if resource == "wizard":
+    if args.command == "wizard":
         wizard = WizardCommands(api)
-
-        if action == "deploy" or action is None:
+        if args.subcommand == "deploy" or args.subcommand is None:
+            # Parse wizard args
             gpu_name = None
             speed = "fast"
             max_price = 2.0
             region = "global"
-            machine_type = "on-demand"
 
-            for arg in args.args:
+            for arg in args.args or []:
                 if "=" in arg:
                     key, value = arg.split("=", 1)
                     if key == "gpu":
@@ -93,15 +177,11 @@ Examples:
                         max_price = float(value)
                     elif key == "region":
                         region = value
-                    elif key == "type":
-                        machine_type = value
                 else:
-                    # First positional arg is GPU name
                     if not gpu_name:
                         gpu_name = arg
 
-            if action is None:
-                # Show help
+            if args.subcommand is None:
                 print("🧙 Wizard Deploy - Quick GPU Provisioning")
                 print("")
                 print("Usage: dumont wizard deploy [gpu] [options]")
@@ -111,75 +191,39 @@ Examples:
                 print("  speed=<mode>     fast (default), slow, ultrafast")
                 print("  price=<$>        Max price per hour (default: 2.0)")
                 print("  region=<name>    Region filter (default: global)")
-                print("  type=<mode>      on-demand (default), spot")
-                print("")
-                print("Examples:")
-                print("  dumont wizard deploy                    # Any GPU, fast")
-                print("  dumont wizard deploy 'RTX 4090'         # Specific GPU")
-                print("  dumont wizard deploy gpu=A100 price=3   # A100, max $3/hr")
-                print("  dumont wizard deploy type=spot          # Spot instance")
                 return
 
             wizard.deploy(gpu_name=gpu_name, speed=speed, max_price=max_price, region=region)
             return
 
-        print(f"❌ Unknown wizard action: {action}")
-        print("Available: deploy")
-        sys.exit(1)
-
-    if resource == "model" and action == "install":
+    # Handle model install
+    if args.command == "model" and args.subcommand == "install":
         model = ModelCommands(api)
-        if len(args.args) < 2:
+        if len(args.args or []) < 2:
             print("❌ Usage: dumont model install <instance_id> <model_id>")
-            print("")
-            print("Examples:")
-            print("  dumont model install 12345 llama3.2")
-            print("  dumont model install 12345 qwen3:0.6b")
-            print("  dumont model install 12345 codellama:7b")
             sys.exit(1)
-
         model.install(args.args[0], args.args[1])
         return
 
-    # Handle models commands (deploy, list, etc)
-    if resource == "models":
+    # Handle models commands
+    if args.command == "models":
         models_cmd = ModelsCommands(api)
 
-        if action == "list" or action is None:
+        if args.subcommand == "list" or args.subcommand is None:
             models_cmd.list()
             return
 
-        if action == "templates":
+        if args.subcommand == "templates":
             models_cmd.templates()
             return
 
-        if action == "deploy":
-            if len(args.args) < 2:
+        if args.subcommand == "deploy":
+            if len(args.args or []) < 2:
                 print("❌ Usage: dumont models deploy <type> <model_id> [options]")
-                print("")
-                print("Types: llm, speech, image, embeddings, vision, video")
-                print("")
-                print("Examples:")
-                print("  dumont models deploy llm meta-llama/Llama-3.1-8B-Instruct")
-                print("  dumont models deploy speech openai/whisper-large-v3")
-                print("  dumont models deploy image stabilityai/stable-diffusion-xl-base-1.0")
-                print("  dumont models deploy embeddings BAAI/bge-large-en-v1.5")
-                print("  dumont models deploy vision HuggingFaceTB/SmolVLM-256M-Instruct")
-                print("  dumont models deploy video damo-vilab/text-to-video-ms-1.7b")
-                print("")
-                print("Options:")
-                print("  gpu=<type>       GPU type (default: RTX 4090)")
-                print("  num_gpus=<n>     Number of GPUs (default: 1)")
-                print("  max_price=<$>    Max price per hour (default: 2.0)")
-                print("  access=<type>    private or public (default: private)")
-                print("  port=<n>         Port (default: 8000)")
-                print("  name=<name>      Deployment name")
                 sys.exit(1)
 
             model_type = args.args[0]
             model_id = args.args[1]
-
-            # Parse options
             options = {}
             for arg in args.args[2:]:
                 if "=" in arg:
@@ -189,42 +233,28 @@ Examples:
             models_cmd.deploy(model_type, model_id, **options)
             return
 
-        if action == "get":
-            if len(args.args) < 1:
-                print("❌ Usage: dumont models get <deployment_id>")
+        if args.subcommand in ("get", "stop", "delete", "logs"):
+            if not args.args:
+                print(f"❌ Usage: dumont models {args.subcommand} <deployment_id>")
                 sys.exit(1)
-            models_cmd.get(args.args[0])
+
+            method = getattr(models_cmd, args.subcommand)
+            method(args.args[0])
             return
 
-        if action == "stop":
-            if len(args.args) < 1:
-                print("❌ Usage: dumont models stop <deployment_id>")
-                sys.exit(1)
-            force = "--force" in args.args or "force=true" in args.args
-            models_cmd.stop(args.args[0], force=force)
-            return
+    # Try smart routing for shortcuts
+    router = SmartRouter(api)
+    all_args = [args.command]
+    if args.subcommand:
+        all_args.append(args.subcommand)
+    all_args.extend(args.args or [])
 
-        if action == "delete":
-            if len(args.args) < 1:
-                print("❌ Usage: dumont models delete <deployment_id>")
-                sys.exit(1)
-            models_cmd.delete(args.args[0])
-            return
+    if router.route(all_args):
+        return
 
-        if action == "logs":
-            if len(args.args) < 1:
-                print("❌ Usage: dumont models logs <deployment_id>")
-                sys.exit(1)
-            models_cmd.logs(args.args[0])
-            return
-
-        print(f"❌ Unknown models action: {action}")
-        print("Available: list, templates, deploy, get, stop, delete, logs")
-        sys.exit(1)
-
-    # Handle regular API commands
+    # Fall back to command builder (OpenAPI discovery)
     builder = CommandBuilder(api)
-    builder.execute(resource, action, args.args)
+    builder.execute(args.command, args.subcommand, args.args or [])
 
 
 if __name__ == "__main__":
