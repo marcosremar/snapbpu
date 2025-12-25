@@ -2,10 +2,12 @@
 Market Module - Intelligence de mercado GPU
 
 Este módulo consolida toda a lógica de análise de mercado:
-- Previsão de preços (ML-based)
-- Monitoramento em tempo real
-- Cálculo de economia
-- Recomendações de GPU
+- Coleta de dados VAST.ai (MarketCollector)
+- Previsão de preços (PricePredictor)
+- Monitoramento em tempo real (MarketMonitor)
+- Cálculo de economia (SavingsCalculator)
+- Estatísticas (StatisticsCalculator)
+- Agente de background (MarketAgent)
 
 Uso:
     from src.modules.market import MarketService, PricePredictor
@@ -17,6 +19,10 @@ Uso:
     # Prever preços
     predictor = PricePredictor()
     forecast = predictor.predict(gpu_model="RTX 4090", hours_ahead=24)
+
+    # Agente de background
+    agent = get_market_agent()
+    agent.start()
 """
 
 from .models import (
@@ -47,6 +53,26 @@ from .savings import (
     calculate_savings,
 )
 
+from .statistics import (
+    StatisticsCalculator,
+    PriceStats,
+    MarketStats,
+    get_statistics_calculator,
+)
+
+from .collector import (
+    MarketCollector,
+    get_collector,
+    DEFAULT_GPUS,
+    MACHINE_TYPES,
+)
+
+from .agent import (
+    MarketAgent,
+    MarketMonitorAgent,  # Alias para compatibilidade
+    get_market_agent,
+)
+
 __all__ = [
     # Models
     "PricePoint",
@@ -66,4 +92,18 @@ __all__ = [
     # Savings
     "SavingsCalculator",
     "calculate_savings",
+    # Statistics (NEW)
+    "StatisticsCalculator",
+    "PriceStats",
+    "MarketStats",
+    "get_statistics_calculator",
+    # Collector (NEW)
+    "MarketCollector",
+    "get_collector",
+    "DEFAULT_GPUS",
+    "MACHINE_TYPES",
+    # Agent (NEW)
+    "MarketAgent",
+    "MarketMonitorAgent",
+    "get_market_agent",
 ]

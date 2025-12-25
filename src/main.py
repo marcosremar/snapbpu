@@ -83,7 +83,7 @@ async def lifespan(app: FastAPI):
 
         # Initialize Market Monitor Agent (se houver database)
         try:
-            from .services.market_monitor_agent import MarketMonitorAgent
+            from .modules.market import get_market_agent
             from .config.database import SessionLocal
 
             # Test database connection
@@ -91,10 +91,9 @@ async def lifespan(app: FastAPI):
             db.close()
 
             if vast_api_key:
-                market_agent = MarketMonitorAgent(
+                market_agent = get_market_agent(
+                    interval_minutes=5,
                     vast_api_key=vast_api_key,
-                    gpus_to_monitor=["RTX 4090", "RTX 3090", "A100", "H100", "RTX 5090"],
-                    interval_minutes=5  # 5 minutos
                 )
                 market_agent.start()
                 agents_started.append("MarketMonitorAgent")

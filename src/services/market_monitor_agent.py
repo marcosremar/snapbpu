@@ -1,4 +1,13 @@
 """
+DEPRECATED: Este arquivo foi migrado para src/modules/market/
+
+Use:
+    from src.modules.market import get_market_agent, MarketAgent
+
+Este arquivo será removido em versão futura.
+Mantido para compatibilidade com código legado.
+
+---
 Agente de monitoramento de mercado VAST.ai expandido.
 
 Coleta:
@@ -7,6 +16,13 @@ Coleta:
 - Dados de confiabilidade de provedores
 - Calcula rankings de custo-benefício
 """
+
+import warnings
+warnings.warn(
+    "market_monitor_agent.py is deprecated. Use src.modules.market.get_market_agent() instead.",
+    DeprecationWarning,
+    stacklevel=2
+)
 
 import time
 import logging
