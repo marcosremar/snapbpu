@@ -19,7 +19,11 @@ from ....core.config import get_settings
 
 logger = logging.getLogger(__name__)
 
+# Router com autenticação para operações de instância
 router = APIRouter(prefix="/serverless", tags=["Serverless GPU"], dependencies=[Depends(require_auth)])
+
+# Router público para info e pricing (sem auth)
+public_router = APIRouter(prefix="/serverless", tags=["Serverless GPU"])
 
 
 class ServerlessModeEnum(str, Enum):
@@ -318,7 +322,46 @@ async def notify_inference_complete(instance_id: int):
     return {"status": "ok", "idle_timer": "started"}
 
 
-@router.get("/pricing")
+@public_router.get("/status")
+async def get_serverless_global_status():
+    """
+    Retorna status geral do sistema serverless (público, sem auth).
+
+    Inclui:
+    - Total de instâncias configuradas
+    - Instâncias ativas vs pausadas
+    - Economia total estimada
+    - Modos disponíveis
+    """
+    manager = get_serverless_manager()
+    instances = manager.list_all()
+
+    total = len(instances)
+    paused = sum(1 for i in instances if i.get("is_paused", False))
+    active = total - paused
+    total_savings = sum(i.get("total_savings_usd", 0) for i in instances)
+
+    return {
+        "status": "operational",
+        "total_instances": total,
+        "active_instances": active,
+        "paused_instances": paused,
+        "total_savings_usd": round(total_savings, 2),
+        "available_modes": [
+            {"mode": "spot", "recovery_time": "~30s", "savings": "60-70%"},
+            {"mode": "economic", "recovery_time": "~7s", "savings": "~83%"},
+            {"mode": "fast", "recovery_time": "<1s", "savings": "~80%"},
+        ],
+        "features": [
+            "auto-pause on idle",
+            "auto-resume on request",
+            "checkpoint sync",
+            "gpu utilization monitoring",
+        ]
+    }
+
+
+@public_router.get("/pricing")
 async def get_serverless_pricing():
     """
     Retorna estimativas de custo para cada modo serverless.

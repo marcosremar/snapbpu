@@ -226,10 +226,10 @@ class SmartRouter:
         ("spot", "fleet-strategy"): ("GET", "/api/v1/metrics/spot/fleet-strategy"),
         ("spot", "savings"): ("GET", "/api/v1/metrics/spot/savings"),
 
-        # Savings
-        ("savings", "summary"): ("GET", "/api/v1/savings/summary"),
-        ("savings", "history"): ("GET", "/api/v1/savings/history"),
-        ("savings", "breakdown"): ("GET", "/api/v1/savings/breakdown"),
+        # Savings (public endpoints)
+        ("savings", "summary"): ("GET", "/api/v1/metrics/spot/savings"),
+        ("savings", "history"): ("GET", "/api/v1/metrics/savings/history"),
+        ("savings", "breakdown"): ("GET", "/api/v1/metrics/savings/real"),
 
         # Jobs
         ("jobs",): ("GET", "/api/v1/jobs"),

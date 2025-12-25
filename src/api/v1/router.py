@@ -40,6 +40,7 @@ api_router.include_router(failover.router, tags=["Failover Orchestrator"])
 
 # Serverless GPU - Auto-pause/resume
 api_router.include_router(serverless.router, tags=["Serverless GPU"])
+api_router.include_router(serverless.public_router, tags=["Serverless GPU"])  # Public endpoints (no auth)
 
 # Spot GPU Deploy - Deploy e failover de instâncias spot
 api_router.include_router(spot_deploy.router, tags=["Spot GPU Deploy"])
