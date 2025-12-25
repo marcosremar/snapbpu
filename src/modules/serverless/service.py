@@ -5,14 +5,20 @@ Lógica de negócio para:
 - Scale down/up automático
 - Auto-destroy após X horas pausado
 - Fallback: snapshot ou migração de disco quando resume falha
+- Suporte a cuda-checkpoint (TensorDock)
+
+Providers suportados:
+- TensorDock (recomendado): Suporta cuda-checkpoint, cold start ~20s
+- VAST.ai: Fallback, cold start ~30-60s
 """
 
 import logging
 import threading
 import time
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, Protocol, runtime_checkable
 from dataclasses import dataclass
+from enum import Enum
 
 from sqlalchemy.orm import Session
 
@@ -25,8 +31,25 @@ from .models import (
     create_serverless_schema,
 )
 from .fallback import FallbackOrchestrator, FallbackResult
+from .checkpoint import GPUCheckpointService, get_checkpoint_service
 
 logger = logging.getLogger(__name__)
+
+
+class ProviderType(Enum):
+    """Tipo de provider GPU"""
+    TENSORDOCK = "tensordock"
+    VAST = "vast"
+
+
+@runtime_checkable
+class GPUProvider(Protocol):
+    """Interface para providers de GPU"""
+
+    def get_instance_status(self, instance_id: str) -> Dict[str, Any]: ...
+    def pause_instance(self, instance_id: str) -> bool: ...
+    def resume_instance(self, instance_id: str) -> bool: ...
+    def destroy_instance(self, instance_id: str) -> bool: ...
 
 
 @dataclass
@@ -59,17 +82,25 @@ class ServerlessService:
     - Executar scale up (resume) quando requisição chega
     - Auto-destroy instâncias pausadas por muito tempo
     - Fallback para snapshot/disco quando resume falha
+    - Suporte a cuda-checkpoint para cold start rápido (TensorDock)
     """
 
     def __init__(
         self,
         session_factory,
-        vast_provider,
+        gpu_provider: GPUProvider,
+        provider_type: ProviderType = ProviderType.TENSORDOCK,
         check_interval: float = 1.0,  # Verificar a cada 1s para scale down rápido
+        enable_cuda_checkpoint: bool = True,  # Usar cuda-checkpoint quando disponível
     ):
         self.session_factory = session_factory
-        self.vast_provider = vast_provider
+        self.gpu_provider = gpu_provider
+        self.provider_type = provider_type
         self.check_interval = check_interval
+        self.enable_cuda_checkpoint = enable_cuda_checkpoint
+
+        # Alias para compatibilidade
+        self.vast_provider = gpu_provider
 
         self._running = False
         self._monitor_thread: Optional[threading.Thread] = None
@@ -77,11 +108,17 @@ class ServerlessService:
         self._lock = threading.Lock()
 
         # Cache de última requisição (em memória para performance)
-        self._last_request: Dict[int, datetime] = {}
+        self._last_request: Dict[str, datetime] = {}
+
+        # Serviço de checkpoint GPU (para TensorDock)
+        self._checkpoint_service: Optional[GPUCheckpointService] = None
+        if enable_cuda_checkpoint and provider_type == ProviderType.TENSORDOCK:
+            self._checkpoint_service = get_checkpoint_service()
+            logger.info("cuda-checkpoint habilitado (TensorDock)")
 
         # Fallback orchestrator para quando resume falha
         self._fallback_orchestrator = FallbackOrchestrator(
-            vast_provider=vast_provider,
+            vast_provider=gpu_provider,
             session_factory=session_factory
         )
 
@@ -191,26 +228,59 @@ class ServerlessService:
                         )
                         self._scale_down(instance_id)
 
-    def _scale_down(self, instance_id: int) -> ScaleDownResult:
-        """Executa scale down (pause) de uma instância"""
+    def _scale_down(self, instance_id: str) -> ScaleDownResult:
+        """
+        Executa scale down (pause) de uma instância.
+
+        Com TensorDock + cuda-checkpoint:
+        1. Cria checkpoint do estado GPU (VRAM + processos)
+        2. Para a instância
+
+        Sem cuda-checkpoint:
+        1. Para a instância diretamente
+        """
         start = time.time()
+        checkpoint_id = None
 
         try:
-            # Pausar via VAST.ai
-            success = self.vast_provider.pause_instance(instance_id)
+            # Obter info da instância
+            with self.session_factory() as session:
+                repo = ServerlessRepository(session)
+                instance = repo.get_instance(instance_id)
+
+            # 1. Criar cuda-checkpoint antes de pausar (se habilitado)
+            if self._checkpoint_service and instance:
+                logger.info(f"Criando cuda-checkpoint para {instance_id}...")
+                checkpoint_result = self._checkpoint_service.create_checkpoint(
+                    instance_id=str(instance_id),
+                    ssh_host=instance.ssh_host,
+                    ssh_port=instance.ssh_port,
+                )
+                if checkpoint_result.get("success"):
+                    checkpoint_id = checkpoint_result.get("checkpoint_id")
+                    logger.info(f"Checkpoint criado: {checkpoint_id} ({checkpoint_result.get('vram_gb', 0):.1f}GB VRAM)")
+                else:
+                    logger.warning(f"Checkpoint falhou: {checkpoint_result.get('error')}")
+
+            # 2. Pausar via provider
+            success = self.gpu_provider.pause_instance(str(instance_id))
 
             if not success:
                 return ScaleDownResult(
                     success=False,
                     instance_id=instance_id,
                     duration_seconds=time.time() - start,
-                    error="VAST.ai pause failed"
+                    error=f"{self.provider_type.value} pause failed"
                 )
 
-            # Atualizar estado no banco
+            # 3. Atualizar estado no banco
             with self.session_factory() as session:
                 repo = ServerlessRepository(session)
                 repo.update_instance_state(instance_id, InstanceStateEnum.PAUSED)
+
+                # Salvar checkpoint_id se criado
+                if checkpoint_id and instance:
+                    repo.update_instance_checkpoint(instance_id, checkpoint_id)
 
                 # Registrar evento
                 instance = repo.get_instance(instance_id)
@@ -220,15 +290,19 @@ class ServerlessService:
                         user_id=instance.user_id,
                         event_type=EventTypeEnum.SCALE_DOWN,
                         duration_seconds=time.time() - start,
-                        details={"reason": "idle_timeout"}
+                        details={
+                            "reason": "idle_timeout",
+                            "checkpoint_id": checkpoint_id,
+                            "provider": self.provider_type.value,
+                        }
                     )
 
-            # Remover do cache
+            # 4. Remover do cache
             with self._lock:
                 self._last_request.pop(instance_id, None)
 
             duration = time.time() - start
-            logger.info(f"Instance {instance_id} scaled down in {duration:.2f}s")
+            logger.info(f"Instance {instance_id} scaled down in {duration:.2f}s (checkpoint: {checkpoint_id or 'none'})")
 
             return ScaleDownResult(
                 success=True,
@@ -249,19 +323,20 @@ class ServerlessService:
     # SCALE UP (Resume / Fallback)
     # =========================================================================
 
-    def _scale_up(self, instance_id: int) -> ScaleUpResult:
+    def _scale_up(self, instance_id: str) -> ScaleUpResult:
         """
         Executa scale up de uma instância.
 
         Ordem de tentativa:
-        1. Resume normal via VAST.ai
-        2. Se falhar: Restaurar snapshot em nova máquina
-        3. Se falhar: Migrar disco para nova máquina
+        1. Resume + cuda-checkpoint restore (TensorDock)
+        2. Resume normal
+        3. Se falhar: Restaurar snapshot em nova máquina
+        4. Se falhar: Migrar disco para nova máquina
         """
         start = time.time()
 
-        # Tentativa 1: Resume normal
-        logger.info(f"Attempting normal resume for {instance_id}")
+        # Tentativa 1: Resume com cuda-checkpoint (se disponível)
+        logger.info(f"Attempting resume for {instance_id} (provider: {self.provider_type.value})")
         result = self._try_resume(instance_id)
 
         if result.success:
@@ -283,12 +358,32 @@ class ServerlessService:
         self._log_scale_up_event(instance_id, result, start)
         return result
 
-    def _try_resume(self, instance_id: int) -> ScaleUpResult:
-        """Tentativa de resume normal via VAST.ai"""
+    def _try_resume(self, instance_id: str) -> ScaleUpResult:
+        """
+        Tentativa de resume com cuda-checkpoint (se disponível).
+
+        Fluxo TensorDock:
+        1. Start instância
+        2. Aguardar running
+        3. Restaurar cuda-checkpoint (VRAM + processos)
+
+        Fluxo VAST:
+        1. Resume instância
+        2. Aguardar running
+        """
         start = time.time()
+        checkpoint_id = None
 
         try:
-            success = self.vast_provider.resume_instance(instance_id)
+            # Verificar se tem checkpoint salvo
+            with self.session_factory() as session:
+                repo = ServerlessRepository(session)
+                instance = repo.get_instance(instance_id)
+                if instance:
+                    checkpoint_id = getattr(instance, 'last_checkpoint_id', None)
+
+            # 1. Resume/Start via provider
+            success = self.gpu_provider.resume_instance(str(instance_id))
 
             if not success:
                 return ScaleUpResult(
@@ -296,13 +391,14 @@ class ServerlessService:
                     instance_id=instance_id,
                     cold_start_seconds=time.time() - start,
                     method="resume",
-                    error="VAST.ai resume failed"
+                    error=f"{self.provider_type.value} resume failed"
                 )
 
-            # Aguardar instância ficar running
+            # 2. Aguardar instância ficar running
             for _ in range(60):  # 60 * 0.5 = 30s timeout
-                status = self.vast_provider.get_instance_status(instance_id)
-                if status.get("actual_status") == "running":
+                status = self.gpu_provider.get_instance_status(str(instance_id))
+                actual_status = status.get("actual_status", status.get("status", ""))
+                if actual_status.lower() in ("running", "active"):
                     break
                 time.sleep(0.5)
             else:
@@ -314,7 +410,25 @@ class ServerlessService:
                     error="Instance did not become running"
                 )
 
-            # Atualizar estado
+            # 3. Restaurar cuda-checkpoint (se disponível)
+            if self._checkpoint_service and checkpoint_id and instance:
+                logger.info(f"Restaurando cuda-checkpoint: {checkpoint_id}")
+                restore_start = time.time()
+
+                restore_result = self._checkpoint_service.restore_checkpoint(
+                    instance_id=str(instance_id),
+                    ssh_host=instance.ssh_host,
+                    ssh_port=instance.ssh_port,
+                    checkpoint_id=checkpoint_id,
+                )
+
+                if restore_result.get("success"):
+                    restore_time = time.time() - restore_start
+                    logger.info(f"Checkpoint restaurado em {restore_time:.2f}s")
+                else:
+                    logger.warning(f"Restore checkpoint falhou: {restore_result.get('error')}")
+
+            # 4. Atualizar estado
             with self.session_factory() as session:
                 repo = ServerlessRepository(session)
                 repo.update_instance_state(instance_id, InstanceStateEnum.RUNNING)
