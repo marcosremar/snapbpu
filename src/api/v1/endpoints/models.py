@@ -119,15 +119,30 @@ async def deploy_model(
     5. Wait for health check
 
     Returns immediately with deployment ID - poll /models/{id} for status.
+
+    Supports multiple input formats:
+    - {"model_type": "llm", "model_id": "llama3.2:1b"}
+    - {"model": "llama3.2:1b"} (auto-detects type)
+    - {"model": "whisper-base", "type": "speech-to-text"}
     """
     try:
         service = get_service(request)
 
+        # Get model ID and type using the helper methods
+        model_id = request_body.get_model_id()
+        model_type = request_body.get_model_type()
+
+        if not model_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="model_id or model is required"
+            )
+
         deployment = await service.create_deployment(
             user_id=user_email,
-            model_type=request_body.model_type.value if hasattr(request_body.model_type, 'value') else request_body.model_type,
-            model_id=request_body.model_id,
-            instance_id=request_body.instance_id,
+            model_type=model_type,
+            model_id=model_id,
+            instance_id=request_body.instance_id or request_body.offer_id,  # offer_id used as instance hint
             gpu_type=request_body.gpu_type,
             num_gpus=request_body.num_gpus,
             max_price=request_body.max_price,
@@ -144,12 +159,12 @@ async def deploy_model(
             "speech": 180,  # 3 min
             "image": 240,  # 4 min
             "embeddings": 120,  # 2 min
-        }.get(deployment.model_type.value, 180)
+        }.get(model_type, 180)
 
         return DeployModelResponse(
             success=True,
             deployment_id=deployment.id,
-            message=f"Deployment started for {deployment.model_id}",
+            message=f"Deployment started for {model_id}",
             estimated_time_seconds=estimated_time,
         )
 

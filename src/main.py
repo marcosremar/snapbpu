@@ -6,7 +6,7 @@ import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 import os
 from fastapi.exceptions import RequestValidationError
@@ -348,10 +348,15 @@ def create_app() -> FastAPI:
     @app.get("/{full_path:path}")
     async def serve_spa(full_path: str, request: Request):
         """Serve React SPA for all non-API routes"""
-        # Skip API routes - they should be handled by the router
-        # If we get here with an API route, it means the route doesn't exist
+        # Handle API routes - redirect to add trailing slash if needed
         if full_path.startswith("api/") or full_path.startswith("api"):
-            # Don't serve SPA for API routes - return proper 404
+            # Try adding trailing slash - many endpoints require it
+            if not full_path.endswith("/"):
+                redirect_url = f"/{full_path}/"
+                if request.query_params:
+                    redirect_url += f"?{request.query_params}"
+                return RedirectResponse(url=redirect_url, status_code=307)
+            # If still not found with trailing slash, return 404
             from fastapi import HTTPException
             raise HTTPException(status_code=404, detail=f"API endpoint not found: /{full_path}")
 

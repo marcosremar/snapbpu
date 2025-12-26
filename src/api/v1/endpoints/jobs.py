@@ -24,7 +24,8 @@ router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
 class CreateJobRequest(BaseModel):
     """Create a new GPU job"""
-    name: str = Field(..., min_length=1, max_length=100, description="Job name")
+    # Name is optional - will be auto-generated if not provided
+    name: Optional[str] = Field(None, min_length=1, max_length=100, description="Job name (auto-generated if not provided)")
 
     # Source type
     source: str = Field("command", description="Source type: command, huggingface, git")
@@ -45,19 +46,26 @@ class CreateJobRequest(BaseModel):
     setup_script: Optional[str] = Field(None, description="Setup script to run before command")
     pip_packages: Optional[List[str]] = Field(default_factory=list, description="Pip packages to install")
 
-    # GPU requirements
-    gpu_type: str = Field("RTX 4090", description="GPU type")
+    # GPU requirements - can be offer_id or gpu_type
+    offer_id: Optional[int] = Field(None, description="VAST.ai offer ID to use")
+    gpu_type: str = Field("RTX 4090", description="GPU type (ignored if offer_id provided)")
     num_gpus: int = Field(1, ge=1, le=8, description="Number of GPUs")
     use_spot: bool = Field(True, description="Use spot instance (cheaper but can be preempted). False = on-demand (stable)")
+    spot: Optional[bool] = Field(None, description="Alias for use_spot")
 
     # Execution
     disk_size: float = Field(50, ge=10, description="Disk size (GB)")
     timeout_minutes: int = Field(480, ge=10, le=1440, description="Max runtime (10 min to 24h)")
+    timeout: Optional[int] = Field(None, description="Alias for timeout_minutes")
     image: str = Field("pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime", description="Docker image")
 
     # Output
     output_paths: Optional[List[str]] = Field(default_factory=lambda: ["/workspace/output"], description="Paths to save")
     save_logs: bool = Field(True, description="Save job logs")
+
+    # Auto-destroy after completion
+    auto_destroy: bool = Field(True, description="Destroy instance after job completes")
+    max_retries: int = Field(0, ge=0, le=5, description="Max retries on failure")
 
 
 class JobResponse(BaseModel):
@@ -141,10 +149,23 @@ async def create_job(
 
     Different from serverless which hibernates for reuse.
     """
+    import uuid
+    from datetime import datetime
+
     try:
+        # Auto-generate name if not provided
+        job_name = request.name
+        if not job_name:
+            timestamp = datetime.utcnow().strftime("%Y%m%d-%H%M%S")
+            job_name = f"job-{timestamp}-{str(uuid.uuid4())[:8]}"
+
+        # Handle aliases
+        use_spot = request.spot if request.spot is not None else request.use_spot
+        timeout_minutes = request.timeout if request.timeout is not None else request.timeout_minutes
+
         # Build JobConfig
         config = JobConfig(
-            name=request.name,
+            name=job_name,
             source=JobSource(request.source),
             command=request.command or "",
             hf_repo=request.hf_repo,
@@ -156,13 +177,16 @@ async def create_job(
             pip_packages=request.pip_packages or [],
             gpu_type=request.gpu_type,
             num_gpus=request.num_gpus,
-            use_spot=request.use_spot,
+            use_spot=use_spot,
             disk_size=request.disk_size,
-            timeout_minutes=request.timeout_minutes,
+            timeout_minutes=timeout_minutes,
             image=request.image,
             output_paths=request.output_paths or ["/workspace/output"],
             save_logs=request.save_logs,
         )
+
+        # If offer_id is provided, we could use it to get GPU details
+        # For now, job_manager will handle GPU provisioning
 
         # Create job
         job = job_manager.create_job(config, user_email)

@@ -40,14 +40,27 @@ class AccessType(str, Enum):
 
 class DeployModelRequest(BaseModel):
     """Deploy a new model request"""
-    model_type: ModelType = Field(..., description="Type of model (llm, speech, image, embeddings, vision, video)")
-    model_id: str = Field(..., description="Model ID (HuggingFace ID or Ollama model name)")
+    # Model type - optional, auto-detected from model name if not provided
+    model_type: Optional[ModelType] = Field(None, description="Type of model (llm, speech, image, embeddings, vision, video) - auto-detected if not provided")
+    type: Optional[str] = Field(None, description="Alias for model_type (for speech-to-text, image-generation, etc.)")
+
+    # Model ID - can be model_id or model
+    model_id: Optional[str] = Field(None, description="Model ID (HuggingFace ID or Ollama model name)")
+    model: Optional[str] = Field(None, description="Alias for model_id")
+
+    # Instance selection
     instance_id: Optional[int] = Field(None, description="Existing instance ID to use (null = create new)")
+    offer_id: Optional[int] = Field(None, description="VAST.ai offer ID to use for new instance")
 
     # GPU config (only if creating new instance)
     gpu_type: Optional[str] = Field(None, description="GPU type (e.g., 'RTX 4090', 'A100')")
     num_gpus: int = Field(1, ge=1, le=8, description="Number of GPUs")
     max_price: float = Field(2.0, ge=0, description="Max price per hour ($)")
+
+    # Runtime/Backend config
+    backend: Optional[str] = Field(None, description="Runtime backend: vllm, ollama, pytorch, diffusers")
+    quantization: Optional[str] = Field(None, description="Quantization: q4, q8, fp16, fp32")
+    source: Optional[str] = Field(None, description="Model source: huggingface, ollama, local")
 
     # Access config
     access_type: AccessType = Field(AccessType.PRIVATE, description="Endpoint access type")
@@ -60,6 +73,49 @@ class DeployModelRequest(BaseModel):
 
     class Config:
         use_enum_values = True
+
+    def get_model_id(self) -> str:
+        """Get model ID from model_id or model alias"""
+        return self.model_id or self.model or ""
+
+    def get_model_type(self) -> str:
+        """Auto-detect model type from model name if not provided"""
+        if self.model_type:
+            return self.model_type.value if hasattr(self.model_type, 'value') else self.model_type
+
+        # Check type alias
+        if self.type:
+            type_mapping = {
+                "speech-to-text": "speech",
+                "stt": "speech",
+                "transcription": "speech",
+                "image-generation": "image",
+                "text-to-image": "image",
+                "embedding": "embeddings",
+            }
+            return type_mapping.get(self.type.lower(), self.type.lower())
+
+        # Auto-detect from model name
+        model = self.get_model_id().lower()
+
+        # Speech models
+        if any(x in model for x in ["whisper", "wav2vec", "speech"]):
+            return "speech"
+
+        # Image models
+        if any(x in model for x in ["stable-diffusion", "sdxl", "flux", "dall-e", "imagen", "diffusion"]):
+            return "image"
+
+        # Embedding models
+        if any(x in model for x in ["embed", "sentence-transformer", "bge", "e5-", "minilm"]):
+            return "embeddings"
+
+        # Vision models
+        if any(x in model for x in ["vision", "llava", "qwen-vl", "cogvlm"]):
+            return "vision"
+
+        # Default to LLM
+        return "llm"
 
 
 class StopModelRequest(BaseModel):

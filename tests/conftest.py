@@ -443,8 +443,14 @@ def _get_vast_client():
         try:
             from src.services.gpu.vast import VastService
             _vast_client = VastService(VAST_API_KEY)
+        except RuntimeError:
+            # Python is shutting down - can't create new threads
+            return None
         except Exception as e:
-            logger.warning(f"Could not create VastService: {e}")
+            try:
+                logger.warning(f"Could not create VastService: {e}")
+            except (ValueError, RuntimeError):
+                pass
     return _vast_client
 
 
@@ -460,6 +466,18 @@ def unregister_instance(instance_id: int):
     logger.info(f"[CLEANUP-TRACKER] Unregistered instance {instance_id}")
 
 
+def _safe_log(level, msg):
+    """Safe logging that doesn't fail during Python shutdown."""
+    try:
+        if level == "info":
+            logger.info(msg)
+        elif level == "warning":
+            logger.warning(msg)
+    except (ValueError, RuntimeError):
+        # Ignore logging errors during shutdown
+        pass
+
+
 def _cleanup_all_test_instances():
     """
     Emergency cleanup of ALL test instances.
@@ -472,16 +490,16 @@ def _cleanup_all_test_instances():
     if not client:
         return
 
-    logger.info("[CLEANUP] Starting emergency cleanup of all test instances...")
+    _safe_log("info", "[CLEANUP] Starting emergency cleanup of all test instances...")
 
     # Method 1: Clean registered instances
     for instance_id in list(_created_instances):
         try:
-            logger.info(f"[CLEANUP] Destroying registered instance {instance_id}")
+            _safe_log("info", f"[CLEANUP] Destroying registered instance {instance_id}")
             client.destroy_instance(instance_id)
             _created_instances.discard(instance_id)
         except Exception as e:
-            logger.warning(f"[CLEANUP] Failed to destroy {instance_id}: {e}")
+            _safe_log("warning", f"[CLEANUP] Failed to destroy {instance_id}: {e}")
 
     # Method 2: Clean all instances with test label (fallback)
     try:
@@ -491,14 +509,14 @@ def _cleanup_all_test_instances():
             if label.startswith(TEST_LABEL_PREFIX) or label.startswith("pytest-"):
                 inst_id = inst.get("id")
                 try:
-                    logger.info(f"[CLEANUP] Destroying label-matched instance {inst_id} (label: {label})")
+                    _safe_log("info", f"[CLEANUP] Destroying label-matched instance {inst_id} (label: {label})")
                     client.destroy_instance(inst_id)
                 except Exception as e:
-                    logger.warning(f"[CLEANUP] Failed to destroy {inst_id}: {e}")
+                    _safe_log("warning", f"[CLEANUP] Failed to destroy {inst_id}: {e}")
     except Exception as e:
-        logger.warning(f"[CLEANUP] Failed to list instances: {e}")
+        _safe_log("warning", f"[CLEANUP] Failed to list instances: {e}")
 
-    logger.info("[CLEANUP] Emergency cleanup complete")
+    _safe_log("info", "[CLEANUP] Emergency cleanup complete")
 
 
 # =============================================================================

@@ -1021,3 +1021,220 @@ async def get_sync_status(
         last_stats=stats.get("last_stats"),
         error=stats.get("error"),
     )
+
+
+# =============================================================================
+# ALIAS ENDPOINTS - Serverless (alternate path)
+# =============================================================================
+
+class ServerlessEnableRequest(BaseModel):
+    """Request to enable serverless mode"""
+    mode: str = "economic"
+    idle_timeout_seconds: int = 10
+    idle_threshold: int = 60  # Alias for gpu_threshold
+    gpu_threshold: float = 5.0
+    keep_warm: bool = False
+    cpu_standby: bool = False  # Alias for mode=fast
+
+
+@router.post("/{instance_id}/serverless/enable")
+async def enable_serverless_alias(
+    instance_id: int,
+    request: ServerlessEnableRequest = ServerlessEnableRequest(),
+    user_email: str = Depends(get_current_user_email),
+):
+    """
+    Enable serverless mode for an instance (alias for /serverless/enable/{id})
+    """
+    from ....modules.serverless import get_serverless_manager
+    from ....infrastructure.providers import FileUserRepository
+    from ....core.config import get_settings
+
+    settings = get_settings()
+    user_repo = FileUserRepository(config_file=settings.app.config_file)
+    user = user_repo.get_user(user_email)
+
+    if not user or not user.vast_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vast.ai API key not configured"
+        )
+
+    manager = get_serverless_manager()
+    manager.configure(vast_api_key=user.vast_api_key)
+
+    # Handle mode aliases
+    mode = request.mode
+    if request.cpu_standby:
+        mode = "fast"
+
+    result = manager.enable(
+        instance_id=instance_id,
+        mode=mode,
+        idle_timeout_seconds=request.idle_timeout_seconds or request.idle_threshold,
+        gpu_threshold=request.gpu_threshold,
+        keep_warm=request.keep_warm,
+    )
+
+    return {
+        **result,
+        "message": f"Serverless mode '{mode}' enabled for instance {instance_id}",
+    }
+
+
+@router.post("/{instance_id}/serverless/disable")
+async def disable_serverless_alias(
+    instance_id: int,
+    user_email: str = Depends(get_current_user_email),
+):
+    """
+    Disable serverless mode for an instance (alias for /serverless/disable/{id})
+    """
+    from ....modules.serverless import get_serverless_manager
+    from ....infrastructure.providers import FileUserRepository
+    from ....core.config import get_settings
+
+    settings = get_settings()
+    user_repo = FileUserRepository(config_file=settings.app.config_file)
+    user = user_repo.get_user(user_email)
+
+    if not user or not user.vast_api_key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Vast.ai API key not configured"
+        )
+
+    manager = get_serverless_manager()
+    manager.configure(vast_api_key=user.vast_api_key)
+
+    result = manager.disable(instance_id)
+
+    return {
+        **result,
+        "message": f"Serverless disabled for instance {instance_id}"
+    }
+
+
+# =============================================================================
+# ALIAS ENDPOINTS - Snapshots (alternate path)
+# =============================================================================
+
+class CreateInstanceSnapshotRequest(BaseModel):
+    """Request to create snapshot from instance"""
+    name: Optional[str] = None
+    type: str = "full"  # full or incremental
+    source_path: str = "/workspace"
+    tags: Optional[list] = None
+
+
+@router.post("/{instance_id}/snapshots", status_code=status.HTTP_201_CREATED)
+async def create_instance_snapshot(
+    instance_id: int,
+    request: CreateInstanceSnapshotRequest = CreateInstanceSnapshotRequest(),
+    instance_service: InstanceService = Depends(get_instance_service),
+):
+    """
+    Create a snapshot from an instance (alias for /snapshots)
+    """
+    from ....domain.services import SnapshotService
+    from ..dependencies import get_snapshot_service
+
+    try:
+        instance = instance_service.get_instance(instance_id)
+
+        if not instance.ssh_host or not instance.ssh_port:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Instance {instance_id} SSH details not available",
+            )
+
+        snapshot_service = get_snapshot_service()
+
+        tags = request.tags or []
+        if request.name:
+            tags.append(f"name:{request.name}")
+        tags.append(f"instance:{instance_id}")
+        tags.append(f"type:{request.type}")
+
+        result = snapshot_service.create_snapshot(
+            ssh_host=instance.ssh_host,
+            ssh_port=instance.ssh_port,
+            source_path=request.source_path,
+            tags=tags,
+        )
+
+        return {
+            "success": True,
+            "snapshot_id": result["snapshot_id"],
+            "instance_id": instance_id,
+            "type": request.type,
+            "files_new": result.get("files_new", 0),
+            "files_changed": result.get("files_changed", 0),
+            "data_added": result.get("data_added", "0 B"),
+        }
+
+    except NotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+    except Exception as e:
+        logger.error(f"Failed to create snapshot for instance {instance_id}: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e),
+        )
+
+
+@router.get("/{instance_id}/metrics")
+async def get_instance_metrics(
+    instance_id: int,
+    instance_service: InstanceService = Depends(get_instance_service),
+):
+    """
+    Get metrics for an instance (GPU utilization, memory, etc.)
+    """
+    try:
+        instance = instance_service.get_instance(instance_id)
+
+        return {
+            "instance_id": instance_id,
+            "gpu_util": instance.gpu_util or 0.0,
+            "gpu_temp": instance.gpu_temp or 0.0,
+            "cpu_util": instance.cpu_util or 0.0,
+            "ram_used": instance.ram_used or 0.0,
+            "ram_total": instance.ram_total or 0.0,
+            "status": instance.status,
+        }
+    except NotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )
+
+
+@router.get("/{instance_id}/health")
+async def get_instance_health(
+    instance_id: int,
+    instance_service: InstanceService = Depends(get_instance_service),
+):
+    """
+    Get health status for an instance
+    """
+    try:
+        instance = instance_service.get_instance(instance_id)
+
+        is_healthy = instance.status == "running"
+
+        return {
+            "instance_id": instance_id,
+            "healthy": is_healthy,
+            "status": instance.status,
+            "gpu_name": instance.gpu_name,
+            "ssh_available": bool(instance.ssh_host and instance.ssh_port),
+        }
+    except NotFoundException as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        )

@@ -21,3 +21,6 @@ google-auth>=2.23.0
 # Machine Learning (para previsao de precos)
 numpy>=1.24.0
 scikit-learn>=1.3.0
+
+# Date/Time (Python 3.13 compatibility)
+python-dateutil>=2.8.2
