@@ -441,7 +441,7 @@ export default function FailoverReport({ isDemo = true }) {
 
       try {
         const token = localStorage.getItem('auth_token')
-        const res = await fetch('/api/standby/failover/test-real/history', {
+        const res = await fetch('/api/v1/standby/failover/test-real/history', {
           headers: token ? { 'Authorization': `Bearer ${token}` } : {}
         })
         if (res.ok) {
@@ -468,7 +468,7 @@ export default function FailoverReport({ isDemo = true }) {
       }
 
       try {
-        const res = await fetch('/api/v1/standby/failover-history')
+        const res = await fetch('/api/v1/standby/failover/report')
         if (res.ok) {
           const data = await res.json()
           setHistory(data.history || [])

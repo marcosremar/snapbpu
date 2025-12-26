@@ -1136,12 +1136,13 @@ async def create_instance_snapshot(
     instance_id: int,
     request: CreateInstanceSnapshotRequest = CreateInstanceSnapshotRequest(),
     instance_service: InstanceService = Depends(get_instance_service),
+    user_email: str = Depends(get_current_user_email),
 ):
     """
     Create a snapshot from an instance (alias for /snapshots)
     """
     from ....domain.services import SnapshotService
-    from ..dependencies import get_snapshot_service
+    from ..dependencies import get_snapshot_service_for_user
 
     try:
         instance = instance_service.get_instance(instance_id)
@@ -1152,7 +1153,7 @@ async def create_instance_snapshot(
                 detail=f"Instance {instance_id} SSH details not available",
             )
 
-        snapshot_service = get_snapshot_service()
+        snapshot_service = get_snapshot_service_for_user(user_email)
 
         tags = request.tags or []
         if request.name:

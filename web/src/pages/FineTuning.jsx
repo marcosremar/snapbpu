@@ -392,7 +392,7 @@ export default function FineTuning() {
   const fetchJobs = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const res = await fetch('/api/finetune/jobs', {
+      const res = await fetch('/api/v1/finetune/jobs', {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
       });
       const data = await res.json();

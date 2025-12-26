@@ -147,7 +147,7 @@ export default function ChatArena() {
             }
 
             const token = localStorage.getItem('auth_token')
-            const res = await fetch('/api/chat/models', {
+            const res = await fetch('/api/v1/chat/models', {
                 headers: { Authorization: `Bearer ${token}` }
             })
             const data = await res.json()

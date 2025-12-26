@@ -352,7 +352,7 @@ export default function Settings() {
 
   const loadSettings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/settings`, { credentials: 'include' })
+      const res = await fetch(`${API_BASE}/api/v1/settings`, { credentials: 'include' })
       const data = await res.json()
       if (data.settings) {
         setSettings(data.settings)
@@ -365,7 +365,7 @@ export default function Settings() {
 
   const loadAgentSettings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/settings/agent`, { credentials: 'include' })
+      const res = await fetch(`${API_BASE}/api/v1/settings/agent`, { credentials: 'include' })
       const data = await res.json()
       if (data.sync_interval) {
         setAgentSettings(data)
@@ -385,7 +385,7 @@ export default function Settings() {
     setMessage(null)
 
     try {
-      const res = await fetch(`${API_BASE}/api/settings/agent`, {
+      const res = await fetch(`${API_BASE}/api/v1/settings/agent`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(agentSettings),
@@ -419,7 +419,7 @@ export default function Settings() {
   const saveCloudStorageSettings = async () => {
     setSavingCloudStorage(true)
     try {
-      const res = await fetch(`${API_BASE}/api/settings/cloud-storage`, {
+      const res = await fetch(`${API_BASE}/api/v1/settings/cloud-storage`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cloudStorageSettings),
@@ -440,7 +440,7 @@ export default function Settings() {
   const testCloudStorageConnection = async () => {
     setTestingConnection(true)
     try {
-      const res = await fetch(`${API_BASE}/api/settings/cloud-storage/test`, {
+      const res = await fetch(`${API_BASE}/api/v1/settings/cloud-storage/test`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cloudStorageSettings),
@@ -460,7 +460,7 @@ export default function Settings() {
 
   const loadCloudStorageSettings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/settings/cloud-storage`, { credentials: 'include' })
+      const res = await fetch(`${API_BASE}/api/v1/settings/cloud-storage`, { credentials: 'include' })
       const data = await res.json()
       if (data.settings) {
         setCloudStorageSettings(prev => ({ ...prev, ...data.settings }))
@@ -503,7 +503,7 @@ export default function Settings() {
     setMessage(null)
 
     try {
-      const res = await fetch(`${API_BASE}/api/settings`, {
+      const res = await fetch(`${API_BASE}/api/v1/settings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(settings),

@@ -103,7 +103,7 @@ export default function FineTuningModal({ isOpen, onClose, onSuccess }) {
       formData.append('file', file);
 
       const token = localStorage.getItem('auth_token');
-      const res = await fetch('/api/finetune/jobs/upload-dataset', {
+      const res = await fetch('/api/v1/finetune/jobs/upload-dataset', {
         method: 'POST',
         body: formData,
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
@@ -140,7 +140,7 @@ export default function FineTuningModal({ isOpen, onClose, onSuccess }) {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const res = await fetch('/api/finetune/jobs', {
+      const res = await fetch('/api/v1/finetune/jobs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

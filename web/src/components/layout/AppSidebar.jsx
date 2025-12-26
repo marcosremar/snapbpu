@@ -14,8 +14,12 @@ import {
   Sparkles,
   Play,
   Columns,
-  Rocket
+  Rocket,
+  Wallet,
+  RefreshCw
 } from "lucide-react";
+
+const API_BASE = import.meta.env.VITE_API_URL || '';
 import { useSidebar } from "../../context/SidebarContext";
 import Logo, { LogoIcon } from "../Logo";
 
@@ -33,6 +37,42 @@ const AppSidebar = ({ isDemo = false }) => {
   const [openSubmenu, setOpenSubmenu] = useState(null);
   const [subMenuHeight, setSubMenuHeight] = useState({});
   const subMenuRefs = useRef({});
+
+  // Balance state
+  const [balance, setBalance] = useState(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
+
+  // Fetch balance
+  const fetchBalance = useCallback(async () => {
+    if (isDemo) {
+      setBalance({ credit: 4.94, balance: 4.94 });
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    setLoadingBalance(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/balance`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBalance(data);
+      }
+    } catch (e) {
+      console.error('Failed to fetch balance:', e);
+    }
+    setLoadingBalance(false);
+  }, [isDemo]);
+
+  useEffect(() => {
+    fetchBalance();
+    // Refresh balance every 60 seconds
+    const interval = setInterval(fetchBalance, 60000);
+    return () => clearInterval(interval);
+  }, [fetchBalance]);
 
   const navItems = [
     {
@@ -290,9 +330,41 @@ const AppSidebar = ({ isDemo = false }) => {
           </div>
         </nav>
 
+        {/* Balance Widget */}
+        {(isExpanded || isHovered || isMobileOpen) && balance && (
+          <div className="mt-auto px-2 mb-3">
+            <div className="relative p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800/30 overflow-hidden">
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-md bg-green-500/20 flex items-center justify-center">
+                    <Wallet className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <span className="text-gray-600 dark:text-gray-400 font-medium text-xs">Saldo VAST.ai</span>
+                </div>
+                <button
+                  onClick={fetchBalance}
+                  disabled={loadingBalance}
+                  className="p-1 rounded hover:bg-green-500/10 transition-colors"
+                  title="Atualizar saldo"
+                >
+                  <RefreshCw className={`w-3 h-3 text-green-600 dark:text-green-400 ${loadingBalance ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+              <div className="text-xl font-bold text-green-700 dark:text-green-300">
+                ${(balance.credit || balance.balance || 0).toFixed(2)}
+              </div>
+              {balance.balance < 1 && (
+                <p className="text-amber-600 dark:text-amber-400 text-[10px] mt-1">
+                  ⚠️ Saldo baixo - adicione créditos
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Promo Widget - Subtle */}
         {(isExpanded || isHovered || isMobileOpen) && (
-          <div className="mt-auto mb-10 px-2">
+          <div className="mb-10 px-2">
             <div className="relative p-3 rounded-xl bg-gray-50 dark:bg-white/5 border border-gray-200 dark:border-white/10 overflow-hidden">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-6 h-6 rounded-md bg-brand-800/10 dark:bg-brand-500/10 flex items-center justify-center">

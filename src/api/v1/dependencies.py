@@ -194,6 +194,38 @@ def get_snapshot_service(
     return SnapshotService(snapshot_provider=snapshot_provider)
 
 
+def get_snapshot_service_for_user(user_email: str) -> SnapshotService:
+    """Get snapshot service for a specific user (callable without Depends)"""
+    user_repo = next(get_user_repository())
+    user = user_repo.get_user(user_email)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    settings = get_settings()
+    repo = user.settings.get("restic_repo") or settings.r2.restic_repo
+    password = user.settings.get("restic_password") or settings.restic.password
+    access_key = user.settings.get("r2_access_key") or settings.r2.access_key
+    secret_key = user.settings.get("r2_secret_key") or settings.r2.secret_key
+
+    if not repo or not password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Restic repository not configured. Please update settings.",
+        )
+
+    snapshot_provider = ResticProvider(
+        repo=repo,
+        password=password,
+        access_key=access_key,
+        secret_key=secret_key,
+    )
+    return SnapshotService(snapshot_provider=snapshot_provider)
+
+
 def get_migration_service(
     user_email: str = Depends(get_current_user_email),
 ) -> MigrationService:
