@@ -3,7 +3,7 @@ import {
   Search, Globe, MapPin, X, Cpu, MessageSquare, Lightbulb, Code, Zap,
   Sparkles, Gauge, Activity, Clock, Loader2, AlertCircle, Check, ChevronRight, ChevronLeft,
   Shield, Server, HardDrive, Cloud, Timer, DollarSign, Database, Filter, Star, TrendingUp,
-  ChevronDown, ChevronUp, Info, HelpCircle, Rocket
+  ChevronDown, ChevronUp, Info, HelpCircle, Rocket, Hourglass
 } from 'lucide-react';
 import { Button, Label, CardContent } from '../tailadmin-ui';
 import { WorldMap, GPUSelector } from './';
@@ -64,6 +64,44 @@ const WizardForm = ({
 
   // Machine selection state
   const [selectionMode, setSelectionMode] = useState('recommended'); // 'recommended' or 'manual'
+  const [provisioningStartTime, setProvisioningStartTime] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Track elapsed time during provisioning
+  useEffect(() => {
+    if (currentStep === 4 && !provisioningWinner) {
+      setProvisioningStartTime(Date.now());
+      const interval = setInterval(() => {
+        setElapsedTime(prev => prev + 1);
+      }, 1000);
+      return () => clearInterval(interval);
+    } else if (provisioningWinner) {
+      // Stop timer when winner found
+    } else {
+      setElapsedTime(0);
+      setProvisioningStartTime(null);
+    }
+  }, [currentStep, provisioningWinner]);
+
+  // Format time as mm:ss
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Estimate remaining time
+  const getETA = () => {
+    if (provisioningWinner) return 'Concluído!';
+    const activeCandidates = provisioningCandidates.filter(c => c.status !== 'failed');
+    if (activeCandidates.length === 0) return 'Sem máquinas ativas';
+    const maxProgress = Math.max(...activeCandidates.map(c => c.progress || 0));
+    if (maxProgress <= 10 || elapsedTime < 3) return 'Estimando...';
+    const estimatedTotal = (elapsedTime / maxProgress) * 100;
+    const remaining = Math.max(0, Math.ceil(estimatedTotal - elapsedTime));
+    if (remaining < 60) return `~${remaining}s restantes`;
+    return `~${Math.ceil(remaining / 60)}min restantes`;
+  };
   const [recommendedMachines, setRecommendedMachines] = useState([]);
   const [loadingMachines, setLoadingMachines] = useState(false);
   const [selectedMachine, setSelectedMachine] = useState(null);
@@ -313,6 +351,9 @@ const WizardForm = ({
     }
   };
 
+  // State for payment confirmation
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+
   const handleStartProvisioning = () => {
     const errors = [];
 
@@ -332,14 +373,112 @@ const WizardForm = ({
     }
 
     setValidationErrors([]);
+    // Show payment confirmation before proceeding
+    setShowPaymentConfirm(true);
+  };
+
+  const handleConfirmPayment = () => {
+    setShowPaymentConfirm(false);
     setCurrentStep(4);
     onSubmit(); // Inicia o provisioning
   };
 
+  const handleCancelPayment = () => {
+    setShowPaymentConfirm(false);
+  };
+
   const selectedFailover = failoverOptions.find(o => o.id === failoverStrategy);
+
+  // Get estimated cost based on selected tier
+  const getEstimatedCost = () => {
+    const tierData = tiers.find(t => t.name === selectedTier);
+    if (!tierData) return { hourly: '0.00', daily: '0.00' };
+    // Extract min price from priceRange like "$0.10-0.30/h"
+    const match = tierData.priceRange?.match(/\$(\d+\.?\d*)/);
+    const minPrice = match ? parseFloat(match[1]) : 0.20;
+    return {
+      hourly: minPrice.toFixed(2),
+      daily: (minPrice * 24).toFixed(2)
+    };
+  };
 
   return (
     <CardContent className="p-6 space-y-6">
+      {/* Payment Confirmation Modal */}
+      {showPaymentConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl animate-scaleIn">
+            <div className="text-center mb-6">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-brand-500/10 border border-brand-500/30 mb-4">
+                <DollarSign className="w-7 h-7 text-brand-400" />
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">Confirmar Provisionamento</h3>
+              <p className="text-sm text-gray-400">
+                Você está prestes a provisionar uma máquina GPU. Verifique os custos estimados abaixo.
+              </p>
+            </div>
+
+            {/* Cost Summary */}
+            <div className="bg-gray-800/50 rounded-lg p-4 mb-6 space-y-3">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">GPU Tier</span>
+                <span className="text-sm font-medium text-white">{selectedTier}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Região</span>
+                <span className="text-sm font-medium text-white">{selectedLocation?.name || 'Global'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Estratégia</span>
+                <span className="text-sm font-medium text-white">{selectedFailover?.name || '-'}</span>
+              </div>
+              <div className="border-t border-gray-700 my-2" />
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Custo estimado/hora</span>
+                <span className="text-lg font-bold text-brand-400">${getEstimatedCost().hourly}/h</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-400">Custo estimado/dia</span>
+                <span className="text-sm text-gray-300">${getEstimatedCost().daily}/dia</span>
+              </div>
+              {selectedFailover?.costHour && (
+                <div className="flex justify-between items-center text-xs">
+                  <span className="text-gray-500">+ Failover</span>
+                  <span className="text-gray-400">{selectedFailover.costHour}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Warning */}
+            <div className="flex items-start gap-2 mb-6 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+              <AlertCircle className="w-4 h-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-yellow-400/90">
+                A cobrança começa assim que a máquina ficar online. Você pode pausar ou destruir a instância a qualquer momento.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3">
+              <Button
+                onClick={handleCancelPayment}
+                variant="ghost"
+                className="flex-1 text-gray-400 hover:text-white hover:bg-gray-800"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleConfirmPayment}
+                className="flex-1 bg-brand-500 hover:bg-brand-600 text-white"
+                data-testid="confirm-payment-button"
+              >
+                <Check className="w-4 h-4 mr-2" />
+                Confirmar e Iniciar
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Stepper Progress Bar */}
       <div className="relative">
         <div className="flex items-center justify-between">
@@ -372,6 +511,11 @@ const WizardForm = ({
                     )}
                   </div>
                   <div className="text-center">
+                    <div className={`text-[10px] font-bold mb-0.5 ${
+                      isPassed ? 'text-brand-400' : isCurrent ? 'text-brand-400' : 'text-gray-600'
+                    }`}>
+                      {step.id}/{steps.length}
+                    </div>
                     <div className={`text-xs font-medium ${
                       isPassed ? 'text-brand-400' : isCurrent ? 'text-gray-200' : 'text-gray-500'
                     }`}>
@@ -923,6 +1067,20 @@ const WizardForm = ({
                 ? 'Sua máquina está pronta para uso'
                 : 'Testando conexão com 5 máquinas simultaneamente. A primeira a responder será selecionada.'}
             </p>
+
+            {/* Timer and ETA */}
+            {!provisioningWinner && provisioningCandidates.length > 0 && (
+              <div className="flex items-center justify-center gap-4 mt-3 text-xs">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
+                  <Clock className="w-3.5 h-3.5 text-gray-400" />
+                  <span className="text-gray-300 font-mono">{formatTime(elapsedTime)}</span>
+                </div>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-500/10 border border-brand-500/30">
+                  <Timer className="w-3.5 h-3.5 text-brand-400" />
+                  <span className="text-brand-400">{getETA()}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Race Track */}
@@ -1008,7 +1166,12 @@ const WizardForm = ({
                       ) : isCancelled ? (
                         <span className="text-[10px] text-gray-600">Cancelado</span>
                       ) : status === 'failed' ? (
-                        <span className="text-[10px] text-red-400">Falhou</span>
+                        <div className="flex flex-col items-end">
+                          <span className="text-[10px] text-red-400">Falhou</span>
+                          {candidate.errorMessage && (
+                            <span className="text-[9px] text-red-400/70">{candidate.errorMessage}</span>
+                          )}
+                        </div>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 text-[10px] text-gray-400">
                           <Loader2 className="w-3 h-3 animate-spin" />

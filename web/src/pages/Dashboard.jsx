@@ -592,10 +592,27 @@ export default function Dashboard({ onStatsUpdate }) {
 
         return { index, instanceId, success: true };
       } catch (error) {
-        // Mark as failed
+        // Mark as failed with descriptive error message
+        let errorMessage = 'Erro desconhecido';
+        if (error.message?.includes('balance') || error.message?.includes('insufficient')) {
+          errorMessage = 'Saldo insuficiente';
+        } else if (error.message?.includes('timeout') || error.message?.includes('Timeout')) {
+          errorMessage = 'Timeout de conexão';
+        } else if (error.message?.includes('unavailable') || error.message?.includes('not available')) {
+          errorMessage = 'Máquina indisponível';
+        } else if (error.message?.includes('network') || error.message?.includes('Network')) {
+          errorMessage = 'Erro de rede';
+        } else if (error.message?.includes('auth') || error.message?.includes('401') || error.message?.includes('403')) {
+          errorMessage = 'Erro de autenticação';
+        } else if (error.message?.includes('limit') || error.message?.includes('quota')) {
+          errorMessage = 'Limite de instâncias atingido';
+        } else if (error.message) {
+          errorMessage = error.message.slice(0, 30);
+        }
+
         setRaceCandidates(prev => {
           const updated = [...prev];
-          updated[index] = { ...updated[index], status: 'failed', progress: 0 };
+          updated[index] = { ...updated[index], status: 'failed', progress: 0, errorMessage };
           return updated;
         });
         return { index, success: false, error };
@@ -913,10 +930,11 @@ export default function Dashboard({ onStatsUpdate }) {
                 {/* Opção 1: Configuração Guiada */}
                 <button
                   onClick={() => { setDeployMethod('manual'); setMode('wizard'); setShowResults(false); }}
-                  className={`p-6 rounded-lg border transition-all text-left group relative overflow-hidden ${
+                  data-testid="config-guided"
+                  className={`p-6 rounded-lg border transition-all text-left group relative overflow-hidden cursor-pointer hover:scale-[1.02] hover:shadow-lg hover:shadow-brand-500/10 active:scale-[0.98] ${
                     deployMethod === 'manual' && mode === 'wizard'
-                      ? 'border-brand-500 ring-2 ring-brand-500/20'
-                      : 'border-gray-700 hover:border-brand-300'
+                      ? 'border-brand-500 ring-2 ring-brand-500/20 bg-brand-500/5'
+                      : 'border-gray-700 hover:border-brand-400 hover:bg-gray-800/50'
                   }`}
                 >
                   {deployMethod === 'manual' && mode === 'wizard' && (
@@ -924,12 +942,12 @@ export default function Dashboard({ onStatsUpdate }) {
                   )}
                   <div className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
-                      deployMethod === 'manual' && mode === 'wizard' ? 'border-brand-500 bg-brand-500' : 'border-gray-600'
+                      deployMethod === 'manual' && mode === 'wizard' ? 'border-brand-500 bg-brand-500' : 'border-gray-600 group-hover:border-brand-400'
                     }`}>
                       {deployMethod === 'manual' && mode === 'wizard' && <Check className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-sm text-white mb-1.5">Configuração Guiada</p>
+                      <p className="font-semibold text-sm text-white mb-1.5 group-hover:text-brand-300 transition-colors">Configuração Guiada</p>
                       <p className="text-xs text-gray-400 leading-relaxed mb-3">Escolha região, GPU e performance de forma simples e intuitiva</p>
                       <span className="inline-block text-[10px] font-semibold text-brand-400 bg-brand-500/10 px-2.5 py-1 rounded-md border border-brand-800/20">✓ Recomendado</span>
                     </div>
@@ -939,10 +957,11 @@ export default function Dashboard({ onStatsUpdate }) {
                 {/* Opção 2: Configuração Avançada */}
                 <button
                   onClick={() => { setDeployMethod('manual'); setMode('advanced'); setShowResults(false); }}
-                  className={`p-6 rounded-lg border transition-all text-left group relative overflow-hidden ${
+                  data-testid="config-advanced"
+                  className={`p-6 rounded-lg border transition-all text-left group relative overflow-hidden cursor-pointer hover:scale-[1.02] hover:shadow-lg hover:shadow-brand-500/10 active:scale-[0.98] ${
                     deployMethod === 'manual' && mode === 'advanced'
-                      ? 'border-brand-500 ring-2 ring-brand-500/20'
-                      : 'border-gray-700 hover:border-brand-300'
+                      ? 'border-brand-500 ring-2 ring-brand-500/20 bg-brand-500/5'
+                      : 'border-gray-700 hover:border-brand-400 hover:bg-gray-800/50'
                   }`}
                 >
                   {deployMethod === 'manual' && mode === 'advanced' && (
@@ -950,12 +969,12 @@ export default function Dashboard({ onStatsUpdate }) {
                   )}
                   <div className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
-                      deployMethod === 'manual' && mode === 'advanced' ? 'border-brand-500 bg-brand-500' : 'border-gray-600'
+                      deployMethod === 'manual' && mode === 'advanced' ? 'border-brand-500 bg-brand-500' : 'border-gray-600 group-hover:border-brand-400'
                     }`}>
                       {deployMethod === 'manual' && mode === 'advanced' && <Check className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-sm text-white mb-1.5">Configuração Avançada</p>
+                      <p className="font-semibold text-sm text-white mb-1.5 group-hover:text-brand-300 transition-colors">Configuração Avançada</p>
                       <p className="text-xs text-gray-400 leading-relaxed mb-3">Controle total com filtros detalhados de hardware e rede</p>
                       <span className="inline-block text-[10px] font-semibold text-gray-500 bg-gray-800 px-2.5 py-1 rounded-md border border-gray-700">Para especialistas</span>
                     </div>
@@ -965,23 +984,24 @@ export default function Dashboard({ onStatsUpdate }) {
                 {/* Opção 3: Assistente IA */}
                 <button
                   onClick={() => { setDeployMethod('ai'); setShowResults(false); }}
-                  className={`p-6 rounded-lg border transition-all text-left group relative overflow-hidden ${
+                  data-testid="config-ai"
+                  className={`p-6 rounded-lg border transition-all text-left group relative overflow-hidden cursor-pointer hover:scale-[1.02] hover:shadow-lg hover:shadow-purple-500/10 active:scale-[0.98] ${
                     deployMethod === 'ai'
-                      ? 'border-brand-500 ring-2 ring-brand-500/20'
-                      : 'border-gray-700 hover:border-brand-300'
+                      ? 'border-purple-500 ring-2 ring-purple-500/20 bg-purple-500/5'
+                      : 'border-gray-700 hover:border-purple-400 hover:bg-gray-800/50'
                   }`}
                 >
                   {deployMethod === 'ai' && (
-                    <div className="absolute top-0 left-0 w-1 h-full bg-brand-500" />
+                    <div className="absolute top-0 left-0 w-1 h-full bg-purple-500" />
                   )}
                   <div className="flex items-start gap-3">
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center mt-0.5 flex-shrink-0 transition-colors ${
-                      deployMethod === 'ai' ? 'border-brand-500 bg-brand-500' : 'border-gray-600'
+                      deployMethod === 'ai' ? 'border-purple-500 bg-purple-500' : 'border-gray-600 group-hover:border-purple-400'
                     }`}>
                       {deployMethod === 'ai' && <Check className="w-3 h-3 text-white" />}
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-sm text-white mb-1.5">Assistente IA</p>
+                      <p className="font-semibold text-sm text-white mb-1.5 group-hover:text-purple-300 transition-colors">Assistente IA</p>
                       <p className="text-xs text-gray-400 leading-relaxed mb-3">Converse e deixe a IA recomendar a melhor configuração</p>
                       <span className="inline-block text-[10px] font-semibold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded-md border border-purple-500/20">✨ Inteligente</span>
                     </div>

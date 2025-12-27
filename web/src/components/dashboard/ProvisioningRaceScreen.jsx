@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Cpu, Loader2, Check, X, Server, Wifi, Zap, Play } from 'lucide-react';
+import { Cpu, Loader2, Check, X, Server, Wifi, Zap, Play, Clock, Timer } from 'lucide-react';
 import { Card, CardContent, Button } from '../tailadmin-ui';
 
 // Progress stages with labels and icons
@@ -106,6 +106,38 @@ const ProgressBar = ({ progress, isWinner, isCancelled, status }) => {
 };
 
 const ProvisioningRaceScreen = ({ candidates, winner, onCancel, onComplete }) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  // Track elapsed time
+  useEffect(() => {
+    if (winner) return; // Stop timer when we have a winner
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [winner]);
+
+  // Format time as mm:ss
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  // Estimate remaining time based on progress of fastest candidate
+  const getETA = () => {
+    if (winner) return 'Concluído!';
+    const activeCandidates = candidates.filter(c => c.status !== 'failed' && c.status !== 'cancelled');
+    if (activeCandidates.length === 0) return 'Sem máquinas ativas';
+    const maxProgress = Math.max(...activeCandidates.map(c => c.progress || 0));
+    if (maxProgress <= 10) return 'Estimando...';
+    const estimatedTotal = (elapsedTime / maxProgress) * 100;
+    const remaining = Math.max(0, Math.ceil(estimatedTotal - elapsedTime));
+    if (remaining < 60) return `~${remaining}s restantes`;
+    return `~${Math.ceil(remaining / 60)}min restantes`;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
       {/* Shimmer animation keyframes */}
@@ -143,6 +175,20 @@ const ProvisioningRaceScreen = ({ candidates, winner, onCancel, onComplete }) =>
                   ? 'Sua máquina está pronta para uso'
                   : 'Criando 5 máquinas simultaneamente. A primeira que ficar pronta será selecionada.'}
               </p>
+
+              {/* Timer and ETA */}
+              {!winner && (
+                <div className="flex items-center justify-center gap-6 mt-4 text-sm">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gray-700/50">
+                    <Clock className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-300 font-mono">{formatTime(elapsedTime)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-900/30 border border-brand-700">
+                    <Timer className="w-4 h-4 text-brand-400" />
+                    <span className="text-brand-300">{getETA()}</span>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Race Track */}
@@ -228,7 +274,12 @@ const ProvisioningRaceScreen = ({ candidates, winner, onCancel, onComplete }) =>
                           ) : isCancelled ? (
                             <span className="text-sm text-gray-600 bg-gray-700/50 px-3 py-1.5 rounded-full">Cancelado</span>
                           ) : status === 'failed' ? (
-                            <span className="text-sm text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full border border-red-800">Falhou</span>
+                            <div className="flex flex-col items-end">
+                              <span className="text-sm text-red-400 bg-red-900/30 px-3 py-1.5 rounded-full border border-red-800">Falhou</span>
+                              {candidate.errorMessage && (
+                                <span className="text-[10px] text-red-400/70 mt-1">{candidate.errorMessage}</span>
+                              )}
+                            </div>
                           ) : status === 'creating' ? (
                             <span className="inline-flex items-center gap-2 text-sm text-blue-400 bg-blue-900/30 px-3 py-1.5 rounded-full border border-blue-800">
                               <Loader2 className="w-3.5 h-3.5 animate-spin" />
