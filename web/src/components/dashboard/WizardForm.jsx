@@ -55,6 +55,8 @@ const WizardForm = ({
   isProvisioning = false,
   onCancelProvisioning,
   onCompleteProvisioning,
+  currentRound = 1,
+  maxRounds = 3,
 }) => {
   const tiers = PERFORMANCE_TIERS;
   const countryData = COUNTRY_DATA;
@@ -351,8 +353,43 @@ const WizardForm = ({
     }
   };
 
-  // State for payment confirmation
+  // State for payment confirmation and balance
   const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
+  const [userBalance, setUserBalance] = useState(null);
+  const [loadingBalance, setLoadingBalance] = useState(false);
+  const [balanceError, setBalanceError] = useState(null);
+
+  // Fetch user balance when entering step 3
+  useEffect(() => {
+    if (currentStep === 3) {
+      fetchUserBalance();
+    }
+  }, [currentStep]);
+
+  const fetchUserBalance = async () => {
+    setLoadingBalance(true);
+    setBalanceError(null);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const res = await fetch('/api/v1/auth/me', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Try to get balance from user data or default to 10.00 for demo
+        const balance = data.user?.balance ?? data.balance ?? 10.00;
+        setUserBalance(parseFloat(balance) || 10.00);
+      } else {
+        // Demo mode - assume $10 balance
+        setUserBalance(10.00);
+      }
+    } catch (e) {
+      // Demo mode fallback
+      setUserBalance(10.00);
+    } finally {
+      setLoadingBalance(false);
+    }
+  };
 
   const handleStartProvisioning = () => {
     const errors = [];
@@ -418,6 +455,42 @@ const WizardForm = ({
               </p>
             </div>
 
+            {/* Balance Display */}
+            <div className={`rounded-lg p-3 mb-4 flex items-center justify-between ${
+              userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly)
+                ? 'bg-red-500/10 border border-red-500/30'
+                : 'bg-green-500/10 border border-green-500/30'
+            }`}>
+              <div className="flex items-center gap-2">
+                <DollarSign className={`w-4 h-4 ${
+                  userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly)
+                    ? 'text-red-400'
+                    : 'text-green-400'
+                }`} />
+                <span className="text-sm text-gray-300">Seu saldo:</span>
+              </div>
+              <span className={`text-lg font-bold ${
+                userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly)
+                  ? 'text-red-400'
+                  : 'text-green-400'
+              }`}>
+                ${userBalance?.toFixed(2) || '-.--'}
+              </span>
+            </div>
+
+            {/* Insufficient balance warning */}
+            {userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly) && (
+              <div className="flex items-start gap-2 mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs text-red-400 font-medium">Saldo insuficiente</p>
+                  <p className="text-[10px] text-red-400/80">
+                    Você precisa de pelo menos ${getEstimatedCost().hourly}/h. Adicione créditos antes de continuar.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Cost Summary */}
             <div className="bg-gray-800/50 rounded-lg p-4 mb-6 space-y-3">
               <div className="flex justify-between items-center">
@@ -468,11 +541,18 @@ const WizardForm = ({
               </Button>
               <Button
                 onClick={handleConfirmPayment}
-                className="flex-1 bg-brand-500 hover:bg-brand-600 text-white"
+                disabled={userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly)}
+                className={`flex-1 ${
+                  userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly)
+                    ? 'bg-gray-600 cursor-not-allowed opacity-50'
+                    : 'bg-brand-500 hover:bg-brand-600'
+                } text-white`}
                 data-testid="confirm-payment-button"
               >
                 <Check className="w-4 h-4 mr-2" />
-                Confirmar e Iniciar
+                {userBalance !== null && userBalance < parseFloat(getEstimatedCost().hourly)
+                  ? 'Saldo Insuficiente'
+                  : 'Confirmar e Iniciar'}
               </Button>
             </div>
           </div>
@@ -1065,16 +1145,23 @@ const WizardForm = ({
             <p className="text-xs text-gray-400">
               {provisioningWinner
                 ? 'Sua máquina está pronta para uso'
-                : 'Testando conexão com 5 máquinas simultaneamente. A primeira a responder será selecionada.'}
+                : `Testando ${provisioningCandidates.length} máquinas simultaneamente. A primeira a responder será selecionada.`}
             </p>
 
-            {/* Timer and ETA */}
+            {/* Round indicator and Timer */}
             {!provisioningWinner && provisioningCandidates.length > 0 && (
-              <div className="flex items-center justify-center gap-4 mt-3 text-xs">
+              <div className="flex items-center justify-center gap-3 mt-3 text-xs flex-wrap">
+                {/* Round indicator */}
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-500/10 border border-purple-500/30">
+                  <Rocket className="w-3.5 h-3.5 text-purple-400" />
+                  <span className="text-purple-400 font-medium">Round {currentRound}/{maxRounds}</span>
+                </div>
+                {/* Timer */}
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
                   <Clock className="w-3.5 h-3.5 text-gray-400" />
                   <span className="text-gray-300 font-mono">{formatTime(elapsedTime)}</span>
                 </div>
+                {/* ETA */}
                 <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-500/10 border border-brand-500/30">
                   <Timer className="w-3.5 h-3.5 text-brand-400" />
                   <span className="text-brand-400">{getETA()}</span>
@@ -1083,8 +1170,8 @@ const WizardForm = ({
             )}
           </div>
 
-          {/* Race Track */}
-          <div className="space-y-2">
+          {/* Race Track - Grid layout for compact display */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
             {provisioningCandidates.map((candidate, index) => {
               const isWinner = provisioningWinner?.id === candidate.id;
               const isCancelled = provisioningWinner && !isWinner;

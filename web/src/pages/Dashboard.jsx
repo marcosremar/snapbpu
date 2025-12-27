@@ -103,6 +103,10 @@ export default function Dashboard({ onStatsUpdate }) {
   const raceIntervalsRef = useRef([]);
   const raceTimeoutsRef = useRef([]);
   const createdInstanceIdsRef = useRef([]);
+  const allOffersRef = useRef([]); // Store all offers for multi-round
+  const currentRoundRef = useRef(1); // Track current round (max 3)
+  const [currentRound, setCurrentRound] = useState(1);
+  const MAX_ROUNDS = 3;
 
   useEffect(() => {
     checkOnboarding();
@@ -535,6 +539,240 @@ export default function Dashboard({ onStatsUpdate }) {
     runRealProvisioningRace(top5);
   };
 
+  // REAL provisioning race with multi-round support
+  const runRealProvisioningRaceWithMultiRound = async (candidates, allOffers, round) => {
+    // Clear previous race intervals/timeouts
+    raceIntervalsRef.current.forEach(clearInterval);
+    raceTimeoutsRef.current.forEach(clearTimeout);
+    raceIntervalsRef.current = [];
+    raceTimeoutsRef.current = [];
+    createdInstanceIdsRef.current = [];
+
+    let winnerFound = false;
+    let failedCount = 0;
+
+    // Create all instances simultaneously
+    const createPromises = candidates.map(async (candidate, index) => {
+      try {
+        // Update status to "creating"
+        setRaceCandidates(prev => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], status: 'creating', progress: 10 };
+          return updated;
+        });
+
+        // Create instance via API
+        const res = await fetch(`${API_BASE}/api/v1/instances`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            offer_id: candidate.id,
+            disk_size: candidate.disk_space || 20,
+            label: `Race-R${round}-${candidate.gpu_name}-${Date.now()}`
+          })
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.detail || errorData.message || 'Failed to create instance');
+        }
+
+        const data = await res.json();
+        const instanceId = data.id || data.instance_id;
+        createdInstanceIdsRef.current.push({ index, instanceId, offerId: candidate.id });
+
+        // Update with instance ID and status
+        setRaceCandidates(prev => {
+          const updated = [...prev];
+          updated[index] = {
+            ...updated[index],
+            instanceId,
+            status: 'connecting',
+            progress: 30
+          };
+          return updated;
+        });
+
+        return { index, instanceId, success: true };
+      } catch (error) {
+        failedCount++;
+        // Mark as failed with descriptive error message
+        let errorMessage = 'Erro desconhecido';
+        const errMsg = error.message?.toLowerCase() || '';
+        if (errMsg.includes('balance') || errMsg.includes('insufficient') || errMsg.includes('funds')) {
+          errorMessage = 'Saldo insuficiente';
+        } else if (errMsg.includes('timeout')) {
+          errorMessage = 'Timeout de conexão';
+        } else if (errMsg.includes('unavailable') || errMsg.includes('not available') || errMsg.includes('already rented')) {
+          errorMessage = 'Máquina indisponível';
+        } else if (errMsg.includes('network')) {
+          errorMessage = 'Erro de rede';
+        } else if (errMsg.includes('auth') || errMsg.includes('401') || errMsg.includes('403') || errMsg.includes('unauthorized')) {
+          errorMessage = 'Erro de autenticação';
+        } else if (errMsg.includes('limit') || errMsg.includes('quota') || errMsg.includes('maximum')) {
+          errorMessage = 'Limite de instâncias';
+        } else if (errMsg.includes('api_key') || errMsg.includes('api key')) {
+          errorMessage = 'API Key inválida';
+        } else if (error.message && error.message.length < 40) {
+          errorMessage = error.message;
+        }
+
+        setRaceCandidates(prev => {
+          const updated = [...prev];
+          updated[index] = { ...updated[index], status: 'failed', progress: 0, errorMessage };
+          return updated;
+        });
+
+        // Check if all have failed (for multi-round)
+        if (failedCount === candidates.length) {
+          setTimeout(() => {
+            checkAndStartNextRound(candidates.map((c, i) => ({ ...c, status: 'failed' })), allOffers, round);
+          }, 500);
+        }
+
+        return { index, success: false, error };
+      }
+    });
+
+    // Wait for all creation attempts
+    await Promise.all(createPromises);
+
+    // If all failed immediately, try next round
+    if (failedCount === candidates.length) {
+      return;
+    }
+
+    // Poll for status updates every 3 seconds
+    const pollInterval = setInterval(async () => {
+      if (winnerFound) {
+        clearInterval(pollInterval);
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/instances`, {
+          headers: { 'Authorization': `Bearer ${getToken()}` }
+        });
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const instances = data.instances || [];
+
+        for (const created of createdInstanceIdsRef.current) {
+          const instance = instances.find(i => i.id === created.instanceId);
+          if (!instance) continue;
+
+          const status = instance.actual_status;
+          const candidateIndex = created.index;
+
+          setRaceCandidates(prev => {
+            const updated = [...prev];
+            if (updated[candidateIndex]) {
+              let progress = updated[candidateIndex].progress || 30;
+              if (status === 'loading') progress = Math.min(progress + 10, 90);
+              if (status === 'running') progress = 100;
+              updated[candidateIndex] = {
+                ...updated[candidateIndex],
+                progress,
+                actualStatus: status,
+                sshHost: instance.ssh_host,
+                sshPort: instance.ssh_port
+              };
+            }
+            return updated;
+          });
+
+          if (status === 'running' && !winnerFound) {
+            winnerFound = true;
+            clearInterval(pollInterval);
+
+            setRaceCandidates(prev => {
+              return prev.map((c, i) => ({
+                ...c,
+                status: i === candidateIndex ? 'connected' : 'cancelled',
+                progress: i === candidateIndex ? 100 : c.progress
+              }));
+            });
+
+            const winnerCandidate = candidates[candidateIndex];
+            setRaceWinner({
+              ...winnerCandidate,
+              instanceId: created.instanceId,
+              ssh_host: instance.ssh_host,
+              ssh_port: instance.ssh_port,
+              actual_status: 'running'
+            });
+
+            // Destroy losing instances
+            for (const other of createdInstanceIdsRef.current) {
+              if (other.instanceId !== created.instanceId) {
+                try {
+                  await fetch(`${API_BASE}/api/v1/instances/${other.instanceId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${getToken()}` }
+                  });
+                } catch (e) {
+                  console.error(`Failed to destroy instance ${other.instanceId}:`, e);
+                }
+              }
+            }
+
+            createdInstanceIdsRef.current = [];
+            toast.success(`🏆 ${winnerCandidate.gpu_name} venceu a corrida!`);
+            break;
+          }
+        }
+      } catch (error) {
+        console.error('Error polling instance status:', error);
+      }
+    }, 3000);
+
+    raceIntervalsRef.current.push(pollInterval);
+
+    // Timeout after 3 minutes per round
+    const raceTimeout = setTimeout(async () => {
+      if (!winnerFound) {
+        clearInterval(pollInterval);
+
+        // Clean up created instances
+        for (const created of createdInstanceIdsRef.current) {
+          try {
+            await fetch(`${API_BASE}/api/v1/instances/${created.instanceId}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${getToken()}` }
+            });
+          } catch (e) {
+            console.error(`Failed to cleanup instance ${created.instanceId}:`, e);
+          }
+        }
+        createdInstanceIdsRef.current = [];
+
+        // Mark all as failed due to timeout
+        setRaceCandidates(prev => prev.map(c => ({
+          ...c,
+          status: c.status === 'failed' ? 'failed' : 'failed',
+          errorMessage: c.errorMessage || 'Timeout'
+        })));
+
+        // Try next round
+        const startedNextRound = checkAndStartNextRound(
+          candidates.map(c => ({ ...c, status: 'failed' })),
+          allOffers,
+          round
+        );
+
+        if (!startedNextRound) {
+          toast.error(`Tempo esgotado após ${MAX_ROUNDS} tentativas.`);
+        }
+      }
+    }, 3 * 60 * 1000); // 3 minutes per round
+
+    raceTimeoutsRef.current.push(raceTimeout);
+  };
+
   // REAL provisioning race - creates actual instances and monitors which one starts first
   const runRealProvisioningRace = async (candidates) => {
     // Clear previous race intervals/timeouts
@@ -862,8 +1100,25 @@ export default function Dashboard({ onStatsUpdate }) {
   };
 
   // Start provisioning race integrated into wizard (no overlay)
-  const startProvisioningRaceIntegrated = (selectedOffers) => {
-    const top5 = selectedOffers.slice(0, 5).map((offer, index) => ({
+  const startProvisioningRaceIntegrated = (selectedOffers, round = 1) => {
+    // Store all offers for potential multi-round
+    if (round === 1) {
+      allOffersRef.current = selectedOffers;
+      currentRoundRef.current = 1;
+      setCurrentRound(1);
+    }
+
+    // Calculate which 5 offers to use for this round
+    const startIndex = (round - 1) * 5;
+    const endIndex = startIndex + 5;
+    const roundOffers = selectedOffers.slice(startIndex, endIndex);
+
+    if (roundOffers.length === 0) {
+      toast.error('Não há mais máquinas disponíveis para tentar.');
+      return;
+    }
+
+    const top5 = roundOffers.map((offer, index) => ({
       ...offer,
       status: 'connecting',
       progress: 0
@@ -871,9 +1126,29 @@ export default function Dashboard({ onStatsUpdate }) {
 
     setRaceCandidates(top5);
     setRaceWinner(null);
+    currentRoundRef.current = round;
+    setCurrentRound(round);
+
     // DON'T set provisioningMode to true - wizard handles step 4 display
-    // Run REAL provisioning race
-    runRealProvisioningRace(top5);
+    // Run REAL provisioning race with multi-round support
+    runRealProvisioningRaceWithMultiRound(top5, selectedOffers, round);
+  };
+
+  // Check if all candidates failed and start next round
+  const checkAndStartNextRound = (candidates, allOffers, currentRound) => {
+    const allFailed = candidates.every(c => c.status === 'failed');
+    if (allFailed && currentRound < MAX_ROUNDS) {
+      const nextRound = currentRound + 1;
+      const hasMoreOffers = allOffers.length > currentRound * 5;
+      if (hasMoreOffers) {
+        toast.info(`Todas as máquinas falharam. Tentando round ${nextRound}/${MAX_ROUNDS}...`);
+        setTimeout(() => {
+          startProvisioningRaceIntegrated(allOffers, nextRound);
+        }, 1000);
+        return true;
+      }
+    }
+    return false;
   };
 
   const resetAdvancedFilters = () => {
@@ -899,15 +1174,7 @@ export default function Dashboard({ onStatsUpdate }) {
         />
       )}
 
-      {/* Provisioning Race Screen */}
-      {provisioningMode && (
-        <ProvisioningRaceScreen
-          candidates={raceCandidates}
-          winner={raceWinner}
-          onCancel={cancelProvisioningRace}
-          onComplete={completeProvisioningRace}
-        />
-      )}
+      {/* NOTE: Provisioning Race Screen removed - now integrated into WizardForm step 4 */}
 
       {/* Deploy Wizard */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -1054,6 +1321,8 @@ export default function Dashboard({ onStatsUpdate }) {
                 isProvisioning={provisioningMode}
                 onCancelProvisioning={cancelProvisioningRace}
                 onCompleteProvisioning={completeProvisioningRace}
+                currentRound={currentRound}
+                maxRounds={MAX_ROUNDS}
               />
             </div>
           )}
