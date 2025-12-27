@@ -626,22 +626,32 @@ export default function Dashboard({ onStatsUpdate }) {
           return updated;
         });
 
-        // Check if all have failed (for multi-round)
-        if (failedCount === candidates.length) {
-          setTimeout(() => {
-            checkAndStartNextRound(candidates.map((c, i) => ({ ...c, status: 'failed' })), allOffers, round);
-          }, 500);
-        }
-
         return { index, success: false, error };
       }
     });
 
     // Wait for all creation attempts
-    await Promise.all(createPromises);
+    const results = await Promise.all(createPromises);
 
-    // If all failed immediately, try next round
-    if (failedCount === candidates.length) {
+    // Count actual failures after all promises complete
+    const totalFailed = results.filter(r => !r.success).length;
+    console.log(`Round ${round}: ${totalFailed}/${candidates.length} failed`);
+
+    // If all failed, try next round after a short delay
+    if (totalFailed === candidates.length) {
+      console.log(`All machines failed in round ${round}, checking for next round...`);
+      toast.warning(`Todas as ${candidates.length} máquinas falharam. Tentando próximo grupo...`);
+
+      setTimeout(() => {
+        const hasMoreOffers = allOffers.length > round * 5;
+        if (round < MAX_ROUNDS && hasMoreOffers) {
+          const nextRound = round + 1;
+          toast.info(`Iniciando round ${nextRound}/${MAX_ROUNDS}...`);
+          startProvisioningRaceIntegrated(allOffers, nextRound);
+        } else {
+          toast.error('Todas as tentativas falharam. Verifique sua API Key e saldo.');
+        }
+      }, 1500);
       return;
     }
 
